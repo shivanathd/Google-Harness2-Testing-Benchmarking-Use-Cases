@@ -1,0 +1,120 @@
+{
+  "task_id": "data-m",
+  "domain": "data",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-cc-agg1/data-m/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-haiku/exec/hpb-cc-agg1/data-m/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "data-m",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.018276410000000003,
+          "cached": false,
+          "notes": "Evidence: one rollout (base1). It made three shell calls, then ended with no assistant text and no output/answer.json. The deliverable folder reads \"(no deliverable produced)\". No run was available to compare against, so each change rests on this single trajectory.\n\n1. **context/harness/systemprompt.md**: added an \"enough evidence\" line and a completion condition (deliverable exists, reopened and checked for the requested fields, then a short final message).\n   - Moment: after the third observation (rollout line 98, the FX-rate listing) the run stopped with no further call. It never computed anything and never wrote output/. The prompt's only instruction was \"write the requested deliverables under output/\", and it was skipped.\n   - The \"enough evidence\" line addresses the same gap. The run spent its calls on inspection and never reached computation.\n\n2. **context/harness/tool_descriptions/tool_guidance.md** (was empty): added a zsh note and a bounded fallback.\n   - Moment: the same zsh failure occurred twice in one run. Line 35 (`cat ... && echo ==== && cat refunds.csv`) returned \"Exit code 1\" with \"(eval):1: === not found\", and the `&&` chain stopped before refunds printed. Line 83 repeated the same unquoted `echo ====` pattern and hit \"(eval):1: === not found\" again. Only the third call (line 97), which dropped the `====` separator, ran to completion.\n   - The note says to quote such tokens, read the error line before re-running, and after one failed fix switch to a `python3 -c` one-liner.\n\nConsidered and not changed:\n- **No Stop hook (hooks.json) to block exit without a deliverable.** The rule requires repeated evidence that prose is skipped, and this is one run. If other candidates or rollouts also end silently without output/, this is the next lever, using the hooks.json Stop form the plugin README describes.\n- **No script.** Nothing repeated enough to justify one, and the failure was a one-off.\n- **CLAUDE.md is in the workspace (172 bytes) and the run never opened it.** Its contents are not in context, so I could not tell whether it matters. Worth checking whether the runtime already loads it.\n- **Quoted thousands-separator amounts in transactions.csv** (for example \"2,845.66\") break `cut -d,` and `awk -F,`. The run never hit this because it did not split those rows, so it is a risk, not a realised failure. I left it out. It is a data-format fact, and the parallel candidate owns those.\n- **LongTermMEMORY.md and guardrails.md** stay empty. Nothing in this trajectory was a domain fact or a standing rule.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.030188200000000002,
+          "cached": false,
+          "notes": "Revised after rejection. The skill no longer records this instance's data; the trigger line is widened in a one-line edit.\n\n**Fixes for the rejection**\n- `skills/revenue-reconciliation/SKILL.md`: removed the \"Workspace facts for this export set\" block entirely. It held S004/S026/S028 duplicates, status counts, the 43/40 row counts, the refund-month tallies, and R00/S033. It is replaced by a \"Profile the exports before summing\" section of checks the agent runs on whatever files it receives: duplicate txn_id identity, status tabulation, currency and FX coverage, refund join, and refund month tabulation. No ids, counts or windows remain.\n- `SKILL.md` Rounding rule: \"In this data, rounding each line first moves the total by one cent\" became the generic \"can move the total by a cent\". Refund currency rule: \"Refunds carry no currency column\" became conditional (\"if the refunds file has no currency column\").\n- Verified by grep that `context/harness/` has no S0xx/R0x ids, 2026 dates, month names, or template braces.\n\n**Change from the earlier attempt**\n- `SKILL.md` Checks: added one check that a refund whose original is not recognised in the period is named in the final message with the rule applied. This is a stated uncertainty, not a fact about this data.\n\n**Trajectory moment behind the remaining edits**\n- `base1.md` (lines 1\u201398): the only rollout made four Bash calls that dumped the CSVs and FX tables, never invoked the `revenue-reconciliation` skill, and never wrote `output/answer.json` (deliverables/base1.md: \"no deliverable produced\"). The always-on trigger was present but did not match the agent's behaviour.\n- `systemprompt.md` trigger line: reworded from \"reconciling \u2026 into a period revenue figure\" to \"computing a period revenue figure (net, recognised or gross) from payment, settlement, refund or FX exports\". This uses the task's own wording (\"Compute \u2026 net revenue \u2026 from transactions.csv, refunds.csv and fx_daily.csv\"). The change is low-confidence, since the rollout shows one run and the old wording was close. It is a single-line swap at no added always-on cost.\n\n**Not changed**\n- No edits to the plugin, scripts, or subagent components. `plugin/README.md` and `scripts/README.md` are comment-only, and no hooks.json or script exists.\n- `guardrails.md`, `LongTermMEMORY.md`, and `tool_guidance.md` stay empty.\n- Did not add guidance on exploration volume or reading order. The rollout's failure looks like over-dumping data, but that is procedure, which is out of scope for this dimension.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.030828895000000002,
+          "cached": false,
+          "notes": "kept -> MERGE of pool/dom1 (skill + trigger) with two short INV rules, not wholesale adoption of either candidate -> dom1 alone lacks the completion and zsh rules that answer base1's failures (silent stop after the FX listing at rollout line 252, and `echo ====` aborts at lines 37, 82 and 96). inv1 alone carries about 850 bytes of always-on prose for a procedure the skill form covers. The workspace CLAUDE.md sizes (base 172 B, dom1 328 B, inv1 1063 B) track systemprompt plus tool_guidance, so the always-on cost is real. Correctness: both candidates wrote 24317.47 / 16 / 5, and my independent recompute from context/source matches (16 recognised, 5 refunds, gross 26983.86, refunds 2666.39), so the merge does not depend on which candidate was right.\n\nkept -> skills/revenue-reconciliation/SKILL.md (dom1 text, unchanged except the next line) -> pool/dom1 rollout line 1 invoked the skill as its first action, and the run delivered the correct answer after an in-code profile (dup identity, status, FX coverage, refund join). The skill holds no task ids, dates or counts (grep clean). Base1 has no skill and delivered nothing (1/1).\n\nrevised -> skill \"Missing rate\" line: \"stop and report\" changed to \"name the missing (date, currency) and the lines it leaves out in your final message, and still write the deliverable\" -> no FX gap occurs in this export set, so this is a downside fix and not a trajectory moment. The original line ends the run with no output/, which is the costliest failure, and it contradicts the Artifact contract in the same file.\n\nkept -> systemprompt trigger line (\"When computing a period revenue figure ... load the `revenue-reconciliation` skill.\") -> the name matches the directory verbatim, and dom1 rollout line 1 fired it (1/1 candidate). Without a trigger the skill is never opened.\n\nkept -> systemprompt completion sentence (from inv1, merged with the skill's reopen check) -> base1 ended after its third observation (rollout line 252) with no tool call, no text and no output/ (deliverables/base1.md: \"no deliverable produced\"). This is 1/1 on the base set, so it is kept as a short generic rule rather than an enforcement mechanism. Both candidates reopened and checked their file.\n\ndropped -> systemprompt \"enough evidence\" line (inv1) -> no rollout over-explored: base1 made 3 calls and stopped, inv1 made about 4 inspection calls before computing, and dom1 made about 4 reads. The line's premise is not in the evidence.\n\nrevised -> tool_guidance.md zsh rule, cut to one sentence -> base1 hit \"(eval):1: === not found\" at lines 37 (exit 1, && chain aborted, refunds not printed), 82 and 96. inv1 avoided the token with `----` and had no shell errors, and dom1 read files with the Read tool and had none. This is a fixed zsh behaviour, not sampling noise, and it is one line of always-on text.\n\ndropped -> inv1 fallback paragraph (\"after one failed fix switch to python3 -c\") -> base1 recovered on the next call (line 96 succeeded with `;`), so the fallback was not needed in any rollout (1/1).\n\ndropped -> hooks.json Stop gate that blocks finishing without output/ -> base1 produced nothing (1/1 base). The rule requires repeated evidence before enforcement, and both candidates delivered, so no second non-delivering rollout exists. Revisit if another rollout ends with no output/. plugin/*.ts is also not run in this rig.\n\ndropped -> a calc helper under scripts/ -> both candidates hand-rolled one correct calculation in a single call each. Nothing was slow or wrong, and no script is named anywhere.\n\nkept (unchanged, empty) -> guardrails.md and LongTermMEMORY.md -> no standing rule or durable domain fact appears in any trajectory outside the skill.\n\nkept -> sub_agents (none) -> no bounded sub-task with a large input and small answer appears in any rollout.\n\nValidation: systemprompt.md and tool_guidance.md contain no braces (only the pre-existing JSON example in plugin/README.md, which is not always-on). The skill's directory name appears verbatim in systemprompt.md, and its frontmatter has name and description.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "data-m",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 4,
+        "expected_P": 3,
+        "usd": 0.079294,
+        "rollout_usd": 0.0,
+        "session_usd": 0.079294,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "data-m",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-cc-agg1/data-m/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.04007307,
+      "experience": {},
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-haiku/exec/hpb-cc-agg1/data-m/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "98c4877f10d66587"
+    }
+  },
+  "errors": []
+}

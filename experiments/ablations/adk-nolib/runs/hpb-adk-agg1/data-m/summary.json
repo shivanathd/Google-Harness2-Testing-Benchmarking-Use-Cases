@@ -1,0 +1,126 @@
+{
+  "task_id": "data-m",
+  "domain": "data",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-adk-agg1/data-m/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/adk-nolib/exec/hpb-adk-agg1/data-m/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "data-m",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.24606579999999997,
+          "cached": false,
+          "notes": "- This was a fix to the rejection only. I did not re-read the trajectories this time.\n- I removed the \"Workspace facts\" block from `systemprompt.md`. It held this instance's ids (S004, S026, S028, R01, R04, R06, R08, R09), the 43-row and 40-id counts, and the result line (16 transactions, 5 refunds, net_usd 24317.47).\n- I replaced the block with \"Checks to re-derive from the data each run\". The checks are:\n  - count duplicate txn_ids and confirm whether they are identical rows;\n  - look for quoted thousands-comma amounts;\n  - look for zero or missing fx rates inside the target month;\n  - take refund currency from the original transaction and check its date against the month;\n  - compare the script's counts with a row-level tally.\n- I changed the script command to use `YYYY-MM`, taken from the task, instead of the hard-coded 2026-09 window.\n- The other harness files had no instance values (grep returned no matches). The script, the checker and the rest of the harness are unchanged.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.2092866,
+          "cached": false,
+          "notes": "This attempt only fixes the rejection. I did not re-read the trajectories or change anything else.\n\n- **What was wrong:** `skills/revenue-reconciliation/SKILL.md` had a paragraph about this task's own data. It named the refund ids, the repeated transaction ids, the row and refund counts, the FX date window and the zero-rate date.\n- **What I changed:** I replaced that paragraph with a generic checklist of data-shape checks to run on any set of transaction, refund and FX exports. The checklist covers these checks:\n  - repeated rows for the same transaction id;\n  - thousands separators in amounts;\n  - multiple currencies and mixed statuses;\n  - a refunds file with no currency column, where the currency comes from the original transaction;\n  - refunds dated outside the requested month;\n  - FX coverage and zero rates, judged only against the dates actually needed.\n- **What I checked:** A grep of the harness for the removed ids, counts and dates (S0/R0 ids, \"2026\", \"September\", \"43\", \"203\") now finds nothing.\n- **Left alone:** the trigger line in `systemprompt.md`, the numbered rules, the deliverable shape and `scripts/recon.py` are unchanged. The skill is still named in the always-on text and its script still ships with it.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.1503427,
+          "cached": false,
+          "notes": "kept -> inv1 wholesale (systemprompt work procedure, `scripts/revenue_recon.py`, `scripts/check_output.py`, Stop `hooks.json`) -> The base rollout (1/1) read the three CSVs, wrote a three-step plan and stopped, so it delivered no `answer.json`. The `inv1` rollout ran `python3 scripts/revenue_recon.py . 2026-09` as its first command and wrote `answer.json` with net_usd 24317.47, 16 transactions and 5 refunds. The script's per-row output shows the right handling: 43 rows deduped to 40 ids, thousands commas parsed, settled_on and refunded_on rates used, refund currency taken from the original transaction. I did not run an independent recomputation. The 16 transactions and 5 refunds look right against the CSVs I read. One minor flaw: the final chat message says 24317.48 while the file says 24317.47. The file is the deliverable, so I left it.\nkept -> \"act, don't narrate / never end a turn on a plan\" line and the hook that blocks finishing without a valid `answer.json` -> This is the exact base failure (1/1 ended on a plan). The Stop hook enforces it without more always-on prose. The `inv1` run had the file before the hook could fire, so the hook itself is untested in rollout.\nkept -> systemprompt \"checks to re-derive from the data each run\" (duplicates, thousands commas, zero FX rates, refund currency from the original transaction, count tally) -> These are written generically with no instance ids or values. The earlier decision logs show an earlier version of this text was rejected for embedding this task's data, and this version avoids that.\ndropped -> dom1 `skills/revenue-reconciliation` and its `recon.py`, and the systemprompt trigger line -> The `dom1` rollout produced nothing, so I treated it as unsafe. It loaded the skill, then called `recon.py` five times with the wrong arguments: `workspace` as the directory, then the three filenames. It crashed each time with FileNotFoundError or NotADirectoryError and ended on \"let's try again\" with no file. The skill's usage line was `<dir with the 3 CSVs>`, but the script crashes on a bad directory with a raw traceback and no usage message. The domain rules in the skill are already covered by the `inv1` script and checks, so merging it would add context and a failure path for no gain.\ndropped -> merging a DOM edit into the INV harness -> The `dom1` rollout is the only evidence for the DOM edit, and it failed on the script call, not on domain knowledge. The `inv1` script already encodes the same rules and delivered. Skipping the merge also avoids a skill-trigger and script-path validation risk.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "data-m",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 5,
+        "expected_P": 3,
+        "usd": 0.605695,
+        "rollout_usd": 0.0,
+        "session_usd": 0.605695,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "data-m",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-adk-agg1/data-m/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.1254432,
+      "experience": {
+        "cue": "A task whose procedure is fixed and checkable (a multi-file reconciliation, ledger or export calculation) where the base harness is a bare one-line prompt, the agent reads the inputs, and the base run ends on a plan with no deliverable.",
+        "lesson": "Put the exact runnable command in systemprompt.md, with the data directory spelled out (for example `.`) and the period as a placeholder taken from the task. Back it with a script in scripts/ that does the whole computation and writes the deliverable. Add a \"never end a turn on a plan\" line. If a skill is used instead, its script must take the path form the agent will see (the workspace root `.`) and must print a usage message on bad arguments, because a bare path placeholder in SKILL.md was misread.",
+        "evidence": "Rows for systemprompt.md and scripts/revenue_recon.py, compared with the skill row. base1 read the CSVs and stopped. inv1 and agg1 ran a prompt-specified command with the data dir as `.` and delivered a file on the first call. dom1 had the same domain rules, but its script usage was only a placeholder in the skill text. It misread it, crashed five times and delivered nothing. The prompt text, script and hook were bundled in inv1/agg1, so the evidence supports only the narrower claim that an explicit command with an explicit directory worked and a placeholder did not.",
+        "confidence": "low-medium. The contrast is a single rollout per arm. inv1 and agg1 are the same harness and the same trajectory, so they are not independent confirmation. Correctness of the 24317.47 figure was not independently checked.",
+        "edits": "component: systemprompt.md (work procedure plus checks list)\ncandidates: inv1, agg1 (the two harnesses are byte-identical)\nchange: The base prompt was a single sentence. The edit added an \"act, don't narrate; never end a turn on a plan\" rule and a read-once, then compute-with-code procedure. It named the script command `python3 scripts/revenue_recon.py . YYYY-MM`, told the agent to run the checker afterwards, and added generic data checks: duplicate ids, thousands commas, zero FX rates, refund currency taken from the original transaction, and a count tally.\nobserved: base1 read all three CSVs, then ended on a plan with no `answer.json`. inv1 and agg1 ran the script as their first action and wrote `output/answer.json` with 24317.47, 16 transactions and 5 refunds. The prompt text, the script and the hook all changed together, so none of them is isolated. The run never exercised the checks list, because the script ran immediately and the agent did no manual tallying. The final chat message said 24317.48 while the file said 24317.47, so the \"re-read and confirm\" instruction was not followed.\nverdict: confounded\n\ncomponent: scripts/revenue_recon.py\ncandidates: inv1, agg1\nchange: Added a deterministic script. It dedupes by txn_id, strips thousands commas, recognises SETTLED rows with settled_on in the month at the settled_on rate, applies refunds at the refunded_on rate using the original transaction's currency, and exits 1 on a missing or zero rate. It prints a per-row breakdown and writes the answer file. Its usage is `<data_dir> <YYYY-MM>`, and the prompt gives the exact command with `.` as the data dir.\nobserved: In inv1 and agg1 the first call succeeded. Output was 43 rows deduped to 40 ids, 16 transactions and 5 refunds, with net 24317.47. Both runs hit this at the same point, so there is only one distinct trajectory, and it is duplicated. The base run never computed anything, so the script is the most likely cause of the delivered file. I cannot separate it from the prompt line that points to it. I did not recompute the figure independently.\nverdict: confounded\n\ncomponent: scripts/check_output.py and hooks.json (Stop hook)\ncandidates: inv1, agg1\nchange: Added a Stop hook that blocks finishing unless `output/answer.json` exists and parses with the correct key types.\nobserved: The hook never fired. The file already existed in both runs before the stop, so there was no execution contrast. It targets the base failure mode (ending on a plan), but it is untested.\nverdict: no observed effect\n\ncomponent: skills/revenue-reconciliation (SKILL.md and scripts/recon.py) plus a systemprompt.md trigger line\ncandidates: dom1\nchange: Added a domain skill with rules for this task. It was loaded through `load_skill` and had its own `recon.py`, whose usage is `SRC_DIR YYYY-MM [OUT]`. The `scripts/revenue_recon.py` and Stop hook files were absent, and the systemprompt was reduced to a trigger line plus an \"actually compute and write the file\" sentence.\nobserved: dom1 loaded the skill, then called `recon.py` five times with the wrong arguments. It passed `workspace` as the directory, then the three filenames. Each call crashed with FileNotFoundError or NotADirectoryError. The agent tried to find a workspace directory through several `list_files` calls and ended on \"let's try again\" with no `answer.json`. The skill's rules were sound. The failure was an interface problem: the agent misread the `<dir with the 3 CSVs>` placeholder, and the script gave a raw traceback instead of a usage message. The skill also said to run `recon.py` from a different path than the data, with no worked example of the directory argument. There was no run of this skill with a correct invocation, so its domain content is untested.\nverdict: hurt\n\ncomponent: LongTermMEMORY.md, guardrails.md, tool_descriptions/tool_guidance.md, plugin/ and skills/README.md\ncandidates: none (these match the base, or are placeholder READMEs)\nchange: No candidate changed these components.\nobserved: Nothing to observe.\nverdict: no observed effect"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/ablations/adk-nolib/exec/hpb-adk-agg1/data-m/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "9c8eea0d3482fe48"
+    }
+  },
+  "errors": []
+}

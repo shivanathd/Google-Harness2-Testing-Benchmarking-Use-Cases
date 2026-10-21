@@ -1,0 +1,17 @@
+  [data] 1/1 ok           data-m
+  [ops] 1/1 ok           ops-m
+  [ops] 1/1 ok           ops-h
+  [data] 1/1 skipped      data-m
+  [ops] 1/1 skipped      ops-h
+  [ops] 1/1 skipped      ops-m
+  [swe] 1/1 partial      swe-m  :: agg: selection failed: no candidate produced an artifact (finals-only pool has no base fallback)
+  [data] 1/1 ok           data-h
+  [swe] 1/1 ok           swe-h
+{"data-m": [1, 0], "data-h": [1, 0], "ops-m": [1, 0], "ops-h": [1, 0], "swe-m": [0, 1], "swe-h": [1, 0]} improver_usd 0.3456
+  [data] 1/1 skipped      data-h
+  [data] 1/1 skipped      data-m
+  [ops] 1/1 skipped      ops-h
+  [ops] 1/1 skipped      ops-m
+  [swe] 1/1 skipped      swe-h
+  [swe] 1/1 partial      swe-m  :: agg: selection failed: no candidate produced an artifact (finals-only pool has no base fallback)
+{"data-m": [1, 0], "data-h": [1, 0], "ops-m": [1, 0], "ops-h": [1, 0], "swe-m": [0, 1], "swe-h": [1, 0]} improver_usd 0.0

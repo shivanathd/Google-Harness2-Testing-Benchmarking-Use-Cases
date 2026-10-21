@@ -1,0 +1,6 @@
+This revises the rejected attempt. I made no new trajectory-driven changes and did not re-read the rollouts this round. The only edits remove instance-specific content from `skills/revenue-reconcile/SKILL.md`.
+
+- **Workspace-fact block removed.** The "Workspace fact (this task instance)" section is gone. It listed the September customers flagged as test accounts, specific charge and chargeback ids, the expected counts and the expected net figure. Those belong to this one instance, so a later task would inherit them as wrong anchors.
+- **Rule 3 example generalized.** The INR magnitude example (a specific paise amount and its converted value) was this task's data. It now says to sanity-check the largest converted amounts against the others.
+- **Fee wording generalized.** Rules 4 and 5 no longer hard-code the flat chargeback fee; they point to the fee stated in `POLICY.md`. The "Run it" line now shows `--fee AMOUNT from POLICY.md` as an option. The script still defaults the fee to 15.00, which comes from the earlier version.
+- **Left unchanged.** The method rules stay: UTC month boundaries, captured-only recognition, minor units and fx, test-customer exclusion, chargeback timing, and count definitions. So do the "before finishing" checks and the trigger line in `systemprompt.md`. All of these are general method, not this instance's data.

@@ -1,0 +1,39 @@
+### invoicing/tax.py
+RATES = {"US": "0.00", "EU": "0.20", "UK": "0.20", "IN": "0.18"}
+
+
+def rate_for(region):
+    code = region.upper()
+    if code not in RATES:
+        raise ValueError(f"unknown region: {region}")
+    return RATES[code]
+
+
+### invoicing/totals.py
+from decimal import Decimal, ROUND_HALF_UP
+
+from .tax import rate_for
+
+CENT = Decimal("0.01")
+
+
+def _cents(amount):
+    return amount.quantize(CENT, rounding=ROUND_HALF_UP)
+
+
+def line_total(item):
+    return _cents(item.qty * Decimal(item.unit_price))
+
+
+def compute_totals(items, region):
+    rate = Decimal(rate_for(region))
+    subtotal = sum((line_total(i) for i in items), Decimal("0"))
+    discount = sum((_cents(line_total(i) * i.discount_pct / 100) for i in items), Decimal("0"))
+    tax = _cents((subtotal - discount) * rate)
+    total = subtotal - discount + tax
+    return {
+        "subtotal": str(_cents(subtotal)),
+        "discount": str(_cents(discount)),
+        "tax": str(_cents(tax)),
+        "total": str(_cents(total)),
+    }

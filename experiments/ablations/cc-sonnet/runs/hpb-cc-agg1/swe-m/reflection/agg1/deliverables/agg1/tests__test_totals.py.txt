@@ -1,0 +1,33 @@
+from invoicing.models import LineItem
+from invoicing.totals import compute_totals
+
+
+def test_simple_us():
+    assert compute_totals([LineItem("a", 2, "10.00")], "US")["total"] == "20.00"
+
+
+def test_region_is_case_insensitive():
+    assert compute_totals([LineItem("a", 2, "10.00")], "us")["total"] == "20.00"
+
+
+def test_unknown_region_raises():
+    import pytest
+
+    with pytest.raises(ValueError):
+        compute_totals([LineItem("a", 1, "1.00")], "XX")
+
+
+def test_discounted_eu_tax_on_discounted_amount():
+    result = compute_totals([LineItem("widget", 3, "19.99", 10)], "eu")
+    assert result == {
+        "subtotal": "59.97",
+        "discount": "6.00",
+        "tax": "10.79",
+        "total": "64.76",
+    }
+
+
+def test_half_cent_rounds_up():
+    result = compute_totals([LineItem("a", 1, "0.125")], "US")
+    assert result["subtotal"] == "0.13"
+    assert result["total"] == "0.13"

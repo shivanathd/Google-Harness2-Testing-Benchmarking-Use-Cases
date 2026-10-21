@@ -1,0 +1,126 @@
+{
+  "task_id": "arbitration-international-dispute-resolution/draft-markup-of-procedural-order",
+  "domain": "arbitration-international-dispute-resolution",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "lab-cc-agg1/arbitration-international-dispute-resolution/draft-markup-of-procedural-order/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/lab-sonnet-imp/exec/lab-cc-agg1/arbitration-international-dispute-resolution/draft-markup-of-procedural-order/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "arbitration-international-dispute-resolution/draft-markup-of-procedural-order",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.5631735000000001,
+          "cached": false,
+          "notes": "I fixed the rejection by deleting the \"Workspace facts (ICC 27841/GVA, draft PO3)\" block from `skills/procedural-order-review/SKILL.md`. The skill now holds method only. I did not re-read the trajectories for this edit.\n\n- **Removed facts:** the block held matter-specific details: the draft's paragraph count, its odd paragraph numbering, the 17.3 schedule layout, the Ansorge email domain mismatch, and the earlier run's comment-balloon problem. All of it is gone.\n- **Generalised wording:** the hard-coded filename `po3-redline-markup.docx` in section 3 now reads \"the requested redline .docx (exact filename from the task)\". Without that change the skill would still name a matter-specific output.\n- **Softened claim:** the line that extracted text over ~30KB \"is truncated\" now says it \"may be truncated\". It is a tool-behaviour claim I did not re-check.\n- **Left unchanged:** the `procedural-order-review` trigger line in `systemprompt.md` (line 40), the `redline-docx` skill and its scripts, and the other harness files.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.7977840999999999,
+          "cached": false,
+          "notes": "- I removed the \"Workspace facts\" block (old section 6) from `skills/arbitration-po-redline-review/SKILL.md`. That block listed this matter's paragraph numbers, memo errors, names, dates and the Alpstein letter details. I replaced it with a generic \"Defect checklist\" covering memo versus record, draft versus prior orders, internal draft defects, third-party material checks and date arithmetic.\n- I also removed matter-specific details from the other sections, because they would be wrong anchors on a different matter:\n  - the \"Record-supported\" list of specific ICC, PILA and IBA article numbers in section 3 now says to build the list from the record, with a check on which rules edition the orders cite;\n  - the Zurich and German-law references in the seat/venue sentence;\n  - the docx tracked-change counts in section 4, now stated as a general risk;\n  - the \"PO1\" and \"RESPONDENT'S\" references in sections 4 and 5, now \"prior orders\" and \"OUR OBJECTION\".\n- The skill's trigger line in `systemprompt.md` (line 35) is unchanged. The skill still has its `name:` and `description:` frontmatter, and the directory name matches.\n- I did not re-open the trajectories this round. These edits only strip facts from the skill and generalise its method. I did not check them against `context/rollouts`.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.2853631,
+          "cached": false,
+          "notes": "kept -> INV edit (inv1): `redline-docx` skill, its two scripts (`tracked_redline.py`, `check_redline.py`), and the systemprompt additions with the trigger lines for both skills. -> Base1 built the redline with pandoc and put all 25 grounds in Word comment balloons. The extracted redline text (`deliverables/base1`) therefore showed the draft with no grounds and no marked changes. In the inv1 rollout the builder worked on the second run after one spec fix, reject-all matched the original, and 24 inline annotations appeared in the extracted text. Evidence is 1 base rollout and 1 candidate rollout. The base failure and the candidate's fix are both concrete, and inv1 delivered both files.\n\nrevised -> `redline-docx` skill header and the systemprompt environment sentence -> I removed the matter-specific history (\"25 grounds\", \"17.3 schedule list\"). That history matches the earlier decisions to strip matter facts from skills. I softened \"python-docx and LibreOffice are not installed\" to \"may not be\". Base1's check did show python-docx missing and soffice not found, but the claim is about the environment and I did not want it stated as universal.\n\nkept -> `procedural-order-review` skill from inv1. -> In the inv1 rollout it produced a cover letter that was ranked and addressed through the Case Manager, withheld the Alpstein and Ansorge material, and listed the memo errors. It also flagged the figures that follow from the record (17.75 hours and the Geneva consultation point).\n\nrevised -> merged dom1's generic defect checklist into `procedural-order-review` as section 5. -> dom1's rollout found date, time and expert-location memo errors, the CMC date mismatch, and the Redfern ruling date discrepancy. The final reply also flagged the set-aside waiver tested against domicile and the \u00b614.5 double-edged clause. These are generic methods and I kept no matter facts. The merge makes two overlapping skills into one, so there is no second trigger to maintain.\n\ndropped -> dom1's `arbitration-po-redline-review` skill and its systemprompt trigger line. -> Its visible strikethrough and bold-underline markup does survive the reader. But it does not produce real tracked changes and it duplicates `procedural-order-review`. The dom1 letter also discloses the Alpstein letter and fallbacks in a Tribunal-facing filing. inv1 left those as choices for the supervising lawyer, which is safer. dom1 did deliver both files, so I did not drop it as unsafe. I dropped it as redundant.\n\nkept -> guardrails, LongTermMEMORY, tool_guidance and the README placeholders unchanged. -> Neither candidate edited them, and no trajectory moment argued for a change.\n\nRisk noted: each candidate has one rollout. The tracked-change builder's output is shown by the reader as the accepted view only, so deletions are not visible in extraction. The skill mitigates this by requiring each inline note to state in words what the draft said and what the markup makes it.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "arbitration-international-dispute-resolution/draft-markup-of-procedural-order",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 5,
+        "expected_P": 3,
+        "usd": 1.646321,
+        "rollout_usd": 0.0,
+        "session_usd": 1.646321,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "arbitration-international-dispute-resolution/draft-markup-of-procedural-order",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "lab-cc-agg1/arbitration-international-dispute-resolution/draft-markup-of-procedural-order/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.158689,
+      "experience": {
+        "cue": "A review task that asks for a redline of an existing .docx, where the evaluating reader shows only extracted body text. Tracked deletions and Word comment balloons may not survive that extraction, and a hand-built or pandoc-built file can flatten the formatting.",
+        "lesson": "Put a tested in-place tracked-changes builder and checker in the harness skills directory. The builder should write real tracked edits into the original document.xml. The checker should confirm that reject-all reproduces the original and that the accepted text contains the key phrases. Add a skill rule that each tracked edit has an adjacent inline note stating what the draft said and what it is changed to. Add a systemprompt trigger line telling the solver to load the skill and not to build the redline with pandoc or put grounds in comment balloons. Also state the reader limitation in the systemprompt.",
+        "evidence": "Edit row \"skills/redline-docx\". base1 (pandoc, 25 grounds in comment balloons) extracted with 1 bracket and no visible grounds. inv1 and agg1 (builder plus inline notes) extracted with 38 and 35 bracketed notes and passed reject-all. dom1 had only visible-markup text conventions, which were readable but not a true redline. The skill and the systemprompt instruction ship together in both successful arms, so the row cannot say which one did the work.",
+        "confidence": "medium. The base-versus-builder contrast is concrete and consistent across two builder rollouts. Each arm is a single rollout. The reader limitation is inferred from the base extraction, not from a test of the reader. The skill and the systemprompt rule cannot be separated.",
+        "edits": "component: skills/redline-docx (SKILL.md, scripts/tracked_redline.py, scripts/check_redline.py)\ncandidates: inv1, agg1 (agg1 kept it; its decision note says it softened the header wording)\nchange: Added a tested builder that edits the original document.xml in place to produce real tracked insertions and deletions. Added a checker that confirms rejecting all changes reproduces the original and greps the accepted text. Added a skill rule that each tracked edit carries an adjacent inline bracketed note stating the ground. The base harness had no redline tooling.\nobserved: base1 built the redline with pandoc and put its 25 grounds in Word comment balloons. The extracted redline text (deliverables/base1) showed 1 bracket and no grounds, and the \u00a717.3 list and TOC were flattened. inv1 and agg1 both loaded the skill at the start of the run and read the builder docstring before using it. In inv1 the first build crashed (tracked_redline.py line 224) and the second run worked after a spec fix. Reject-all matched the original. The extracted redline shows 38 bracketed notes (inv1) and 35 (agg1), each with a pinpoint. dom1 had no builder and used a visible strikethrough and bold-underline convention, with no native tracked changes. That form is readable but is not a real redline. This is the clearest execution contrast in the record. It is still one rollout per arm, and it is entangled with the systemprompt change that told the solver not to use comment balloons.\nverdict: helped"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/lab-sonnet-imp/exec/lab-cc-agg1/arbitration-international-dispute-resolution/draft-markup-of-procedural-order/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "679844099471a3ba"
+    }
+  },
+  "errors": []
+}

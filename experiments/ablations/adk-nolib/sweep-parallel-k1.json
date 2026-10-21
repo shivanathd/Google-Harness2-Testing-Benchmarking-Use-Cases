@@ -1,0 +1,101 @@
+{
+  "data-m": {
+    "domain": "data",
+    "n_tasks": 1,
+    "seed": null,
+    "done": 1,
+    "failed": 0,
+    "tasks": [
+      {
+        "task": "data-m",
+        "status": "skipped",
+        "library_entries_before": {
+          "agg": 0
+        }
+      }
+    ]
+  },
+  "data-h": {
+    "domain": "data",
+    "n_tasks": 1,
+    "seed": null,
+    "done": 1,
+    "failed": 0,
+    "tasks": [
+      {
+        "task": "data-h",
+        "status": "skipped",
+        "library_entries_before": {
+          "agg": 0
+        }
+      }
+    ]
+  },
+  "ops-m": {
+    "domain": "ops",
+    "n_tasks": 1,
+    "seed": null,
+    "done": 1,
+    "failed": 0,
+    "tasks": [
+      {
+        "task": "ops-m",
+        "status": "skipped",
+        "library_entries_before": {
+          "agg": 0
+        }
+      }
+    ]
+  },
+  "ops-h": {
+    "domain": "ops",
+    "n_tasks": 1,
+    "seed": null,
+    "done": 1,
+    "failed": 0,
+    "tasks": [
+      {
+        "task": "ops-h",
+        "status": "skipped",
+        "library_entries_before": {
+          "agg": 0
+        }
+      }
+    ]
+  },
+  "swe-m": {
+    "domain": "swe",
+    "n_tasks": 1,
+    "seed": null,
+    "done": 0,
+    "failed": 1,
+    "tasks": [
+      {
+        "task": "swe-m",
+        "status": "partial",
+        "error": "agg: selection failed: no candidate produced an artifact (finals-only pool has no base fallback)",
+        "library_entries_before": {
+          "agg": 0
+        }
+      }
+    ]
+  },
+  "swe-h": {
+    "domain": "swe",
+    "n_tasks": 1,
+    "seed": null,
+    "done": 1,
+    "failed": 0,
+    "tasks": [
+      {
+        "task": "swe-h",
+        "status": "skipped",
+        "library_entries_before": {
+          "agg": 0
+        }
+      }
+    ]
+  },
+  "improver_usd": 0.0,
+  "improver_calls": 4
+}

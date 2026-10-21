@@ -1,0 +1,1 @@
+- Log-analysis tasks: multi-timezone timestamps, multi-line tracebacks that mention ERROR/user=/code=, and INFO lines saying "retrying after ERROR" are deliberate traps. The scripts/log_window.py helper handles all of them; eyeballing gave a wrong answer before.

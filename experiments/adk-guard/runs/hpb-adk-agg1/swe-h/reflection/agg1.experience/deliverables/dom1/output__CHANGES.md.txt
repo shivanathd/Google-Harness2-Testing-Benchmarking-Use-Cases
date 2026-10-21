@@ -1,0 +1,24 @@
+# CHANGES.md
+
+## Issue 1: `stock report` crashes when the stock file does not exist yet or is empty.
+- Updated `store.load` to return `{}` for missing or empty files.
+- Verified by running probe 1: read-only command on a missing file and on an empty file -> no output, exit 0.
+
+## Issue 2: `remove` lets quantities go below zero and silently creates unknown SKUs. `ops.remove` must raise ValueError instead and leave the data unchanged. `ops.add` must likewise raise ValueError for a quantity that is not positive.
+- Updated `ops.add` to raise ValueError for non-positive quantities.
+- Updated `ops.remove` to raise ValueError for negative quantities and unknown SKUs.
+- Updated `cli.main` to catch these errors, print `error: <message>` to stderr, return exit status 1, and leave the file unchanged.
+- Verified by running probe 2: over-removal / invalid operation -> exit 1, stderr `error: ...`, stdout empty, file byte-identical before/after.
+
+## Issue 3: Feature: `stock report --low N` lists only SKUs with quantity < N, sorted by quantity ascending, then by SKU.
+- Added `--low` option to `stock report` to filter and sort SKUs with quantity < N.
+- Ensured the plain `stock report` output remains unchanged.
+- Verified by running probe 4: Existing output unchanged on a multi-record file; new filter/sort option with ties (secondary key), and no matches.
+
+## Probes run
+1. read-only command on a missing file and on an empty file -> no output, exit 0.
+2. over-removal / invalid operation -> exit 1, stderr `error: ...`, stdout empty, file byte-identical before/after.
+3. operation hitting the exact limit -> exit 0, quantity 0.
+4. Existing output unchanged on a multi-record file; new filter/sort option with ties (secondary key), and no matches.
+5. Core functions called directly raise ValueError and the passed dict is unchanged.
+6. Existing tests pass, unedited.

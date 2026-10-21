@@ -1,0 +1,28 @@
+{
+ "cond": "h2-parallel-k1/intask",
+ "task": "swe-e",
+ "rep": 1,
+ "partial": 0.2,
+ "all_pass": false,
+ "checks": {
+  "seconds": false,
+  "all_units_spaced": false,
+  "uppercase": false,
+  "zero": true,
+  "outer_space": true,
+  "empty_raises": false,
+  "unknown_unit_raises": false,
+  "garbage_raises": false,
+  "repeat_unit_raises": false,
+  "order_raises": false
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/adk-guard/runs/hpb-adk-agg1/swe-e/harnesses/agg1",
+ "cost_usd": null,
+ "tokens_in": 61753,
+ "tokens_out": 1460,
+ "wall_s": 276.6,
+ "error": "",
+ "infra_error": false,
+ "turns": null,
+ "tool_calls": 23
+}

@@ -1,0 +1,23 @@
+There was one rollout (base1). It was correct and efficient, so the change is small and only touches `systemprompt.md`. I didn't run the task or recompute the answer.
+
+- **Evidence:**
+  - The agent printed every file first. Then it profiled the FX file in Python: row counts, duplicate keys, date range.
+  - It found exact duplicate rows for S004, S026 and S028 and counted each once by txn_id. Its final summary says counting them twice would add about $4,167.
+  - It also parsed quoted thousands-separator amounts such as "2,515.81" and kept Decimal precision until the final rounding.
+  - It wrote `answer.json` in the requested shape, with `net_usd`, `transactions` and `refunds`.
+  - Its last step printed what it had just written, but it never reopened the file to check it.
+  - Early shell commands failed with "= not found" and exit code 1, and cost a couple of wasted turns.
+- **Edit:** I added a short "Working method for export reconciliation" block to `systemprompt.md`.
+  - **Method:**
+    - Read and profile every input before computing: duplicates, number formats, status values, date ranges, key coverage.
+    - Parse with `python3 -I`, csv and Decimal, instead of shell one-liners.
+    - Keep full precision and round only the final figure.
+    - Reopen the written output and check it against the computed values.
+    - Summarise the choices made, such as duplicates, exclusions and rounding.
+  - **Workspace facts, labelled "re-verify":**
+    - Quoted thousands-separator amounts need the commas removed before parsing.
+    - There are exact duplicate rows for S004, S026 and S028, which count once.
+    - `fx_daily.csv` has one row per date and currency (USD, EUR, INR) for every day from Aug 1 to Oct 31 2026, with no gaps.
+    - Every refund's txn_id exists in `transactions.csv`.
+    - A refund's currency is the original transaction's currency.
+- **Not added:** I added no skill, script or plugin. With a single correct run there is no repeated failure to justify one, and the work is a one-off calculation.

@@ -1,0 +1,7 @@
+This revision only fixes the rejected skill; no other component changed. I didn't re-read the trajectories this round.
+
+- **`skills/log-window-stats/SKILL.md`:**
+  - I removed the "Workspace facts" line. It listed this instance's offsets, its traceback and INFO-line quirks, and the verified answer (15 events, 6 users, top E500, with E403/E401 at 4 each). Those were results and facts about this task's data, which the rejection said must not be recorded.
+  - In its place is a generic step: before counting, re-derive from the log which UTC offsets appear, whether lines are in time order, and whether continuation or INFO lines only mention the level word. Only timestamp-led lines with the level in the level position count as events.
+  - The earlier procedure is unchanged. That covers the script run with `--list`, the check that each listed row falls inside the window, the shell-less fallback of listing events line by line, and reopening the written file.
+- **Checks:** a grep of the harness finds no remaining task-specific ids or counts. The skill is still named in `systemprompt.md` and its helper script still ships at `skills/log-window-stats/scripts/log_window_stats.py`. I did not run the script.

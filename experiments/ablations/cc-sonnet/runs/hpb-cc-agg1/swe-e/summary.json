@@ -1,0 +1,126 @@
+{
+  "task_id": "swe-e",
+  "domain": "swe",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-cc-agg1/swe-e/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-sonnet/exec/hpb-cc-agg1/swe-e/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "swe-e",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.0843505,
+          "cached": false,
+          "notes": "The only rollout (base1) fixed `src/durations.py` correctly. It then ended without ever creating `output/durations.py`, which the task explicitly required. `deliverables/base1` holds only the `src` file.\n\nThe trajectory shows how that happened:\n- The agent put the fix, the verification and the planned `ls output` into one bash command and left the `output/` copy for later.\n- Its first check failed on `python3 -I` ignoring `PYTHONPATH`. It fixed that.\n- Its second check failed on its own arithmetic: it expected 7335 for \"2h 5m 10s\", but the correct value is 7510, and the code returned 7510. The run stopped there with no copy and no further verification.\n\nChanges:\n1. `systemprompt.md` now has a short bug-fix procedure.\n   - Copy the fix to the requested output path immediately after editing, and re-copy after any later edit, so a failed check cannot leave the deliverable missing.\n   - Verify against every sentence of the docstring, since the one existing test is only a sample.\n   - When a check fails, decide whether the code or the expected value is wrong before touching anything. The 7510 example is included.\n   - Finish only after `diff src/<file> output/<file>` is clean and the tests pass.\n   - Use `sys.path.insert` rather than `PYTHONPATH` under `python3 -I`, as the run discovered.\n2. `scripts/check_output.py` is new. It takes `SRC:DEST` pairs and checks that each destination exists, is byte-identical to its source and compiles. It exits 2 with a fix instruction if not, and exits 0 if the source doesn't exist. I only tested the case where the source doesn't exist; I did not run it against a real mismatch or a missing destination.\n3. `hooks.json` is new. It registers a Stop hook that runs `check_output.py src/durations.py:output/durations.py`, as the `plugin/README` says this rig supports. It blocks finishing at most 3 times, and only while the copy is missing, stale or broken. It does not block a valid finish. A single run is thin evidence for a hook, but the missing deliverable is exactly the \"exit before a deliverable exists\" case.\n\nNo skill, subagent or guardrail was added. The failure was ordinary sequencing plus one skipped deliverable, and the Stop hook covers the latter.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.0991849,
+          "cached": false,
+          "notes": "I added one skill and one trigger line, and changed nothing else. The evidence is a single rollout, `base1`.\n\n- **What `base1` did:** The agent replaced the `findall` loop in `src/durations.py` with an anchored `fullmatch` regex that has h, m and s groups. That code looks correct against the docstring. The agent then ran its own check, which asserted `\"2h 5m 10s\" == 7335`. The correct value is 7200+300+10 = 7510, so the expectation was wrong and the code was right. The rollout ends on that assertion failure. It never added regression tests, and `output/durations.py` was never created.\n- **Skill:** I added `skills/docstring-bugfix/SKILL.md` and put its trigger line in `systemprompt.md`. It carries the practitioner knowledge for this kind of task:\n  - Treat the docstring as the controlling spec, not just the one symptom in the bug report.\n  - Split the docstring into clauses, and test at least one input that must be rejected for each.\n  - Use a strict whole-string parse rather than `findall`, because scanning silently skips junk.\n  - When a check disagrees with the code, recompute the expected value by hand before deciding which side is wrong.\n  - Add regression tests to the existing tests file.\n  - Make the `output/` copy right after the first passing edit and re-copy after any later edit. The last step of that item (diffing the two files) is not tied to the rollout.\n- **Workspace fact in the skill:** `\"2h 5m 10s\"` equals 7510. This is the exact hand-calculation slip the agent made. I did not add other workspace facts.\n- **Not changed:** Commands, retries and the `python3 -I` / `PYTHONPATH` stumble belong to the procedure candidate, so I left them alone.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.1274885,
+          "cached": false,
+          "notes": "kept -> inv1 (copy to output/ right after the edit, verify against the docstring, short bug-fix procedure in `systemprompt.md`, `scripts/check_output.py`, Stop hook in `hooks.json`) -> Base rollout `base1` fixed `src/durations.py` but ended on its own wrong assertion (expected 7335 for \"2h 5m 10s\", correct is 7510) without ever creating `output/durations.py`. The inv1 rollout is the only one that delivered both `src/durations.py` and `output/durations.py`, and its `diff` was clean. I also ran `check_output.py` here. It exits 2 when the copy is missing and exits 0 once the copy matches. The Stop hook backs up the prose rule. The evidence is thin: one rollout, and I can't tell from the rollout whether the hook fired.\ndropped -> dom1 `docstring-bugfix` skill and its trigger line in `systemprompt.md` -> The dom1 rollout produced no `output/durations.py`, so it did not deliver. After loading the skill it edited the source and the tests and stopped. It never ran any tests or checks and never made the copy, even though the skill says to deliver early. Its test file calls `pytest.raises` with no `import pytest`, so the new tests cannot run. A skill that the agent loads but doesn't act on does not fix the missing deliverable, so I treated it as unsafe. The skill's ideas (docstring clauses, rejection cases, recompute expected values by hand) are already covered by inv1's \"verify against every sentence\" and its 7510 example.\ndropped -> dom1's regression-test advice -> It was never verified in the rollout, and the one run that tried it produced a broken test file. I left it out.\nkept -> `guardrails.md`, `LongTermMEMORY.md`, `tool_guidance.md` unchanged -> No trajectory moment pointed at them. The `python3 -I` / `PYTHONPATH` stumble in base1 is covered by one line in inv1's tool notes.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "swe-e",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 3,
+        "expected_P": 3,
+        "usd": 0.311024,
+        "rollout_usd": 0.0,
+        "session_usd": 0.311024,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "swe-e",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-cc-agg1/swe-e/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.12282979999999999,
+      "experience": {
+        "cue": "A fix-and-deliver task where the work product must also be written to a separate required path, and an earlier run ended on a failing self-check or a stray tool error before that copy existed.",
+        "lesson": "Put the copy-to-deliverable-path step in systemprompt.md, which the agent always reads, with explicit ordering: save the deliverable straight after the first edit, re-copy after each later edit, and only then run extended verification. Do not move the rule into an optional skill that has to be loaded first, and do not rely on a Stop hook or helper script alone until a rollout shows the hook firing.",
+        "evidence": "Rows for systemprompt.md (inv1 and agg1) and the skills row (dom1). The base run and the dom1 run both ended with no output copy. The base run ended after a failed check on its own wrong expectation. The dom1 run ended at the test-file edit after loading a skill that told it to copy early. The two prompt-rule runs both ended with a clean src/output diff, and agg1 copied in the same command as its first test run. The hook and script rows show no effect, so they are not part of the lesson.",
+        "confidence": "low. It rests on one rollout per variant and on a partly confounded comparison: dom1 differed in several ways at once, and base failed through its own slip. Treat it as a hypothesis worth testing again, not as established.",
+        "edits": "component: systemprompt.md (inline bug-fix workflow: copy to output/ right after the edit, verify against every docstring sentence, recompute expected values before blaming the code, finish only after diff is clean, plus a `python3 -I` / `sys.path.insert` note)\ncandidates: inv1, agg1 (the two harnesses are byte-identical, so agg1 adds nothing over inv1)\nchange: Adds a four-step procedure and a tool note to the base prompt. The key instruction is to copy the file to the requested output path immediately after fixing it, before extended verification, and to re-copy after each later edit.\nobserved: base1 fixed src but its first check failed on `PYTHONPATH` under `-I`. Its second check failed on its own wrong expectation (7335 instead of 7510), and it ended with no `output/durations.py`. inv1 and agg1 both used `sys.path.insert` in the first check script and used 7510. Both ended with a clean diff and a copy in output/. agg1 ran `mkdir -p output && cp` in the same command as the tests and checks, and its first-ever test run passed. inv1 ran its checks first and copied afterwards, still before finishing. The prompt rule probably contributed, but each variant has one rollout, and the base failure may have been a one-off slip.\nverdict: confounded\n \ncomponent: scripts/check_output.py\ncandidates: inv1, agg1\nchange: Adds a script that checks each SRC:DEST pair exists, is byte-identical, and compiles. It exits 2 with an instruction if not.\nobserved: Neither inv1 nor agg1 shows the script running. Both rollouts had already made a clean copy by themselves. The decision notes say it was tested only for the case where the source does not exist, and for a missing or mismatched copy by a later check.\nverdict: no observed effect\n \ncomponent: hooks.json (Stop hook that runs check_output.py)\ncandidates: inv1, agg1\nchange: Registers a Stop hook that blocks finishing while the output copy is missing or stale.\nobserved: A grep for \"hook\" or \"Stop\" in the agg1 and inv1 rollouts finds nothing, so the hook never visibly fired. The deliverable is present in both, but the prompt rule explains that. The inv1 notes also say they could not tell whether the hook fired.\nverdict: no observed effect\n \ncomponent: skills/docstring-bugfix/SKILL.md and the trigger line in systemprompt.md (which replaces the inline workflow)\ncandidates: dom1\nchange: Moves the procedure into a skill and shrinks the system prompt to one line that says to load it. The skill includes a clause checklist, a \"prefer a fullmatch anchored parse\" instruction, regression tests, and the 7510 fact. It also says to copy to output/ right after the first passing edit.\nobserved: dom1's source fix was reasonable and it added many tests to tests/test_durations.py. Its rollout ends at that test-file edit, with no test run and no output/durations.py. The deliverables folder holds only src and tests. The decision notes say the test file uses `pytest.raises` without importing pytest. The skill states the copy rule but the agent did not follow it. The rule is also no longer in the always-loaded prompt, so I read this as at least no better than the prompt form. It is a single rollout, and the change swapped the prompt rule for the skill in one step.\nverdict: hurt\n \ncomponent: guardrails.md, LongTermMEMORY.md, tool_descriptions/tool_guidance.md\ncandidates: none (unchanged in all candidates)\nchange: None.\nobserved: No difference.\nverdict: no observed effect"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-sonnet/exec/hpb-cc-agg1/swe-e/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "5779ca229e623746"
+    }
+  },
+  "errors": []
+}

@@ -1,0 +1,17 @@
+- Both base1 and base2 gave the same answer (`{"net_usd": 18691.64, "transactions": 21}`) and handled every data trap. I did not check the figure against the source.
+  - Both deduped 42 rows to 36 unique txn_ids, with a check for conflicting repeats.
+  - Both parsed the ISO and "Sep 15, 2026" dates.
+  - Both read "(954.34)" as negative and stripped thousands commas.
+  - Both excluded the 2026-10-26 SETTLED row and the August rows.
+  - Both multiplied by usd_per_unit.
+- The runs did not diverge, and neither made a concrete error. The inherited harness was essentially empty (one-line system prompt, no memory or guardrails), so the agent rediscovered these checks ad hoc each time.
+- I added one on-demand skill, `skills/revenue-reconciliation/SKILL.md`, and one trigger line in `systemprompt.md`. The skill is a checklist with these parts:
+  - Dedupe on the normalised row.
+  - Treat conflicting repeats of one txn_id as a real conflict. Neither run met this case, but base1's script raised on it, so it is a risk visible in the trajectory.
+  - Parse dates and amounts strictly.
+  - Check the FX rate direction and that every currency has a rate.
+  - Round once at the end, using Decimal.
+  - Make the count and the amount describe the same set of transactions.
+  - Reconcile rows read, unique keys and rows excluded before finishing.
+- The skill carries one workspace fact, labelled "verify before reuse". The fact comes from both rollouts' data profiling.
+- I made no always-on prose changes beyond the single trigger line, because the runs got the answer right. The skill costs nothing until a similar task loads it.

@@ -1,0 +1,11 @@
+kept -> inv1 candidate adopted wholesale: skill `payment-revenue-reconcile`, its `scripts/net_revenue.py` with `--out`, and the `systemprompt.md` trigger line plus act-don't-plan rule -> base1 (the only base rollout) read all three CSVs and then ended with a prose plan. It never computed anything and never wrote `output/answer.json`. inv1 loaded the skill, ran the script once, and wrote and re-read the file in one call. dom1 also delivered, so no rollout tied to either edit was empty.
+
+kept -> script writes the answer itself via `--out`, then re-reads it (inv1) rather than printing only (dom1) -> the costliest failure here is a run with no file. inv1's single script call produced `output/answer.json` = {"net_usd": 24317.47, "transactions": 16, "refunds": 5}. dom1 needed a separate hand-written `write_file` step for the same numbers. The keys and shape follow the task's schema exactly. I re-ran the adopted script on the source CSVs and it gave the same 24317.47, 16 and 5.
+
+dropped -> dom1's separate "write the deliverable early" trigger wording and its script that prints but does not write -> dom1 and inv1 got identical results (24317.47, 16, 5), so there was no outcome gain. inv1's trigger already covers the failure through the act-don't-plan rule, which targets base1's plan-then-stop ending. dom1's rules and workspace facts overlap almost completely with inv1's SKILL.md.
+
+dropped -> dom1's extra audit detail (excluded-by-reason counts, duplicate refund_id handling, `--status` flag) -> it would cost little but neither rollout showed it changed the answer, and with one rollout each it is not evidence. I left it out rather than merge two near-identical scripts.
+
+kept -> no changes to `guardrails.md`, `LongTermMEMORY.md` or `tool_guidance.md`, and no plugin -> neither candidate touched them. There is no repeated evidence (n=1) that prose gets skipped.
+
+Caveat: the skill's "workspace facts" (S004/S026/S028 duplicates, INR=0 on 2026-10-31, which refunds fall in September) are specific to this workspace. The skill labels them "verified here, re-check if they differ", so they should not mislead on other data. Evidence is one base rollout plus one rollout per candidate.

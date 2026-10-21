@@ -1,0 +1,43 @@
+base draft-markup-of-arbitration-agreement r1 59/59 exec $0.17403335 judge $2.395 turns=20 err=
+base draft-markup-of-arbitration-agreement r2 59/59 exec $0.13115129 judge $2.5257 turns=16 err=
+judge failed on /Users/me/GoogleHarness2/experiments/lab/exec/eval/base/arbitration-international-dispute-resolution/draft-markup-of-procedural-order/r1: ['C-054']
+base draft-markup-of-procedural-order r1 ?/? exec $0.20770943 judge $? turns=21 err=
+judge failed on /Users/me/GoogleHarness2/experiments/lab/exec/eval/base/arbitration-international-dispute-resolution/draft-markup-of-arbitration-agreement/r3: ['C-018', 'C-036', 'C-037', 'C-038', 'C-049']
+base draft-markup-of-arbitration-agreement r3 ?/? exec $0.23357871000000005 judge $? turns=24 err=
+judge failed on /Users/me/GoogleHarness2/experiments/lab/exec/eval/base/arbitration-international-dispute-resolution/draft-markup-of-procedural-order/r3: ['C-011', 'C-022', 'C-026', 'C-036', 'C-037']
+base draft-markup-of-procedural-order r3 ?/? exec $0.43799111 judge $? turns=34 err=
+judge failed on /Users/me/GoogleHarness2/experiments/lab/exec/eval/base/arbitration-international-dispute-resolution/draft-markup-of-procedural-order/r2: ['C-002', 'C-009']
+base draft-markup-of-procedural-order r2 ?/? exec $0.48585032 judge $? turns=27 err=
+judge failed on /Users/me/GoogleHarness2/experiments/lab/exec/eval/base/arbitration-international-dispute-resolution/draft-markup-of-proposed-interim-order/r2: ['C-009', 'C-010', 'C-012', 'C-017', 'C-022']
+base draft-markup-of-proposed-interim-order r2 ?/? exec $0.46769921 judge $? turns=26 err=
+judge failed on /Users/me/GoogleHarness2/experiments/lab/exec/eval/base/arbitration-international-dispute-resolution/draft-markup-of-proposed-interim-order/r1: ['C-001', 'C-006', 'C-022', 'C-023', 'C-025']
+base draft-markup-of-proposed-interim-order r1 ?/? exec $0.5889568900000001 judge $? turns=29 err=
+base draft-markup-of-arbitration-agreement r1 59/59 exec $0.17403335 judge $2.395 turns=20 err=
+base draft-markup-of-arbitration-agreement r2 59/59 exec $0.13115129 judge $2.5257 turns=16 err=
+base draft-markup-of-proposed-interim-order r1 27/37 exec $0.5889568900000001 judge $0.4765 turns=29 err=
+base draft-markup-of-proposed-interim-order r2 27/37 exec $0.46769921 judge $0.5596 turns=26 err=
+judge failed on /Users/me/GoogleHarness2/experiments/lab/exec/eval/base/arbitration-international-dispute-resolution/draft-markup-of-procedural-order/r3: [('C-001', 'Not logged in · Please run /login')]
+base draft-markup-of-procedural-order r3 ?/? exec $0.43799111 judge $? turns=34 err=
+base draft-markup-of-arbitration-agreement r3 54/59 exec $0.23357871000000005 judge $0.4599 turns=24 err=
+judge failed on /Users/me/GoogleHarness2/experiments/lab/exec/eval/base/arbitration-international-dispute-resolution/draft-markup-of-procedural-order/r2: [('C-007', 'Not logged in · Please run /login')]
+base draft-markup-of-procedural-order r2 ?/? exec $0.48585032 judge $? turns=27 err=
+base draft-markup-of-proposed-interim-order r3 25/37 exec $0.42754049000000016 judge $1.0746 turns=21 err=
+judge failed on /Users/me/GoogleHarness2/experiments/lab/exec/eval/base/arbitration-international-dispute-resolution/draft-markup-of-procedural-order/r1: [('C-004', 'Not logged in · Please run /login')]
+base draft-markup-of-procedural-order r1 ?/? exec $0.20770943 judge $? turns=21 err=
+base identify-arbitration-agreement-issues r1 28/40 exec $0.12828027 judge $0.6149 turns=17 err=
+judge failed on /Users/me/GoogleHarness2/experiments/lab/exec/eval/base/arbitration-international-dispute-resolution/identify-arbitration-agreement-issues/r2: [('C-016', 'Not logged in · Please run /login'), ('C-022', 'Not logged in · Please run /login')]
+base identify-arbitration-agreement-issues r2 ?/? exec $0.09432725 judge $? turns=18 err=
+judge failed on /Users/me/GoogleHarness2/experiments/lab/exec/eval/base/arbitration-international-dispute-resolution/identify-arbitration-agreement-issues/r3: [('C-026', 'Not logged in · Please run /login')]
+base identify-arbitration-agreement-issues r3 ?/? exec $0.15347135999999997 judge $? turns=14 err=
+base draft-markup-of-arbitration-agreement r1 59/59 exec $0.17403335 judge $2.395 turns=20 err=
+base draft-markup-of-arbitration-agreement r3 54/59 exec $0.23357871000000005 judge $0.4599 turns=24 err=
+base draft-markup-of-arbitration-agreement r2 59/59 exec $0.13115129 judge $2.5257 turns=16 err=
+base draft-markup-of-proposed-interim-order r1 27/37 exec $0.5889568900000001 judge $0.4765 turns=29 err=
+base draft-markup-of-proposed-interim-order r2 27/37 exec $0.46769921 judge $0.5596 turns=26 err=
+base draft-markup-of-proposed-interim-order r3 25/37 exec $0.42754049000000016 judge $1.0746 turns=21 err=
+base identify-arbitration-agreement-issues r1 28/40 exec $0.12828027 judge $0.6149 turns=17 err=
+base identify-arbitration-agreement-issues r2 29/40 exec $0.09432725 judge $0.6279 turns=18 err=
+base draft-markup-of-procedural-order r2 30/55 exec $0.48585032 judge $0.3966 turns=27 err=
+base draft-markup-of-procedural-order r3 43/55 exec $0.43799111 judge $0.625 turns=34 err=
+base draft-markup-of-procedural-order r1 27/55 exec $0.20770943 judge $0.3307 turns=21 err=
+base identify-arbitration-agreement-issues r3 31/40 exec $0.15347135999999997 judge $1.21 turns=14 err=

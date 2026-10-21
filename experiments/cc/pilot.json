@@ -1,0 +1,653 @@
+[
+  {
+    "task": "data-e",
+    "rep": 1,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "valid_json": true,
+      "net_usd": true,
+      "transactions": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.00531091,
+      "turns": 6,
+      "subtype": "success",
+      "task": "data-e",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 28.4
+    }
+  },
+  {
+    "task": "data-e",
+    "rep": 2,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "valid_json": true,
+      "net_usd": true,
+      "transactions": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.00534044,
+      "turns": 5,
+      "subtype": "success",
+      "task": "data-e",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 28.7
+    }
+  },
+  {
+    "task": "data-e",
+    "rep": 3,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "valid_json": true,
+      "net_usd": true,
+      "transactions": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.00487828,
+      "turns": 4,
+      "subtype": "success",
+      "task": "data-e",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 26.7
+    }
+  },
+  {
+    "task": "data-m",
+    "rep": 1,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "valid_json": true,
+      "net_usd": true,
+      "transactions": true,
+      "refunds": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.00676857,
+      "turns": 7,
+      "subtype": "success",
+      "task": "data-m",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 36.4
+    }
+  },
+  {
+    "task": "data-m",
+    "rep": 2,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "valid_json": true,
+      "net_usd": true,
+      "transactions": true,
+      "refunds": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.006817159999999999,
+      "turns": 6,
+      "subtype": "success",
+      "task": "data-m",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 36.3
+    }
+  },
+  {
+    "task": "data-m",
+    "rep": 3,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "valid_json": true,
+      "net_usd": true,
+      "transactions": true,
+      "refunds": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.006642150000000001,
+      "turns": 6,
+      "subtype": "success",
+      "task": "data-m",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 37.7
+    }
+  },
+  {
+    "task": "data-h",
+    "rep": 1,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "valid_json": true,
+      "net_usd": true,
+      "transactions": true,
+      "chargebacks": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.006350650000000001,
+      "turns": 5,
+      "subtype": "success",
+      "task": "data-h",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 37.9
+    }
+  },
+  {
+    "task": "data-h",
+    "rep": 2,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "valid_json": true,
+      "net_usd": true,
+      "transactions": true,
+      "chargebacks": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.008041910000000001,
+      "turns": 5,
+      "subtype": "success",
+      "task": "data-h",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 44.2
+    }
+  },
+  {
+    "task": "data-h",
+    "rep": 3,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "valid_json": true,
+      "net_usd": true,
+      "transactions": true,
+      "chargebacks": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.008026080000000001,
+      "turns": 5,
+      "subtype": "success",
+      "task": "data-h",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 45.9
+    }
+  },
+  {
+    "task": "ops-e",
+    "rep": 1,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "valid_json": true,
+      "errors": true,
+      "users": true,
+      "top_code": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.006627050000000001,
+      "turns": 5,
+      "subtype": "success",
+      "task": "ops-e",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 35.6
+    }
+  },
+  {
+    "task": "ops-e",
+    "rep": 2,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "valid_json": true,
+      "errors": true,
+      "users": true,
+      "top_code": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.00631521,
+      "turns": 5,
+      "subtype": "success",
+      "task": "ops-e",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 34.2
+    }
+  },
+  {
+    "task": "ops-e",
+    "rep": 3,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "valid_json": true,
+      "errors": true,
+      "users": true,
+      "top_code": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.006189030000000001,
+      "turns": 5,
+      "subtype": "success",
+      "task": "ops-e",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 34.2
+    }
+  },
+  {
+    "task": "ops-m",
+    "rep": 1,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "valid_json": true,
+      "failed": true,
+      "users": true,
+      "top_code": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.00842479,
+      "turns": 6,
+      "subtype": "success",
+      "task": "ops-m",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 45.4
+    }
+  },
+  {
+    "task": "ops-m",
+    "rep": 2,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "valid_json": true,
+      "failed": true,
+      "users": true,
+      "top_code": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.006740440000000001,
+      "turns": 7,
+      "subtype": "success",
+      "task": "ops-m",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 48.0
+    }
+  },
+  {
+    "task": "ops-m",
+    "rep": 3,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "valid_json": true,
+      "failed": true,
+      "users": true,
+      "top_code": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.00761623,
+      "turns": 7,
+      "subtype": "success",
+      "task": "ops-m",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 47.8
+    }
+  },
+  {
+    "task": "ops-h",
+    "rep": 1,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "valid_json": true,
+      "gateway.requests": true,
+      "gateway.error_rate": true,
+      "gateway.p95_ms": true,
+      "search.requests": true,
+      "search.error_rate": true,
+      "search.p95_ms": true,
+      "billing.requests": true,
+      "billing.error_rate": true,
+      "billing.p95_ms": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.00829941,
+      "turns": 7,
+      "subtype": "success",
+      "task": "ops-h",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 57.6
+    }
+  },
+  {
+    "task": "ops-h",
+    "rep": 2,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "valid_json": true,
+      "gateway.requests": true,
+      "gateway.error_rate": true,
+      "gateway.p95_ms": true,
+      "search.requests": true,
+      "search.error_rate": true,
+      "search.p95_ms": true,
+      "billing.requests": true,
+      "billing.error_rate": true,
+      "billing.p95_ms": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.00801297,
+      "turns": 8,
+      "subtype": "success",
+      "task": "ops-h",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 55.8
+    }
+  },
+  {
+    "task": "ops-h",
+    "rep": 3,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "valid_json": true,
+      "gateway.requests": true,
+      "gateway.error_rate": true,
+      "gateway.p95_ms": true,
+      "search.requests": true,
+      "search.error_rate": true,
+      "search.p95_ms": true,
+      "billing.requests": true,
+      "billing.error_rate": true,
+      "billing.p95_ms": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.007449,
+      "turns": 7,
+      "subtype": "success",
+      "task": "ops-h",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 51.2
+    }
+  },
+  {
+    "task": "swe-e",
+    "rep": 1,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "seconds": true,
+      "all_units_spaced": true,
+      "uppercase": true,
+      "zero": true,
+      "outer_space": true,
+      "empty_raises": true,
+      "unknown_unit_raises": true,
+      "garbage_raises": true,
+      "repeat_unit_raises": true,
+      "order_raises": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.006833059999999999,
+      "turns": 8,
+      "subtype": "success",
+      "task": "swe-e",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 62.1
+    }
+  },
+  {
+    "task": "swe-e",
+    "rep": 2,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "seconds": true,
+      "all_units_spaced": true,
+      "uppercase": true,
+      "zero": true,
+      "outer_space": true,
+      "empty_raises": true,
+      "unknown_unit_raises": true,
+      "garbage_raises": true,
+      "repeat_unit_raises": true,
+      "order_raises": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.00551561,
+      "turns": 7,
+      "subtype": "success",
+      "task": "swe-e",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 93.2
+    }
+  },
+  {
+    "task": "swe-e",
+    "rep": 3,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "seconds": true,
+      "all_units_spaced": true,
+      "uppercase": true,
+      "zero": true,
+      "outer_space": true,
+      "empty_raises": true,
+      "unknown_unit_raises": true,
+      "garbage_raises": true,
+      "repeat_unit_raises": true,
+      "order_raises": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.006031959999999999,
+      "turns": 8,
+      "subtype": "success",
+      "task": "swe-e",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 51.1
+    }
+  },
+  {
+    "task": "swe-m",
+    "rep": 1,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "basic_us": true,
+      "eu_discount": true,
+      "lowercase_region": true,
+      "half_up_line": true,
+      "float_cents": true,
+      "multi_line_in": true,
+      "tax_after_discount": true,
+      "unknown_region": true,
+      "strings": true,
+      "empty": true,
+      "rate_for_case": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.010192479999999999,
+      "turns": 11,
+      "subtype": "success",
+      "task": "swe-m",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 105.5
+    }
+  },
+  {
+    "task": "swe-m",
+    "rep": 2,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "basic_us": true,
+      "eu_discount": true,
+      "lowercase_region": true,
+      "half_up_line": true,
+      "float_cents": true,
+      "multi_line_in": true,
+      "tax_after_discount": true,
+      "unknown_region": true,
+      "strings": true,
+      "empty": true,
+      "rate_for_case": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.00777602,
+      "turns": 10,
+      "subtype": "success",
+      "task": "swe-m",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 101.2
+    }
+  },
+  {
+    "task": "swe-m",
+    "rep": 3,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "basic_us": true,
+      "eu_discount": true,
+      "lowercase_region": true,
+      "half_up_line": true,
+      "float_cents": true,
+      "multi_line_in": true,
+      "tax_after_discount": true,
+      "unknown_region": true,
+      "strings": true,
+      "empty": true,
+      "rate_for_case": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.010309589999999999,
+      "turns": 12,
+      "subtype": "success",
+      "task": "swe-m",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 86.3
+    }
+  },
+  {
+    "task": "swe-h",
+    "rep": 1,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "load_missing": true,
+      "load_empty": true,
+      "add_accumulates": true,
+      "add_nonpositive": true,
+      "remove_ok": true,
+      "remove_too_many": true,
+      "remove_unknown": true,
+      "remove_keeps_data": true,
+      "report_format": true,
+      "report_missing_file": true,
+      "cli_remove_error": true,
+      "cli_add_bad": true,
+      "report_low": true,
+      "add_then_report": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.0105617,
+      "turns": 15,
+      "subtype": "success",
+      "task": "swe-h",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 89.8
+    }
+  },
+  {
+    "task": "swe-h",
+    "rep": 2,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "load_missing": true,
+      "load_empty": true,
+      "add_accumulates": true,
+      "add_nonpositive": true,
+      "remove_ok": true,
+      "remove_too_many": true,
+      "remove_unknown": true,
+      "remove_keeps_data": true,
+      "report_format": true,
+      "report_missing_file": true,
+      "cli_remove_error": true,
+      "cli_add_bad": true,
+      "report_low": true,
+      "add_then_report": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.009939600000000002,
+      "turns": 14,
+      "subtype": "success",
+      "task": "swe-h",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 85.5
+    }
+  },
+  {
+    "task": "swe-h",
+    "rep": 3,
+    "partial": 1.0,
+    "all_pass": true,
+    "checks": {
+      "load_missing": true,
+      "load_empty": true,
+      "add_accumulates": true,
+      "add_nonpositive": true,
+      "remove_ok": true,
+      "remove_too_many": true,
+      "remove_unknown": true,
+      "remove_keeps_data": true,
+      "report_format": true,
+      "report_missing_file": true,
+      "cli_remove_error": true,
+      "cli_add_bad": true,
+      "report_low": true,
+      "add_then_report": true
+    },
+    "meta": {
+      "error": "",
+      "cost_usd": 0.009376019999999999,
+      "turns": 10,
+      "subtype": "success",
+      "task": "swe-h",
+      "harness": "/Users/me/GoogleHarness2/experiments/cc/base_harness",
+      "wall_s": 83.3
+    }
+  }
+]

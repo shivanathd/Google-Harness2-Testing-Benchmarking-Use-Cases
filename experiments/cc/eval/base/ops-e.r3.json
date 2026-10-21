@@ -1,0 +1,21 @@
+{
+ "cond": "base",
+ "task": "ops-e",
+ "rep": 3,
+ "partial": 1.0,
+ "all_pass": true,
+ "checks": {
+  "errors": true,
+  "users": true,
+  "top_code": true
+ },
+ "harness": "base",
+ "cost_usd": 0.00448562,
+ "tokens_in": 138233,
+ "tokens_out": 2507,
+ "wall_s": 47.9,
+ "error": "",
+ "infra_error": false,
+ "turns": 6,
+ "tool_calls": null
+}

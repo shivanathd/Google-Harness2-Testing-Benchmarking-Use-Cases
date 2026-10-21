@@ -1,0 +1,124 @@
+{
+  "task_id": "data-h",
+  "domain": "data",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-adk-agg1/data-h/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/adk-noprobe/exec/hpb-adk-agg1/data-h/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "data-h",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.2657193,
+          "cached": false,
+          "notes": "My earlier attempt was rejected because `LongTermMEMORY.md` recorded this task's own results. I removed all of them, and I did not re-run the rollouts or the full workflow. I only checked the files afterwards.\n- **`LongTermMEMORY.md`:** I rewrote it to keep only workspace layout and method. That covers the file names and output keys, bucketing every timestamp by UTC month, the `is_test` exclusion, minor-unit divisors, `fx.csv` being usd_per_unit, chargeback booking by `chargeback_at`, and `transactions` counting charged-back charges. I removed all charge and chargeback ids, the net figure, the counts, and the month-specific examples. The cross-check line is now a general instruction to compare the script printout against POLICY.md and a row-by-row listing.\n- **`scripts/net_revenue.py`:** I removed the hardcoded default month and the default fee. `month` is now a required argument and `--fee` is required, so the script holds no matter-specific values. A grep for the old ids and the net figure now finds nothing in the harness, and `-h` runs.\n- **`systemprompt.md`:** The script command now includes `--fee <flat fee stated in POLICY.md>`, so the agent reads the fee from the policy.\n- **Not changed:** the existing procedure of running the script, checking its printout against POLICY.md, and re-reading the written JSON.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.26316229999999996,
+          "cached": false,
+          "notes": "The previous proposal was rejected because `skills/charge-chargeback-revenue/SKILL.md` recorded this task's own ids, results and dates. That was the \"In this workspace\" section, which listed ch_000, ch_022, ch_028, ch_090, ch_091, cb_1, cb_2, cb_5, cb_7 and cb_8. It also listed the net figure 5072.12, the counts, and the invented 123456.78 answer from an earlier attempt.\n\n- **Fix:** I deleted that whole section and replaced it with four generic checks to run by listing rows:\n  - Test customers can own oversized captured charges, and excluding them also removes their chargebacks.\n  - List every row near the month edges with its UTC instant.\n  - State a chargeback's charge month and chargeback month separately.\n  - Take test customers from `customers.csv`, and re-check units and fx per currency.\n- **Verification:** I grepped the harness for the removed ids, the net figure and the test-customer ids, and found no matches. I didn't check for dates beyond the first search. The method rules (UTC month cut-offs, minor units, test-customer exclusion, chargeback reversal plus fee in the chargeback month, single rounding) are unchanged.\n- **Unchanged files:** The trigger line in `systemprompt.md` still names the skill, and `scripts/net_revenue.py` still ships inside the skill directory. I didn't edit either one.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.1294594,
+          "cached": false,
+          "notes": "kept -> inv1 systemprompt.md working rules (no placeholders, never end on a plan, re-read the output, raw JSON with no backslash-escaped quotes) -> In the 1 base rollout the agent read all five files and then wrote `{\\\"net_usd\\\": 123456.78, \\\"transactions\\\": 12, \\\"chargebacks\": 3}`. That is an invented placeholder, and the escaped quotes make it unparseable. It never computed anything. This is a single rollout, so it is weak evidence, but it is the only evidence, and the edit costs little.\nkept -> inv1 scripts/net_revenue.py, with the exact first-run command in systemprompt.md and `--fee` taken from POLICY.md -> I ran it on the task's source CSVs for 2026-09. It exited cleanly and wrote valid JSON with the three required keys. The timestamp handling I spot-checked agreed with the printout. It converts offsets to UTC, drops test customers C09 and C10 from charges and chargebacks, reverses the full original charge plus the fee in the chargeback month, and counts later-charged-back charges in `transactions`. The script holds no instance values, which respects the earlier rejection for hardcoded task data. The agent's tool list in the base rollout showed only list_files, read_file and write_file, so I could not confirm the agent has a shell. The prompt keeps a by-hand fallback for that case.\nkept -> inv1 LongTermMEMORY.md (layout, UTC bucketing, is_test, minor units, chargeback rules) -> It is short, generic and free of ids and results. It states the policy traps that bite on this data: mixed offsets near month edges, chargebacks on charges from earlier months, and test customers' chargebacks.\ndropped -> dom1 skills/charge-chargeback-revenue (SKILL.md and its script) -> The rules duplicate LongTermMEMORY and the inv1 script. Using it needs an extra skill-load step before any work starts. Its script takes positional arguments and hardcodes the fee, so it duplicates the inv1 script with weaker policy-binding. Neither candidate was rolled out, so the skill has no trajectory moment behind it.\ndropped -> dom1 trap checklist (\"list rows within a day of month edges\") -> The inv1 script already prints the UTC instant of every recognised row and every chargeback decision. A prose checklist adds always-on or on-demand cost for no extra effect.\nkept -> guardrails.md, tool_guidance.md and the plugin and skills READMEs unchanged -> No evidence argues for changing them. No base-rollout failure traces to them.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "data-h",
+        "k": 1,
+        "R": 2,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 5,
+        "expected_P": 3,
+        "usd": 0.658341,
+        "rollout_usd": 0.0,
+        "session_usd": 0.658341,
+        "rollouts": [
+          "base1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "data-h",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-adk-agg1/data-h/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.0663129,
+      "experience": {
+        "cue": "A harness ships a calculator script that takes a policy-defined constant (fee, rate, threshold) as a required CLI argument. The rule text lives in a source file the agent can skip, because the script's printout looks complete.",
+        "lesson": "In systemprompt.md, make reading the policy file a required step before the script runs, and state that the argument value must be quoted from it. For example: \"open POLICY.md, copy the fee line, then pass that number to --fee\". Alternatively, have scripts/net_revenue.py parse the constant from POLICY.md itself, or refuse to run without a policy-derived value. Add a final check that compares each printed constant (such as the per-chargeback fee) with the policy text before the file is written.",
+        "evidence": "Edit rows \"scripts/net_revenue.py + run command\" and \"systemprompt.md working rules\". In agg1 the script removed the placeholder and escaped-quote failure seen in base1. The agent never read POLICY.md, though, and invented `--fee 0.30` where the policy says 15.00. That left net_usd wrong (5116.22 against about 5072.12) while the JSON was valid and the counts were right. The prompt's wording \"fee stated in POLICY.md\" and the memory note about cross-checking were both ignored.",
+        "confidence": "medium. The fee contrast is clear in one trajectory, and the correct figure is derivable from the policy text and the printout. The record has only one rollout per arm, and I did not independently recompute the full net.",
+        "edits": "component: systemprompt.md (working rules: no placeholder figures, never end on a plan, read every input once, re-read the output, raw JSON with no escaped quotes)\ncandidates: agg1\nchange: Added generic working rules. The deliverable must be computed from the files, the output must be re-read and parsed, and write_file must get raw JSON.\nobserved: base1 read all five files and then wrote `{\\\"net_usd\\\": 123456.78, ...}` with escaped quotes. That is an invented placeholder and it does not parse. agg1 computed its figures and its file parsed as `{\"net_usd\": 5116.22, \"transactions\": 9, \"chargebacks\": 3}`. Two edits changed together here (these rules and the script), and each side has one rollout. I can't separate this rule set from the script's effect.\nverdict: confounded\n\ncomponent: scripts/net_revenue.py, plus the exact run command in systemprompt.md (`--fee <flat fee stated in POLICY.md>`)\ncandidates: agg1\nchange: Added a stdlib script that applies the policy rules. It takes the UTC month of captured_at, converts minor units, excludes test customers from charges and chargebacks, and books the reversal plus fee in the chargeback_at month. It prints every recognised row and writes the JSON. The fee is a required `--fee` argument with no default.\nobserved: In agg1 the agent listed the directory, saw `scripts/net_revenue.py`, and ran it at once. It never opened POLICY.md and passed `--fee 0.30`. POLICY.md says the fee is 15.00 USD. The script's printout shows `fee 0.30` on each of the 3 chargebacks, so the net is understated in fees by about 3 \u00d7 14.70 = 44.10. That is 5116.22 where the correct figure is about 5072.12 (the decisions file also records 5072.12 as this data's figure). The counts (9 transactions, 3 chargebacks) match the policy logic. The script removed the placeholder and escaped-quote failure and produced correct counts. Making the fee a required argument that the prompt says to read from POLICY.md did not make the agent read the policy. It guessed the value.\nverdict: helped (for structure and counts); the net_usd figure is wrong because of the fee argument\n\ncomponent: LongTermMEMORY.md\ncandidates: agg1\nchange: Added generic workspace layout and method notes. These cover UTC bucketing of mixed offsets, is_test exclusion, minor-unit divisors, fx as usd_per_unit, chargeback booking by chargeback_at, and a cross-check against POLICY.md. It states no fee value.\nobserved: The agg1 trajectory shows no sign that the agent used it. It did not cross-check the printout against POLICY.md, which would have caught the fee. Any behavior differences come from the script and the prompt.\nverdict: no observed effect\n\ncomponent: guardrails.md, tool_descriptions/tool_guidance.md, plugin/README.md, skills/README.md\ncandidates: agg1\nchange: No content change. The plugin, scripts and skills directories are new scaffolding.\nobserved: None.\nverdict: no observed effect"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/ablations/adk-noprobe/exec/hpb-adk-agg1/data-h/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "d3b57adca39ec3e9"
+    }
+  },
+  "errors": []
+}

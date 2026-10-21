@@ -1,0 +1,126 @@
+{
+  "task_id": "swe-m",
+  "domain": "swe",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-cc-agg1/swe-m/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-sonnet/exec/hpb-cc-agg1/swe-m/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "swe-m",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "**Evidence.** There is one rollout, `base1`.\n- It read the issue, docs and source, and ran the baseline tests. One test already failed, because `test_simple_us` expects `\"20.00\"` and the code returned a float.\n- It then edited `invoicing/tax.py` and `invoicing/totals.py` (Decimal math, tax after discount, `region.upper()`, `ValueError` for an unknown region).\n- The trajectory ends right after those two edits. It never re-ran the tests, never ran the issue's examples, and never wrote `output/CHANGES.md`, which `task.md` requires.\n- It also never opened `CLAUDE.md`, although `ls` showed it.\n- The earliest divergence is the missing deliverable and missing verification after the last edit.\n- The library entry `swe-e` records a similar failure: a run ended before the output file existed. Its lesson was that the copy-to-output rule belongs in always-on text, written right after the first edit, and that a skill alone did not work. It also saw no evidence that a Stop hook or script fired.\n- I treated that lesson as a hypothesis only, and I'm not asserting it from experience here.\n\n**Changes.**\n1. `systemprompt.md` now holds a short issue-fix workflow, in always-on text.\n   - It says to read `ISSUE.md`, `CLAUDE.md`, the spec docs, the source and the tests.\n   - It says to satisfy every issue bullet and every spec rule, including return types and formats, rounding, case handling and error types.\n   - It says to write `output/CHANGES.md` right after the first fix edit and update it after later edits.\n   - It says to verify with the existing tests plus a script that reproduces each issue bullet and edge cases.\n   - It says to add regression tests to `tests/`.\n   - It says to finish only when tests pass or any failure is explained, and to re-read `CHANGES.md` once.\n   - Motivation: `base1` stopped after its edits with no deliverable and no verification. A workspace fact is encoded as procedure: in this workspace a baseline test already fails, because the existing test expected strings.\n   - I kept this in always-on text rather than a skill because the `swe-e` evidence says the skill version hurt. The prompt is short and has no template braces.\n2. I added `scripts/check_done.py` and a Stop hook, `hooks.json`.\n   - The script checks that `output/CHANGES.md` exists and is non-empty, and that `python -m pytest tests` does not exit with failures (return code 1).\n   - If pytest is missing or times out, it lets the run finish.\n   - It exits 2 with the reason on stderr, and the runner caps blocking at 3 attempts, so valid completion is never blocked for good.\n   - I tested it by hand in a scratch directory: it blocks on a missing `CHANGES.md` or a failing test, and passes when both are fine.\n   - Motivation: the `base1` run ended with no `CHANGES.md` and unrun tests. This is the \"exit before a deliverable exists\" case. The `swe-e` hook never visibly fired, so this one is a backstop and the prompt rule is the main lever.\n\nI made no edits to `guardrails.md`, `LongTermMEMORY.md`, tool guidance, skills or sub-agents, because no trajectory moment motivated them.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "**What I read:** `task.md`, the harness, `source/`, the only rollout (`base1`), and the library's `swe-e` harness. I did not run any harness code.\n\n**What `base1` did:**\n- It read the docs, ran the baseline, and found that the existing test already fails because the code returns a float.\n- It then made two edits: `rate_for` now upper-cases the region and raises ValueError, and `totals.py` was rewritten with Decimal and half-up rounding.\n- The trajectory stops there. It never re-ran the tests and never wrote `output/CHANGES.md`, which the task requires.\n- It never read the root `CLAUDE.md`, although its first `ls` listed that file.\n- Its code looks right on a read-through, but nothing in the trajectory confirms it, and there are no regression tests.\n\n**Changes:**\n1. `systemprompt.md` (replaced the one-line base text).\n   - Why: the `base1` run ended right after the edits, with no test run and no `CHANGES.md`.\n   - The new text says to treat the cited doc as the spec and the issue as samples only. It says to read `CLAUDE.md`, and to write `output/CHANGES.md` as soon as the fix passes the existing tests. It also says never to end a turn right after an edit.\n   - The library's `swe-e` lesson says to keep the write-the-deliverable-early rule in the always-on prompt, not in a skill. I followed that. Its confidence is low, since it rests on one rollout per variant.\n   - The same file holds the trigger line for the new skill.\n\n2. New skill `skills/spec-doc-money-fix/SKILL.md`, loaded for money, rounding, tax, discount or docs-rules issues.\n   - **Clause checklist:** each doc bullet maps to a code line and a test. It covers the string-with-two-decimals return format, the order of operations (discount before tax), rounding at each step the doc names, case-insensitive region codes, and ValueError raised before any arithmetic.\n   - **Decimal pitfalls:** build Decimals from the strings, never from floats. Use `quantize` with `ROUND_HALF_UP`, not `round()`. `sum()` needs a Decimal start value for empty input. Check other callers if a helper's return type changes.\n   - **Hand-computed values for this workspace:** the ISSUE example gives subtotal \"59.97\", discount \"6.00\", tax \"10.79\" and total \"64.76\". A 0.125 unit price gives \"0.13\", and qty 3 gives \"0.38\". RATES are listed, and an unknown region raises ValueError. These are labelled as workspace facts to recompute.\n   - **Tests and `CHANGES.md`:** the tests to add, and what `CHANGES.md` should contain: files changed, one line per symptom and per extra doc clause, tests added, and the test result.\n   - The skill does not change the deliverable's shape. `CHANGES.md` stays short, as the task asks.\n\nI made no changes to guardrails, memory, tool guidance, scripts or plugins, because the single rollout gives no evidence for them.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "kept -> inv1 systemprompt.md issue-fix workflow, trimmed (hook and prose detail cut) -> base1 ended right after its two edits with no test run and no `output/CHANGES.md`, and the same stop-after-edit shape appeared in inv1's rollout. Because the rule has only a single-rollout basis (inv1 also stopped), the main change is that CHANGES.md is now written in the same step as the first edit, before verification, and the prompt says never to end a turn right after an edit. This follows the library's swe-e lesson to keep the deliver-early rule in always-on text. Confidence is low: 1 base rollout and 1 inv1 rollout, both ended identically, so the rule's effect is untested. The extra steps (\"read CLAUDE.md\", \"treat docs/ as the spec\", \"check types and formats, case handling and error types\") come from base1 never opening CLAUDE.md and from the baseline test failing on the float-versus-string return.\ndropped -> inv1 `scripts/check_done.py` and Stop `hooks.json` -> inv1's rollout shows no sign of the hook firing, and it stopped after edits anyway. The swe-e library entry records the same hook with no observed effect. `hooks.json` also sits outside the listed editable surface. A hook that runs pytest and blocks adds risk, and the trajectory does not show it helping.\ndropped -> dom1 skill `spec-doc-money-fix` and its trigger line -> the dom1 rollout produced nothing. It loaded the skill, ran the baseline tests, and ended with no edits and no CHANGES.md, so I treat it as non-delivering and unsafe. The swe-e library entry also records a skill-based variant that ended with no output copy. The skill's hand-computed values are specific to this workspace and have no support from a delivering rollout.\nkept -> guardrails.md, LongTermMEMORY.md, tool_guidance.md, scripts, plugin unchanged -> no trajectory moment motivated any change.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "swe-m",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 0,
+        "expected_P": 3,
+        "usd": 0.0,
+        "rollout_usd": 0.0,
+        "session_usd": 0.0,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "swe-m",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-cc-agg1/swe-m/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.12502459999999999,
+      "experience": {
+        "cue": "A fix-an-issue task where a file under output/ is a required deliverable, and earlier runs of the harness stopped right after the code edits with the deliverable unwritten and nothing verified.",
+        "lesson": "In the always-on systemprompt.md, tell the agent to write the deliverable file (here output/CHANGES.md) in the same step as its first fix edit, and state \"never end a turn right after an edit\". Do not make it a separate later step, and do not move it into a skill or a Stop hook. Check it by confirming the deliverable exists in the trajectory right after the first edit.",
+        "evidence": "In the edit rows, base1 (no rule) and inv1 (a separate \"write CHANGES.md after the edit, then verify\" step plus a Stop hook) both ended right after their edits with no CHANGES.md. agg1 (same-step plus never-end-after-an-edit wording) wrote CHANGES.md and tests and ran pytest straight after its edits. dom1 moved the guidance into a skill and loaded it, and it made no edits at all. The hook shows no sign of firing.",
+        "confidence": "low. Each arm is a single rollout, and agg1's rule differs from inv1's only in wording, so the rule's effect may be chance. This is the only execution contrast in the record.",
+        "edits": "component: systemprompt.md (the \"Issue-fix workflow\" block, added against the base's one-line prompt)\ncandidates: agg1 (this is the current harness; its `harness.diff` is empty). inv1 and dom1 each rewrote it.\nchange: Replaced the one-line base prompt with a five-step workflow. It covers reading ISSUE.md, CLAUDE.md, the docs and the tests, and treating the cited doc as the spec, with the issue and tests as samples. It also says to write output/CHANGES.md \"in the same step as your first fix edit \u2026 Never end a turn right after an edit\", then verify and add regression tests.\nobserved: base1 (one-line prompt) ran the baseline, made two edits and stopped. It never reran the tests and wrote no CHANGES.md. agg1 made the same two edits, then in the next action wrote CHANGES.md, appended regression tests and ran pytest (5 passed). Its deliverables include output/CHANGES.md and tests/test_totals.py. The fixes are the same in both runs (Decimal, half-up, tax after discount, upper-cased region, ValueError). Only the delivery differs. There is one rollout per arm, so run-to-run variance cannot be excluded.\nverdict: confounded (the only delivering run, but n=1 per arm, and inv1's reworded variant below failed to deliver)\n\ncomponent: systemprompt.md (inv1's reworded workflow, plus a closing line about `python3 -I`)\ncandidates: inv1\nchange: Kept the five-step shape. Step 3 became \"Write output/CHANGES.md as soon as the fix is edited, then verify \u2026 before extended verification\". It dropped the \"same step\" and \"never end a turn right after an edit\" wording. It added \"a failing command is information, not the end of the task\".\nobserved: inv1 ran the baseline, made its two edits (totals.py, then tax.py) and the trajectory ends there. It has no CHANGES.md, no test run and no regression tests. This is the same stop-after-edit shape as base1. A deliver-early rule in a separate step did not produce the deliverable in this run. agg1's \"same step / never end after an edit\" wording did, but one rollout each cannot separate wording from chance.\nverdict: confounded (a failing variant of the same component, n=1)\n\ncomponent: hooks.json and scripts/check_done.py (Stop hook)\ncandidates: inv1\nchange: Added a Stop hook that runs `check_done.py`. It exits 2 if output/CHANGES.md is missing or empty, or if pytest exits with failures.\nobserved: inv1's trajectory shows no hook firing or any follow-up turn after the last edit. It ended without CHANGES.md exactly as base1 did. The hook either did not run in this runner or did not extend the run. There is no execution evidence either way.\nverdict: no observed effect\n\ncomponent: skills/spec-doc-money-fix/SKILL.md, with a trigger line in systemprompt.md and a shortened workflow prompt\ncandidates: dom1\nchange: Added a skill with a clause checklist, Decimal pitfalls, hand-computed values for this workspace and CHANGES.md contents. The system prompt was cut to a short paragraph that tells the agent to load the skill for money or rounding issues.\nobserved: dom1 read the files, called the Skill tool, ran the baseline pytest (1 failed) and ended. There were no edits and no CHANGES.md, and the deliverable is only a log. The skill load and the baseline run were the last actions. The skill replaced the always-on workflow, so the effect of the skill and the effect of removing the workflow cannot be separated.\nverdict: confounded (the run did not deliver, but the skill and the prompt cut changed together, n=1)"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-sonnet/exec/hpb-cc-agg1/swe-m/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "32381a724a0ce3fd"
+    }
+  },
+  "errors": []
+}

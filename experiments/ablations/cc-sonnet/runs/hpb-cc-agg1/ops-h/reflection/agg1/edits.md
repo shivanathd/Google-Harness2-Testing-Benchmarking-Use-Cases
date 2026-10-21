@@ -1,0 +1,25 @@
+component: scripts/traffic_report.py, with the log-analysis procedure block in systemprompt.md
+candidates: agg1, inv1 (dom1 carried a near-copy of the script inside a skill, covered in the skill row)
+change: Added a single script that does the whole computation: skip truncated lines, convert timestamps to UTC, apply the half-open window, drop /healthz, count status >= 500 as errors, convert latency_s per row, and take nearest-rank p95. It writes output/answer.json when called with `--write`. The system prompt gained a procedure block that gives the exact command with `--write` on it. The block also says to reopen and validate the file, and not to treat a printout as finishing.
+observed: base1 hand-rolled a /tmp parser and got the same numbers, then spent its turns on billing cross-tabs and ended with output/ empty ("no deliverable produced"). agg1 read RUNBOOK and the script, ran the script with `--write` as its second action, and ran a key/type validation as its third. It finished with a correct file after 3 actions. inv1 ran the same command as its fourth action and then ran extra billing cross-tabs, but the file was already on disk. Both delivered the identical answer: gateway 96/0.1354/334, search 119/0.1513/192, billing 124/0.1613/393. The script and the prompt block were added together, and no run isolates one from the other. There is also one rollout per harness.
+verdict: confounded
+component: hooks.json and scripts/check_output.py (Stop hook that blocks finishing while output/ is empty or invalid)
+candidates: agg1, inv1
+change: Added a Stop hook that exits 2 while output/ has no file, an empty file or invalid JSON.
+observed: It never fired in agg1 or inv1, because the answer was already written before either run finished. base1 and dom1 lacked the hook and ended empty, but dom1 is confounded by its skill, so the hook is not shown to be needed or to work.
+verdict: no observed effect
+component: systemprompt.md "check the logs against RUNBOOK" line
+candidates: agg1 (generic wording: check for mixed offsets and for a latency-key switch, with the billing 09:00 UTC example), inv1 (hardcoded workspace facts: offsets -03:00/+01:00/+00:00 and the billing cutover)
+change: The same line was written two ways. agg1's is generic and inv1's carries this workspace's facts.
+observed: Both runs produced byte-identical answers. The script handles offsets and the latency key per row, so neither wording changed any action. agg1 never cross-tabbed billing. inv1 did, but only after the file was written.
+verdict: no observed effect
+component: skills/traffic-report/SKILL.md and skills/traffic-report/scripts/traffic_stats.py, plus the one-line trigger in systemprompt.md (replacing the procedure block)
+candidates: dom1
+change: Moved the method and helper into an on-demand skill. The system prompt shrank to "load the traffic-report skill first; write the file, reopen it". The helper took `--write` as an optional flag, and the skill text said to add it.
+observed: dom1's first action loaded the skill. It then ran the helper without `--write`, spent its remaining turns reading the helper source and sampling logs, and ended on a `zcat` error with output/ empty ("no deliverable produced"). Its helper numbers would have matched the others, so the method was sound and the write never happened. The skill had the write rule one level down. The run also had no Stop hook, and base1 failed the same way without any skill, so the result may be run-to-run variance.
+verdict: confounded
+component: plugin/README.md, skills/README.md, LongTermMEMORY.md, guardrails.md, tool_descriptions/tool_guidance.md
+candidates: agg1, inv1, dom1
+change: The README placeholders were added (or left empty). The memory, guardrail and tool-guidance files are unchanged from base.
+observed: No trajectory touched them.
+verdict: no observed effect

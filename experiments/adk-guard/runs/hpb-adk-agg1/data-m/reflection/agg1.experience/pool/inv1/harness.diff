@@ -1,0 +1,217 @@
+--- current/scripts/net_revenue.py
++++ inv1/scripts/net_revenue.py
+@@ -1,24 +1,29 @@
+ #!/usr/bin/env python3
+-"""Net revenue in USD for one month: settled transactions minus refunds, daily fx.
++"""Monthly net revenue in USD from transactions + refunds + daily fx exports.
+ 
+-Usage: python3 scripts/net_revenue.py --month YYYY-MM [--tx transactions.csv]
+-           [--refunds refunds.csv] [--fx fx_daily.csv] [--out output/answer.json] [--dry]
++Usage (run from the workspace root; the files are listed by list_files "."):
++  python3 scripts/net_revenue.py --month 2026-09 [--tx transactions.csv]
++      [--refunds refunds.csv] [--fx fx_daily.csv] [--status SETTLED]
++      [--out output/answer.json] [--dry]
+ 
+-Standard library only. Rules: a txn_id counts once (first row kept; conflicting
+-duplicates reported); revenue = status SETTLED, month of settled_on, rate of the
+-settled_on day; refunds = month of refunded_on, in the original transaction's
+-currency, rate of the refunded_on day. Amounts may carry thousands commas or
+-"(x)" negatives. Writes {"net_usd", "transactions", "refunds"}; rounds once at the
+-end. Diagnostics go to stderr -- read them against the raw files.
++Rules: a txn_id counts once (first row kept, conflicting duplicates reported);
++a transaction is recognised if status matches and settled_on is in the month,
++at that day's usd_per_unit; a refund reduces revenue in the month of
++refunded_on, in the ORIGINAL transaction's currency, at the refund day's rate.
++Stdlib only. Handles thousands separators ("2,845.66"), "(x)" negatives,
++currency symbols, several date formats. Rounds once at the end.
++Writes {"net_usd","transactions","refunds"} and prints a diagnostic to stderr.
++Exit 1 with a message on unparseable value, missing fx rate (no silent
++carry-forward), zero/invalid rate, refund for unknown txn, missing column.
+ """
+ import argparse, csv, json, os, re, sys
+ from datetime import datetime
+ from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
+ 
+-FMTS = ["%Y-%m-%d", "%b %d, %Y", "%B %d, %Y", "%Y/%m/%d", "%m/%d/%Y", "%d %b %Y", "%Y-%m-%dT%H:%M:%S"]
++DATE_FORMATS = ["%Y-%m-%d", "%b %d, %Y", "%B %d, %Y", "%Y/%m/%d", "%m/%d/%Y", "%d %b %Y", "%Y-%m-%dT%H:%M:%S"]
+ 
+ 
+-def amt(s):
++def parse_amount(s):
+     t = s.strip()
+     neg = t.startswith("(") and t.endswith(")")
+     t = re.sub(r"[()\s,$€£₹]", "", t)
+@@ -31,93 +36,95 @@
+     return -v if neg else v
+ 
+ 
+-def day(s):
++def parse_date(s, what):
+     t = s.strip()
+-    for f in FMTS:
++    for f in DATE_FORMATS:
+         try:
+             return datetime.strptime(t, f).date()
+         except ValueError:
+             pass
+-    sys.exit("unparseable date %r" % s)
++    sys.exit("unparseable %s %r" % (what, s))
+ 
+ 
+-def rows(path):
++def read(path, cols):
+     with open(path, newline="", encoding="utf-8-sig") as f:
+-        return [{k.strip(): (v or "").strip() for k, v in r.items()} for r in csv.DictReader(f)]
++        rows = [{k.strip(): (v or "").strip() for k, v in r.items()} for r in csv.DictReader(f)]
++    for c in cols:
++        if not rows or c not in rows[0]:
++            sys.exit("missing column %s in %s" % (c, path))
++    return rows
+ 
+ 
+ def main():
+     a = argparse.ArgumentParser()
+-    a.add_argument("--month", required=True)
+     a.add_argument("--tx", default="transactions.csv")
+     a.add_argument("--refunds", default="refunds.csv")
+     a.add_argument("--fx", default="fx_daily.csv")
++    a.add_argument("--month", required=True, help="YYYY-MM, from the task")
+     a.add_argument("--status", default="SETTLED")
+     a.add_argument("--out", default="output/answer.json")
+     a.add_argument("--dry", action="store_true")
+     o = a.parse_args()
+-    y, m = map(int, o.month.split("-"))
+-    inm = lambda d: (d.year, d.month) == (y, m)
++    year, mon = map(int, o.month.split("-"))
+ 
+     fx = {}
+-    for r in rows(o.fx):
+-        fx[(day(r["date"]), r["currency"].upper())] = Decimal(r["usd_per_unit"])
++    for r in read(o.fx, ("date", "currency", "usd_per_unit")):
++        fx[(parse_date(r["date"], "fx date"), r["currency"].upper())] = Decimal(r["usd_per_unit"])
+ 
+-    def rate(d, c):
+-        v = fx.get((d, c.upper()))
+-        if v is None or v <= 0:
+-            sys.exit("no usable fx rate for %s on %s (got %r)" % (c, d, v))
++    def rate(d, cur, what):
++        v = fx.get((d, cur))
++        if v is None:
++            sys.exit("no fx rate for %s on %s (%s)" % (cur, d, what))
++        if v <= 0:
++            sys.exit("fx rate for %s on %s is %s (%s): invalid" % (cur, d, v, what))
+         return v
+ 
+-    seen, dup, conf = {}, 0, []
+-    for r in rows(o.tx):
+-        k = tuple(r[c] for c in ("created_on", "settled_on", "amount", "currency", "status"))
+-        if r["txn_id"] in seen:
+-            dup += 1
+-            if seen[r["txn_id"]] != k:
+-                conf.append(r["txn_id"])
++    txs = read(o.tx, ("txn_id", "settled_on", "amount", "currency", "status"))
++    seen, dupes, conflicts, total, n, by_cur = {}, 0, [], Decimal(0), 0, {}
++    for r in txs:
++        tid = r["txn_id"]
++        key = tuple(r[c] for c in ("settled_on", "amount", "currency", "status"))
++        if tid in seen:
++            dupes += 1
++            if seen[tid] != key:
++                conflicts.append(tid)
+             continue
+-        seen[r["txn_id"]] = k
+-    rev, n, cur_tot = Decimal(0), 0, {}
+-    info = {}
+-    for tid, (cr, st, am, cu, status) in seen.items():
+-        info[tid] = (status, cu)
+-        if status.upper() != o.status.upper() or not st:
++        seen[tid] = key
++        r["currency"] = r["currency"].upper()
++        if r["status"].upper() != o.status.upper() or not r["settled_on"]:
+             continue
+-        d = day(st)
+-        if not inm(d):
++        d = parse_date(r["settled_on"], "settled_on")
++        if (d.year, d.month) != (year, mon):
+             continue
+-        usd = amt(am) * rate(d, cu)
+-        rev += usd
++        usd = parse_amount(r["amount"]) * rate(d, r["currency"], "txn " + tid)
++        total += usd
+         n += 1
+-        cur_tot[cu] = cur_tot.get(cu, Decimal(0)) + usd
++        by_cur[r["currency"]] = by_cur.get(r["currency"], Decimal(0)) + usd
++    cur_of = {r["txn_id"]: r["currency"].upper() for r in txs}
+ 
+-    ref, nr, rdup, orphan, unsettled = Decimal(0), 0, 0, [], []
+-    rseen = set()
+-    for r in rows(o.refunds):
+-        rid = r.get("refund_id") or (r["txn_id"], r["refunded_on"], r["amount"])
+-        if rid in rseen:
+-            rdup += 1
++    refs = read(o.refunds, ("refund_id", "txn_id", "refunded_on", "amount"))
++    seen_r, rdupes, rtotal, rn = set(), 0, Decimal(0), 0
++    for r in refs:
++        if r["refund_id"] in seen_r:
++            rdupes += 1
+             continue
+-        rseen.add(rid)
+-        d = day(r["refunded_on"])
+-        if not inm(d):
++        seen_r.add(r["refund_id"])
++        d = parse_date(r["refunded_on"], "refunded_on")
++        if (d.year, d.month) != (year, mon):
+             continue
+-        if r["txn_id"] not in info:
+-            orphan.append(r["txn_id"])
+-            continue
+-        if info[r["txn_id"]][0].upper() != o.status.upper():
+-            unsettled.append(r["txn_id"])
+-        ref += amt(r["amount"]) * rate(d, info[r["txn_id"]][1])
+-        nr += 1
++        if r["txn_id"] not in cur_of:
++            sys.exit("refund %s references unknown txn_id %s" % (r["refund_id"], r["txn_id"]))
++        rtotal += parse_amount(r["amount"]) * rate(d, cur_of[r["txn_id"]], "refund " + r["refund_id"])
++        rn += 1
+ 
+-    q = lambda v: v.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+-    net = float(q(rev - ref))
+-    print("unique_txn=%d dup_rows_dropped=%d conflicting_dups=%s | revenue_txns=%d revenue_usd=%s by_cur=%s | "
+-          "refunds_applied=%d refunds_usd=%s dup_refund_rows=%d orphan_refunds=%s refunds_on_non_%s_txn=%s | net_usd=%.2f"
+-          % (len(seen), dup, conf or "none", n, q(rev), {k: str(q(v)) for k, v in cur_tot.items()},
+-             nr, q(ref), rdup, orphan or "none", o.status, unsettled or "none", net), file=sys.stderr)
+-    ans = {"net_usd": net, "transactions": n, "refunds": nr}
++    q = lambda x: x.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
++    net = float(q(total - rtotal))
++    print("tx_rows=%d unique_txn=%d dup_rows_dropped=%d conflicting_dups=%s recognised=%d gross_usd=%s by_currency=%s | "
++          "refund_rows=%d dup_refund_ids=%d refunds_applied=%d refunds_usd=%s | net_usd=%.2f"
++          % (len(txs), len(seen), dupes, conflicts or "none", n, q(total),
++             {k: str(q(v)) for k, v in sorted(by_cur.items())}, len(refs), rdupes, rn, q(rtotal), net),
++          file=sys.stderr)
++    ans = {"net_usd": net, "transactions": n, "refunds": rn}
+     if not o.dry:
+         os.makedirs(os.path.dirname(o.out) or ".", exist_ok=True)
+         with open(o.out, "w") as f:
+--- current/systemprompt.md
++++ inv1/systemprompt.md
+@@ -1,11 +1,11 @@
+-You are an assistant that completes tasks inside a workspace directory. Read the task, do the work, and write the requested deliverables under output/. A task is not done until the file exists: do not end a turn with only a plan -- compute and write. Start by listing the workspace and reading the inputs with tools. If a command fails, read the error and change something before rerunning; never rerun an unchanged failing command, and pass a value after every flag (e.g. --out output/answer.json).
++You are an assistant that completes tasks inside a workspace directory. Read the task, do the work, and write the requested deliverables under output/.
+ 
+-Revenue reconciliation (payment export + refunds + daily fx): run `python3 scripts/net_revenue.py --month YYYY-MM` (stdlib only; flags --tx --refunds --fx --status --out). It writes output/answer.json as net_usd, transactions, refunds, and prints diagnostics on stderr. Rules it applies, which you must also hold if you compute by hand:
+-- Revenue: status SETTLED only, month taken from settled_on (not created_on), rate of the settled_on day. PENDING/VOID rows and blank settled_on never count.
+-- A txn_id counts once; drop exact duplicate rows and report conflicting ones.
+-- Refunds: month taken from refunded_on, amount is in the original transaction's currency (look it up by txn_id), rate of the refunded_on day. A refund can belong to a transaction settled in another month; it still reduces the month it was issued.
+-- Strip thousands commas from amounts; use usd_per_unit as multiply-to-USD; round once, at the end.
+-- "transactions" = distinct settled transactions recognised; "refunds" = refunds applied in the month. Keep exactly the keys the task names.
+-Before finishing, check stderr: the per-currency totals, counts, orphan refunds and refunds on non-SETTLED transactions must match what you see in the raw files, and every month-boundary row (settled/refunded on the 1st or last day, or in a neighbouring month) must be classified deliberately.
++Working rules (tool budget is small, about 40 model calls -- spend them on the deliverable):
++- Act, don't announce: start with list_files "." and read the inputs with tools in your first turn. A reply that only states a plan, with no deliverable written, is a failed run. Never end a turn before output/ holds the requested file.
++- Write the deliverable early; refine after. If a command fails, read the error and change the code or input handling before rerunning; never rerun an unchanged failing command. After two failures of the same kind, switch approach (stdlib `csv` + `decimal` instead of pandas; don't retry pip install).
++- Keep helper scripts out of output/. Paths are relative to the workspace root; do not probe `/`.
++- Messy exports: check the distinct formats in every column (dates, amounts with thousands separators, status, duplicate keys) before computing.
++- Finish by reopening the deliverable and checking its keys and types against the task wording.
+ 
+-Expect in these exports: exact duplicate transaction rows, quoted amounts containing commas, one fx row per date per currency, and possibly a zero or blank rate on some day. A zero or missing rate on a day you need must be raised, not applied; a bad rate on a day outside the target month is irrelevant. Refunds dated outside the target month (earlier or later) do not reduce it -- list them and confirm each is excluded for its date, not its transaction's settlement month.
++Revenue reconciliation (transactions + refunds + daily fx CSVs): run `python3 scripts/net_revenue.py --month YYYY-MM` (month from the task; flags --status, --tx, --refunds, --fx, --out). It is a stdlib-only helper that counts each txn_id once, recognises status-matching rows by settled_on at that day's rate, subtracts refunds issued in the month at the refund day's rate in the original transaction's currency, and writes output/answer.json as {"net_usd","transactions","refunds"} -- check those keys match the task. Use it instead of hand-rolling. Read its stderr line: duplicate and conflict counts and per-currency subtotals must agree with the raw files. It exits 1 on an unparseable value, a missing/zero fx rate or an unknown refund txn_id; fix the input handling rather than rerunning unchanged.
++In this workspace (verified): transactions.csv repeats some txn_ids as identical rows (count each once); amounts can carry thousands commas; currencies are USD/EUR/INR with usd_per_unit fx rates (multiply). Some fx rows hold a 0 rate on dates outside the requested month -- irrelevant unless a recognised settlement or refund falls on that date. Sanity-check the helper's counts against a quick independent filter of the raw files before finishing.

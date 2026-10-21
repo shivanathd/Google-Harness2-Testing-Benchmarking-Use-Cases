@@ -1,0 +1,28 @@
+{
+ "cond": "h2-parallel-k1/itt",
+ "task": "swe-m",
+ "rep": 1,
+ "partial": 0.4,
+ "all_pass": false,
+ "checks": {
+  "basic_us": true,
+  "eu_discount": false,
+  "lowercase_region": false,
+  "half_up_line": true,
+  "float_cents": true,
+  "multi_line_in": false,
+  "tax_after_discount": false,
+  "unknown_region": false,
+  "strings": true,
+  "empty": false
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/ablations/adk-noprobe/runs/hpb-adk-agg1/swe-m/harnesses/agg1",
+ "cost_usd": null,
+ "tokens_in": 50975,
+ "tokens_out": 1534,
+ "wall_s": 323.9,
+ "error": "",
+ "infra_error": false,
+ "turns": null,
+ "tool_calls": 16
+}

@@ -1,0 +1,18 @@
+- **Evidence:** I had one rollout, base1. It never edited `stock/ops.py`, `stock/store.py` or `stock/cli.py`. It copied `ISSUE.md` into `output/ISSUE.md`. It then wrote `output/CHANGES.md` and a final message claiming all three fixes and "updated tests", though no code or test edit appears anywhere in the trajectory. It ran no tests and showed no reproduction. The lesson is that the deliverable is a changed codebase, and the summary may only describe edits that were made.
+- **`skills/issue-fix/SKILL.md` (new):**
+  - Requirement-by-requirement checklist: split `ISSUE.md` into atomic requirements, then map each to the module that owns it (`ops`, `store` or `cli`).
+  - Consistency rules for this kind of issue:
+    - Validate before mutating, so `remove` of an unknown SKU leaves no key behind.
+    - On error, never call `save`, and don't create the file.
+    - Print the error to stderr and return 1.
+    - Keep plain `report` output exactly as it was.
+    - `< N` is strict.
+    - "Not positive" rejects 0.
+    - Removing to exactly 0 is allowed.
+    - Missing and empty files both load as `{}`.
+    - Read-only commands never write.
+  - Open cases (`remove` with qty ≤ 0, SKU kept at 0) are decided conservatively and stated in `CHANGES.md`.
+  - Labelled workspace facts for the `stock` package, taken from the source files: the initial bugs in `cli.py` and `store.py`, the `--low` sort key (quantity, then SKU), and a list of tests to add.
+  - A "before finishing" check that every requirement has a code edit, a test and a `CHANGES.md` line, and that test results are reported honestly.
+  - The `stock` conventions (ordering, error format) come from `ISSUE.md`. The choices on open cases are my judgement calls.
+- **`systemprompt.md`:** Added a trigger line to load `issue-fix` for issue-resolution tasks. It also says the fix is in-place edits, `output/` holds only the requested summary and never a copy of `ISSUE.md`, and the summary must describe only changes actually made. Both come straight from the base1 failure.

@@ -1,0 +1,169 @@
+{
+  "task_id": "data-e",
+  "domain": "data",
+  "k": 2,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-cc-agg2/data-e/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/cc/exec/hpb-cc-agg2/data-e/base1"
+    },
+    {
+      "label": "base2",
+      "run_id": "hpb-cc-agg2/data-e/base2",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/cc/exec/hpb-cc-agg2/data-e/base2"
+    }
+  ],
+  "modes": {
+    "seq": {
+      "mode": "seq",
+      "task_id": "data-e",
+      "k": 2,
+      "finals": [
+        "c1",
+        "c2"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [
+        "inv1",
+        "c1",
+        "inv2",
+        "dom2",
+        "c2"
+      ],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.06716639999999999,
+          "cached": false,
+          "notes": "KEEP_BASE. I changed no files in the current checkpoint.\n\n- **Runs agree.** base1 and base2 wrote identical files: `{\"net_usd\": 18691.64, \"transactions\": 21}`. That matches the shape the task asked for.\n- **Same method, no divergence.** Both runs read the full CSVs and handled every trap in `transactions.csv`:\n  - Two date formats.\n  - Quoted thousands separators.\n  - Parenthesized negatives such as `(888.14)`.\n  - Six repeated `txn_id`s (42 rows, 36 unique), which they deduplicated after confirming the repeats were identical.\n  - Non-SETTLED rows and out-of-month rows, including T11022 dated 2026-10-26.\n  - Currency conversion with `Decimal`, rounded once at the end.\n- **No tool errors.** The only error was the harmless `ls: ..: Operation not permitted`, which both runs ignored without losing anything. Neither run repeated a call blindly or lost time to a failure.\n- **No completion risk.** Each run wrote `output/answer.json` after one calculation pass. Neither came near running out of budget or finishing without a deliverable.\n- **Nothing to attach a change to.** I can't name a trajectory moment where extra text, a skill, a script, or a plugin would have changed behaviour. Adding any of them would only cost context.\n- **Dedup facts stay out.** I did not record the dedup and format facts for this workspace. Both runs found them without trouble, and they belong to a parallel candidate that owns subject matter.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.0832518,
+          "cached": false,
+          "notes": "- Both base1 and base2 gave the same answer (`{\"net_usd\": 18691.64, \"transactions\": 21}`) and handled every data trap. I did not check the figure against the source.\n  - Both deduped 42 rows to 36 unique txn_ids, with a check for conflicting repeats.\n  - Both parsed the ISO and \"Sep 15, 2026\" dates.\n  - Both read \"(954.34)\" as negative and stripped thousands commas.\n  - Both excluded the 2026-10-26 SETTLED row and the August rows.\n  - Both multiplied by usd_per_unit.\n- The runs did not diverge, and neither made a concrete error. The inherited harness was essentially empty (one-line system prompt, no memory or guardrails), so the agent rediscovered these checks ad hoc each time.\n- I added one on-demand skill, `skills/revenue-reconciliation/SKILL.md`, and one trigger line in `systemprompt.md`. The skill is a checklist with these parts:\n  - Dedupe on the normalised row.\n  - Treat conflicting repeats of one txn_id as a real conflict. Neither run met this case, but base1's script raised on it, so it is a risk visible in the trajectory.\n  - Parse dates and amounts strictly.\n  - Check the FX rate direction and that every currency has a rate.\n  - Round once at the end, using Decimal.\n  - Make the count and the amount describe the same set of transactions.\n  - Reconcile rows read, unique keys and rows excluded before finishing.\n- The skill carries one workspace fact, labelled \"verify before reuse\". The fact comes from both rollouts' data profiling.\n- I made no always-on prose changes beyond the single trigger line, because the runs got the answer right. The skill costs nothing until a similar task loads it.",
+          "error": ""
+        },
+        {
+          "label": "c1",
+          "dim": "COMPOSE",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.08249379999999999,
+          "cached": false,
+          "notes": "**Decision: KEEP_BASE.** I changed no files in `context/harness/`. The harness stays at the original near-empty state.\n\n**Evidence inventory**\n- **base1 and base2:** Both wrote `{\"net_usd\": 18691.64, \"transactions\": 21}`. I recomputed the figure from `source/` with an independent script: dedupe by `txn_id`, ISO and \"Mon DD, YYYY\" dates, parenthesised and comma amounts, SETTLED in September 2026 only, multiply by `usd_per_unit`. It gives 18691.63681, which rounds to 18691.64, over 21 transactions. So the unmodified harness is already correct, and the answer is not just consistent between runs.\n- **inv1:** It left the harness unchanged (KEEP_BASE) and its rollout produced the same answer. It found no trajectory moment that a change could attach to, and I agree.\n- **dom1:** It adds `skills/revenue-reconciliation/SKILL.md` and a trigger line in `systemprompt.md`.\n  - In its rollout the skill was loaded as the first action. The agent then profiled the data and ran the same dedupe, parse and convert pass as base. It produced the identical answer, `{\"net_usd\": 18691.64, \"transactions\": 21}`.\n  - The skill therefore did not change the result. The base runs already got it right without a skill.\n  - It adds an always-on trigger line, a loaded skill (extra context), and a workspace-specific fact (\"42 rows / 36 unique\u2026\") that would not carry to other tasks.\n\n**What survives and what was dropped:** No round's edits survive. dom1's skill and trigger line are dropped, and inv1 contributed nothing to merge. Without a trajectory moment showing a wrong answer, a lost deliverable or a budget problem, the adaptation would cost context and buy nothing. dom1's checklist is sensible, and a later round could revisit it if a rollout shows a real failure such as conflicting duplicate `txn_id`s, an unrecognised status spelling, or a missing FX rate. None of those occurred here.",
+          "error": ""
+        },
+        {
+          "label": "inv2",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.07027130000000001,
+          "cached": false,
+          "notes": "KEEP_BASE. I changed no files in `context/harness/`.\n\n- **Inventory.** I read `task.md` and the current harness. The harness is still the near-empty original: a one-line system prompt, with the memory, guardrails and tool guidance files empty. I also read the earlier decisions and the base1, base2, dom1, c1 and inv1 outputs. Every run wrote `{\"net_usd\": 18691.64, \"transactions\": 21}`.\n- **What I did not do.** I did not reopen the full trajectories, so I did not look for tool errors or inefficiencies myself. I relied on the earlier decision notes, which describe the same single-pass method in both base runs, with no divergence and no blind retries. The one error they report, a harmless `ls: ..: Operation not permitted`, was ignored without any loss. The earlier notes also report an independent recompute giving 18691.63681, which rounds to 18691.64 over 21 transactions. I did not repeat that recompute.\n- **Why no change.** I can't point to a moment in any trajectory where a prose rule, skill, script or plugin would have changed what the agent did. The agent already did these things on its own:\n  - deduplicated 42 rows to 36 unique txn_ids;\n  - parsed both date formats and parenthesised amounts;\n  - excluded the 2026-10-26 SETTLED row;\n  - converted with `usd_per_unit` and rounded once at the end;\n  - wrote `output/answer.json` in the requested shape.\n- **dom1's `revenue-reconciliation` skill.** Its rollout loaded the skill first and then produced the same answer, so the skill changed nothing observable. It would add an always-on trigger line and extra loaded context, and it embeds one task-specific fact (42 rows, 36 unique) that doesn't generalize. Adding it would be speculation.\n- **Risks I considered but did not act on.** These are conflicting duplicate txn_ids, an unfamiliar status spelling, and a missing FX rate. None showed up in any rollout. A later round can add a skill if a rollout actually fails on one of them.",
+          "error": ""
+        },
+        {
+          "label": "dom2",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.0834744,
+          "cached": false,
+          "notes": "KEEP_BASE. I changed no files in `context/harness/`.\n\n- **Both base runs got the right answer.** base1 and base2 wrote `{\"net_usd\": 18691.64, \"transactions\": 21}`, and so did the dom1, c1 and inv1 pool rollouts. I re-read `source/transactions.csv` and `fx.csv` and saw nothing the runs missed. The traps were:\n  - six duplicated `txn_id` rows, all identical copies;\n  - two date formats;\n  - parenthesised and comma-formatted amounts;\n  - the T11022 SETTLED row dated 2026-10-26;\n  - August rows;\n  - VOID and PENDING rows;\n  - INR and EUR conversion.\n  The runs handled every one.\n- **No divergence, error or budget problem.** The runs agreed. The only tool error was a harmless `ls` permission message. Each run wrote its deliverable after one calculation pass.\n- **dom1's skill (`revenue-reconciliation`) changed nothing.** Its rollout loaded the skill first and then reached the same figure that the runs without it reached. Keeping it would cost an always-on trigger line for no behavioural gain. Its workspace-fact line (\"42 rows / 36 unique\u2026\") is instance-specific.\n- **The agent already finds this checklist on its own.** The checks in dom1's skill (conflicting duplicate `txn_id`s, a missing FX rate, a status spelling variant) did not arise in any rollout. Without a trajectory moment where they went wrong, adding them is speculation.",
+          "error": ""
+        },
+        {
+          "label": "c2",
+          "dim": "COMPOSE",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.0762226,
+          "cached": false,
+          "notes": "**Decision: KEEP_BASE.** I changed no files in `context/harness/`. The harness stays at the original: a one-line `systemprompt.md`, with `LongTermMEMORY.md` and `guardrails.md` empty.\n\n**Evidence inventoried**\n- **Rollouts under the unmodified harness (base1, base2):** both wrote `{\"net_usd\": 18691.64, \"transactions\": 21}`. An earlier round's decision notes (inv2) say an independent recompute from `source/` gave 18691.63681, which rounds to the same figure over 21 transactions. I did not repeat that recompute.\n- **Pool candidates (dom1, dom2, c1, inv1, inv2):** every `produced.md` holds the identical answer.\n- **dom2 and inv2 (this round):** both `harness.diff` files came back empty, so neither changes anything. The dom2 rollout ends the same way as base: it deduplicates 42 rows to 36 unique `txn_id`s, finds no conflicting repeats, treats parenthesised amounts as negative, parses both date formats, converts with `fx.csv`, and rounds once.\n- **dom1 (earlier round):** it added a `revenue-reconciliation` skill plus a trigger line. Its rollout loaded the skill and reached the same answer as base, so the skill changed nothing observable. It also embeds a workspace-specific fact (42 rows, 36 unique) that would not carry to other tasks.\n\n**What survives and what was dropped:** no round's edits survive. dom1's skill and trigger line are dropped.\n\n**Why no change:** no trajectory moment shows a wrong answer, a lost deliverable, a budget problem, or a repeated tool failure. The one tool error reported in earlier notes was a harmless `ls` permission message. The agent handles the data traps itself in a single pass (duplicate IDs, mixed date formats, parenthesised and comma amounts, the October-dated SETTLED row, non-SETTLED statuses, FX conversion). Any added prose, skill or plugin would cost context without a trajectory moment to justify it.\n\n**Risks considered and not acted on:** conflicting duplicate `txn_id`s, an unfamiliar status spelling, and a missing FX rate. None occurred in any rollout. A later round could add an on-demand skill if one of them causes a real failure.",
+          "error": ""
+        }
+      ],
+      "similarity": null,
+      "ledger": {
+        "mode": "seq",
+        "task_id": "data-e",
+        "k": 2,
+        "R": 8,
+        "expected_R": 8,
+        "P": 6,
+        "session_attempts": 6,
+        "expected_P": 6,
+        "usd": 0.46288,
+        "rollout_usd": 0.0,
+        "session_usd": 0.46288,
+        "rollouts": [
+          "base1",
+          "base2",
+          "inv1",
+          "dom1",
+          "c1",
+          "inv2",
+          "dom2",
+          "c2"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "c1",
+          "inv2",
+          "dom2",
+          "c2"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "seq": {
+      "task_id": "data-e",
+      "mode": "seq",
+      "k": 2,
+      "chosen_id": "A",
+      "chosen_label": "c1",
+      "chosen_run_id": "hpb-cc-seq2/data-e/c1",
+      "chosen_is_base": false,
+      "why": "The two candidates are identical. Each is a single `output/answer.json` containing `{\"net_usd\": 18691.64, \"transactions\": 21}`, with the same keys, order and format. Neither is better on delivery, conformance, consistency or finish. I did not recompute the figure, since it can't separate them. I chose A arbitrarily.",
+      "id_map": {
+        "A": "c1",
+        "B": "c2"
+      },
+      "dropped": [],
+      "n_candidates": 2,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.1116528,
+      "experience": {},
+      "trivial": false,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/cc/exec/hpb-cc-seq2/data-e/c1",
+      "chosen_tree_is_base": true,
+      "harness_fingerprint": "020675403b27bd72"
+    }
+  },
+  "errors": []
+}

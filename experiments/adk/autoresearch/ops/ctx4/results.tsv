@@ -1,0 +1,5 @@
+iter	score	kept	notes
+0	0.333	True	baseline
+1	0.000	False	ead of eyeballing, read the whole file, and use the script for log-window questions. The baseline agent estimated by eye and wrote 24/10/E500. On the sample log the script gives 15 errors and 6 users 
+2	0.000	False	sers and top code as JSON. The system prompt, guardrails and tool guidance now tell the agent to compute counts with this script instead of estimating from a truncated read. The baseline's by-eye esti
+3	1.000	True	r runs wrote 24/10/E500 by eye). I rewrote the system prompt, guardrails, tool guidance and memory so the agent runs the script instead of estimating, with the exact command and a fallback. The two ea

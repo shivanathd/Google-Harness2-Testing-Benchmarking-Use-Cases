@@ -1,0 +1,8 @@
+{
+  "chosen_label": "c1",
+  "candidate_ids": {
+    "A": "c1",
+    "B": "c2"
+  },
+  "reason": "The two candidates are identical. Each is a single `output/answer.json` containing `{\"net_usd\": 18691.64, \"transactions\": 21}`, with the same keys, order and format. Neither is better on delivery, conformance, consistency or finish. I did not recompute the figure, since it can't separate them. I chose A arbitrarily."
+}

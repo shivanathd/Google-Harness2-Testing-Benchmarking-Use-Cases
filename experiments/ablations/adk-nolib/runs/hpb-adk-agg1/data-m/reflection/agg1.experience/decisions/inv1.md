@@ -1,0 +1,10 @@
+- This was a fix to the rejection only. I did not re-read the trajectories this time.
+- I removed the "Workspace facts" block from `systemprompt.md`. It held this instance's ids (S004, S026, S028, R01, R04, R06, R08, R09), the 43-row and 40-id counts, and the result line (16 transactions, 5 refunds, net_usd 24317.47).
+- I replaced the block with "Checks to re-derive from the data each run". The checks are:
+  - count duplicate txn_ids and confirm whether they are identical rows;
+  - look for quoted thousands-comma amounts;
+  - look for zero or missing fx rates inside the target month;
+  - take refund currency from the original transaction and check its date against the month;
+  - compare the script's counts with a row-level tally.
+- I changed the script command to use `YYYY-MM`, taken from the task, instead of the hard-coded 2026-09 window.
+- The other harness files had no instance values (grep returned no matches). The script, the checker and the rest of the harness are unchanged.

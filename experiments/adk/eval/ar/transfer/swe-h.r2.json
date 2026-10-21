@@ -1,0 +1,32 @@
+{
+ "cond": "ar/transfer",
+ "task": "swe-h",
+ "rep": 2,
+ "partial": 0.6428571428571429,
+ "all_pass": false,
+ "checks": {
+  "load_missing": true,
+  "load_empty": true,
+  "add_accumulates": true,
+  "add_nonpositive": true,
+  "remove_ok": true,
+  "remove_too_many": false,
+  "remove_unknown": true,
+  "remove_keeps_data": false,
+  "report_format": true,
+  "report_missing_file": true,
+  "cli_remove_error": false,
+  "cli_add_bad": false,
+  "report_low": true,
+  "add_then_report": false
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/adk/autoresearch/swe/final",
+ "cost_usd": null,
+ "tokens_in": 29898,
+ "tokens_out": 1413,
+ "wall_s": 193.9,
+ "error": "",
+ "infra_error": false,
+ "turns": null,
+ "tool_calls": 12
+}

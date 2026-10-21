@@ -1,0 +1,6 @@
+This fixes the rejected skill, `skills/revenue-reconciliation/SKILL.md`.
+- **Removed:** I deleted the "Verified facts for THIS workspace" section. It held this task's own data: the transaction and refund ids, the counts, the gross, refund and net totals, and the September window. The rules, the artifact contract and the "Before finishing, confirm" checks are unchanged. They teach the method and use no instance values.
+- **Added:** a short "Workspace-specific values" section. It tells the agent to derive counts, ids, totals and the period from the supplied exports and the task's stated period, and not to carry them over from memory or earlier tasks. It also tells the agent to report the target month and its dedup, exclusion and rounding choices.
+- **Check:** a grep of the skill finds no remaining numbers of four or more digits and no S0/R0-style ids.
+- **Trigger line:** `systemprompt.md` still has the line naming `revenue-reconciliation`. No scripts are referenced.
+- **Not re-read:** I did not re-read the rollouts this round. The only change is stripping instance data from the skill.

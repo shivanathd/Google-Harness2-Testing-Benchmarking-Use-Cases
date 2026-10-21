@@ -1,0 +1,1 @@
+- read_file cannot read .gz files (billing's log is gzipped) and dumps whole files into context; run the skill's helper script on logs instead of viewing them.

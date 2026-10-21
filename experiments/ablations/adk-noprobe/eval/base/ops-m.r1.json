@@ -1,0 +1,21 @@
+{
+ "cond": "base",
+ "task": "ops-m",
+ "rep": 1,
+ "partial": 0.0,
+ "all_pass": false,
+ "checks": {
+  "failed": false,
+  "users": false,
+  "top_code": false
+ },
+ "harness": "base",
+ "cost_usd": null,
+ "tokens_in": 812919,
+ "tokens_out": 1456,
+ "wall_s": 1179.0,
+ "error": "LlmCallsLimitExceededError: Max number of llm calls limit of `40` exceeded",
+ "infra_error": false,
+ "turns": null,
+ "tool_calls": 40
+}

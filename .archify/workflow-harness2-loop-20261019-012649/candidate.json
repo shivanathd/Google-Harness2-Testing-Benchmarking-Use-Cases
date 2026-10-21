@@ -1,0 +1,339 @@
+{
+ "schema_version": 2,
+ "diagram_type": "workflow",
+ "meta": {
+  "title": "Harness\u00b2 Task Loop",
+  "quality_profile": "showcase",
+  "output": ".archify/workflow-harness2-loop-20261019-012649/harness2-loop.html",
+  "repository": {
+   "url": "git@github.com:google-research/harness2.git",
+   "link_mode": "local-only",
+   "revision": "1cfe254e8d25b15f37048c3730134686abe60335"
+  }
+ },
+ "lanes": [
+  {
+   "id": "exec",
+   "label": "Agent executor (fixed model)"
+  },
+  {
+   "id": "improver",
+   "label": "Improver model"
+  },
+  {
+   "id": "memory",
+   "label": "Improvement harness (per domain)"
+  }
+ ],
+ "phases": [
+  {
+   "id": "reference",
+   "label": "Reference",
+   "fromCol": 0,
+   "toCol": 1
+  },
+  {
+   "id": "ppc",
+   "label": "Propose \u00b7 Probe \u00b7 Compose",
+   "fromCol": 2,
+   "toCol": 4,
+   "variant": "emphasis"
+  },
+  {
+   "id": "learn",
+   "label": "Adopt + learn",
+   "fromCol": 5,
+   "toCol": 5,
+   "variant": "dashed"
+  }
+ ],
+ "groups": [
+  {
+   "id": "task_level",
+   "label": "Task-level recursion",
+   "lane": "improver",
+   "fromCol": 2,
+   "toCol": 4,
+   "variant": "emphasis"
+  },
+  {
+   "id": "harness_level",
+   "label": "Harnessing-level recursion",
+   "lane": "memory",
+   "fromCol": 1,
+   "toCol": 5,
+   "variant": "dashed"
+  }
+ ],
+ "mainPath": [
+  "task",
+  "base",
+  "propose",
+  "probe",
+  "compose",
+  "adopted",
+  "reflect",
+  "entry"
+ ],
+ "nodes": [
+  {
+   "id": "task",
+   "lane": "exec",
+   "col": 0,
+   "type": "external",
+   "label": "Task t",
+   "sublabel": "prompt + source files",
+   "width": 132,
+   "sources": [
+    {
+     "path": "harness2/core/spec.py",
+     "line": 201,
+     "end_line": 250,
+     "label": "BenchmarkAdapter seam"
+    }
+   ]
+  },
+  {
+   "id": "base",
+   "lane": "exec",
+   "col": 1,
+   "type": "backend",
+   "label": "Base rollouts",
+   "sublabel": "k reference runs",
+   "width": 132,
+   "sources": [
+    {
+     "path": "harness2/core/schedule.py",
+     "line": 616,
+     "end_line": 633,
+     "label": "k base rollouts"
+    }
+   ]
+  },
+  {
+   "id": "probe",
+   "lane": "exec",
+   "col": 3,
+   "type": "backend",
+   "label": "Probe rollouts",
+   "sublabel": "run every candidate",
+   "width": 132,
+   "sources": [
+    {
+     "path": "harness2/core/recursion.py",
+     "line": 390,
+     "end_line": 405,
+     "label": "roll candidates"
+    }
+   ]
+  },
+  {
+   "id": "adopted",
+   "lane": "exec",
+   "col": 5,
+   "type": "backend",
+   "label": "Adopted harness",
+   "sublabel": "k finals, one kept",
+   "tag": "k>1: blind selector",
+   "width": 140,
+   "sources": [
+    {
+     "path": "harness2/core/schedule.py",
+     "line": 514,
+     "end_line": 522,
+     "label": "trivial or blind selection"
+    }
+   ]
+  },
+  {
+   "id": "propose",
+   "lane": "improver",
+   "col": 2,
+   "type": "security",
+   "label": "Propose",
+   "sublabel": "INV + DOM edits",
+   "tag": "never sees graders",
+   "width": 132,
+   "sources": [
+    {
+     "path": "harness2/core/recursion.py",
+     "line": 368,
+     "end_line": 389,
+     "label": "INV/DOM proposals"
+    },
+    {
+     "path": "harness2/core/context.py",
+     "line": 191,
+     "end_line": 200,
+     "label": "sources minus answer keys"
+    },
+    {
+     "path": "harness2/core/recursion.py",
+     "line": 108,
+     "end_line": 133,
+     "label": "reject grader verdicts"
+    }
+   ]
+  },
+  {
+   "id": "compose",
+   "lane": "improver",
+   "col": 4,
+   "type": "backend",
+   "label": "Compose",
+   "sublabel": "contrast executions",
+   "width": 132,
+   "sources": [
+    {
+     "path": "harness2/core/recursion.py",
+     "line": 408,
+     "end_line": 447,
+     "label": "k compositions"
+    }
+   ]
+  },
+  {
+   "id": "reflect",
+   "lane": "improver",
+   "col": 5,
+   "type": "backend",
+   "label": "Reflect",
+   "sublabel": "what each edit did",
+   "width": 140,
+   "sources": [
+    {
+     "path": "harness2/core/selection.py",
+     "line": 402,
+     "end_line": 453,
+     "label": "reflect_adoption"
+    }
+   ]
+  },
+  {
+   "id": "library",
+   "lane": "memory",
+   "col": 1,
+   "type": "database",
+   "label": "Domain library",
+   "sublabel": "earlier tasks' lessons",
+   "width": 132,
+   "sources": [
+    {
+     "path": "harness2/core/schedule.py",
+     "line": 699,
+     "end_line": 712,
+     "label": "library threaded in order"
+    }
+   ]
+  },
+  {
+   "id": "entry",
+   "lane": "memory",
+   "col": 5,
+   "type": "database",
+   "label": "Library entry",
+   "sublabel": "harness + lesson",
+   "width": 140,
+   "sources": [
+    {
+     "path": "harness2/core/library.py",
+     "line": 106,
+     "end_line": 153,
+     "label": "Library.add"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "id": "task-base",
+   "from": "task",
+   "to": "base",
+   "variant": "default"
+  },
+  {
+   "id": "base-propose",
+   "from": "base",
+   "to": "propose",
+   "label": "trajectories",
+   "variant": "emphasis"
+  },
+  {
+   "id": "propose-probe",
+   "from": "propose",
+   "to": "probe",
+   "label": "candidates",
+   "variant": "emphasis"
+  },
+  {
+   "id": "probe-compose",
+   "from": "probe",
+   "to": "compose",
+   "label": "contrasts",
+   "variant": "emphasis"
+  },
+  {
+   "id": "compose-adopted",
+   "from": "compose",
+   "to": "adopted",
+   "label": "refined",
+   "variant": "emphasis"
+  },
+  {
+   "id": "adopted-reflect",
+   "from": "adopted",
+   "to": "reflect",
+   "variant": "default"
+  },
+  {
+   "id": "reflect-entry",
+   "from": "reflect",
+   "to": "entry",
+   "label": "cue \u00b7 lesson",
+   "variant": "default"
+  },
+  {
+   "id": "entry-library",
+   "from": "entry",
+   "to": "library",
+   "label": "next task in domain",
+   "variant": "dashed",
+   "role": "return"
+  },
+  {
+   "id": "library-propose",
+   "from": "library",
+   "to": "propose",
+   "label": "read first",
+   "variant": "dashed",
+   "role": "branch"
+  }
+ ],
+ "cards": [
+  {
+   "dot": "cyan",
+   "title": "Recursion budget k",
+   "items": [
+    "Parallel: k general + k domain candidates, then k compositions",
+    "Sequential: k Propose-Probe-Compose rounds carrying evidence",
+    "Each mode costs 4k rollouts and 3k improver stages per task"
+   ]
+  },
+  {
+   "dot": "rose",
+   "title": "Verifier-free",
+   "items": [
+    "Improver sees prompt, sources, trajectories and deliverables",
+    "No rubric, score or answer key; invalid edits retried once, else fall back"
+   ]
+  },
+  {
+   "dot": "violet",
+   "title": "Editable surface",
+   "items": [
+    "System prompt, guardrails, memory, tool guidance",
+    "Skills, scripts, subagents, plugins"
+   ]
+  }
+ ]
+}

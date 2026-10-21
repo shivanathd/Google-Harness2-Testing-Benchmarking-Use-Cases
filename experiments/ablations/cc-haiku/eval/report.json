@@ -1,0 +1,434 @@
+{
+  "executor": "cc",
+  "task_hash": "8aec868f593e",
+  "n_rows": 108,
+  "infra_voided": 0,
+  "comparisons": {
+    "h2-parallel-k1/intask": {
+      "n_tasks": 5,
+      "mean_delta": 0.2,
+      "ci95": [
+        -0.2,
+        0.55
+      ],
+      "signflip_p": 0.4375,
+      "improved": 4,
+      "regressed": 1,
+      "per_task": [
+        {
+          "task": "data-e",
+          "tier": "easy",
+          "treat": 1.0,
+          "base": 0.75,
+          "delta": 0.25,
+          "treat_allpass": "4/4",
+          "base_allpass": "3/4",
+          "treat_sd": 0.0,
+          "base_sd": 0.4330127018922193,
+          "flips": {
+            "up": [],
+            "down": []
+          }
+        },
+        {
+          "task": "data-m",
+          "tier": "medium",
+          "treat": 1.0,
+          "base": 0.75,
+          "delta": 0.25,
+          "treat_allpass": "4/4",
+          "base_allpass": "3/4",
+          "treat_sd": 0.0,
+          "base_sd": 0.4330127018922193,
+          "flips": {
+            "up": [],
+            "down": []
+          }
+        },
+        {
+          "task": "data-h",
+          "tier": "hard",
+          "treat": 1.0,
+          "base": 0.5,
+          "delta": 0.5,
+          "treat_allpass": "4/4",
+          "base_allpass": "2/4",
+          "treat_sd": 0.0,
+          "base_sd": 0.5,
+          "flips": {
+            "up": [
+              "chargebacks 0.50->1.00",
+              "net_usd 0.50->1.00",
+              "transactions 0.50->1.00"
+            ],
+            "down": []
+          }
+        },
+        {
+          "task": "ops-e",
+          "tier": "easy",
+          "treat": 0.25,
+          "base": 0.75,
+          "delta": -0.5,
+          "treat_allpass": "1/4",
+          "base_allpass": "3/4",
+          "treat_sd": 0.4330127018922193,
+          "base_sd": 0.4330127018922193,
+          "flips": {
+            "up": [],
+            "down": [
+              "errors 0.75->0.25",
+              "top_code 0.75->0.25",
+              "users 0.75->0.25"
+            ]
+          }
+        },
+        {
+          "task": "swe-m",
+          "tier": "medium",
+          "treat": 1.0,
+          "base": 0.5,
+          "delta": 0.5,
+          "treat_allpass": "4/4",
+          "base_allpass": "2/4",
+          "treat_sd": 0.0,
+          "base_sd": 0.5,
+          "flips": {
+            "up": [
+              "basic_us 0.50->1.00",
+              "empty 0.50->1.00",
+              "eu_discount 0.50->1.00",
+              "float_cents 0.50->1.00",
+              "half_up_line 0.50->1.00",
+              "lowercase_region 0.50->1.00",
+              "multi_line_in 0.50->1.00",
+              "strings 0.50->1.00",
+              "tax_after_discount 0.50->1.00",
+              "unknown_region 0.50->1.00"
+            ],
+            "down": []
+          }
+        }
+      ]
+    },
+    "h2-parallel-k1/itt": {
+      "n_tasks": 4,
+      "mean_delta": 0.13839285714285715,
+      "ci95": [
+        0.0,
+        0.4375
+      ],
+      "signflip_p": 0.5,
+      "improved": 2,
+      "regressed": 0,
+      "per_task": [
+        {
+          "task": "ops-m",
+          "tier": "medium",
+          "treat": 0.5,
+          "base": 0.0,
+          "delta": 0.5,
+          "treat_allpass": "2/4",
+          "base_allpass": "0/4",
+          "treat_sd": 0.5,
+          "base_sd": 0.0,
+          "flips": {
+            "up": [
+              "failed 0.00->0.50",
+              "top_code 0.00->0.50",
+              "users 0.00->0.50"
+            ],
+            "down": []
+          }
+        },
+        {
+          "task": "ops-h",
+          "tier": "hard",
+          "treat": 0.0,
+          "base": 0.0,
+          "delta": 0.0,
+          "treat_allpass": "0/4",
+          "base_allpass": "0/4",
+          "treat_sd": 0.0,
+          "base_sd": 0.0,
+          "flips": {
+            "up": [],
+            "down": []
+          }
+        },
+        {
+          "task": "swe-e",
+          "tier": "easy",
+          "treat": 1.0,
+          "base": 1.0,
+          "delta": 0.0,
+          "treat_allpass": "4/4",
+          "base_allpass": "4/4",
+          "treat_sd": 0.0,
+          "base_sd": 0.0,
+          "flips": {
+            "up": [],
+            "down": []
+          }
+        },
+        {
+          "task": "swe-h",
+          "tier": "hard",
+          "treat": 1.0,
+          "base": 0.9464285714285714,
+          "delta": 0.0535714285714286,
+          "treat_allpass": "4/4",
+          "base_allpass": "3/4",
+          "treat_sd": 0.0,
+          "base_sd": 0.09278843611976129,
+          "flips": {
+            "up": [],
+            "down": []
+          }
+        }
+      ]
+    },
+    "h2-parallel-k1/transfer": {
+      "n_tasks": 4,
+      "mean_delta": 0.25,
+      "ci95": [
+        -0.125,
+        0.625
+      ],
+      "signflip_p": 0.5,
+      "improved": 2,
+      "regressed": 0,
+      "per_task": [
+        {
+          "task": "data-m",
+          "tier": "medium",
+          "treat": 0.75,
+          "base": 0.75,
+          "delta": 0.0,
+          "treat_allpass": "3/4",
+          "base_allpass": "3/4",
+          "treat_sd": 0.4330127018922193,
+          "base_sd": 0.4330127018922193,
+          "flips": {
+            "up": [],
+            "down": []
+          }
+        },
+        {
+          "task": "data-h",
+          "tier": "hard",
+          "treat": 0.75,
+          "base": 0.5,
+          "delta": 0.25,
+          "treat_allpass": "3/4",
+          "base_allpass": "2/4",
+          "treat_sd": 0.4330127018922193,
+          "base_sd": 0.5,
+          "flips": {
+            "up": [],
+            "down": []
+          }
+        },
+        {
+          "task": "ops-m",
+          "tier": "medium",
+          "treat": 0.75,
+          "base": 0.0,
+          "delta": 0.75,
+          "treat_allpass": "3/4",
+          "base_allpass": "0/4",
+          "treat_sd": 0.4330127018922193,
+          "base_sd": 0.0,
+          "flips": {
+            "up": [
+              "failed 0.00->0.75",
+              "top_code 0.00->0.75",
+              "users 0.00->0.75"
+            ],
+            "down": []
+          }
+        },
+        {
+          "task": "ops-h",
+          "tier": "hard",
+          "treat": 0.0,
+          "base": 0.0,
+          "delta": 0.0,
+          "treat_allpass": "0/4",
+          "base_allpass": "0/4",
+          "treat_sd": 0.0,
+          "base_sd": 0.0,
+          "flips": {
+            "up": [],
+            "down": []
+          }
+        }
+      ]
+    },
+    "h2-parallel-k1/variant": {
+      "n_tasks": 4,
+      "mean_delta": -0.125,
+      "ci95": [
+        -0.75,
+        0.625
+      ],
+      "signflip_p": 1.0,
+      "improved": 1,
+      "regressed": 3,
+      "per_task": [
+        {
+          "task": "data-e-v",
+          "tier": "easy",
+          "treat": 0.5,
+          "base": 1.0,
+          "delta": -0.5,
+          "treat_allpass": "1/2",
+          "base_allpass": "2/2",
+          "treat_sd": 0.5,
+          "base_sd": 0.0,
+          "flips": {
+            "up": [],
+            "down": [
+              "net_usd 1.00->0.50",
+              "transactions 1.00->0.50"
+            ]
+          }
+        },
+        {
+          "task": "data-m-v",
+          "tier": "medium",
+          "treat": 1.0,
+          "base": 0.0,
+          "delta": 1.0,
+          "treat_allpass": "2/2",
+          "base_allpass": "0/2",
+          "treat_sd": 0.0,
+          "base_sd": 0.0,
+          "flips": {
+            "up": [
+              "net_usd 0.00->1.00",
+              "refunds 0.00->1.00",
+              "transactions 0.00->1.00"
+            ],
+            "down": []
+          }
+        },
+        {
+          "task": "data-h-v",
+          "tier": "hard",
+          "treat": 0.5,
+          "base": 1.0,
+          "delta": -0.5,
+          "treat_allpass": "1/2",
+          "base_allpass": "2/2",
+          "treat_sd": 0.5,
+          "base_sd": 0.0,
+          "flips": {
+            "up": [],
+            "down": [
+              "chargebacks 1.00->0.50",
+              "net_usd 1.00->0.50",
+              "transactions 1.00->0.50"
+            ]
+          }
+        },
+        {
+          "task": "ops-e-v",
+          "tier": "easy",
+          "treat": 0.0,
+          "base": 0.5,
+          "delta": -0.5,
+          "treat_allpass": "0/2",
+          "base_allpass": "1/2",
+          "treat_sd": 0.0,
+          "base_sd": 0.5,
+          "flips": {
+            "up": [],
+            "down": [
+              "errors 0.50->0.00",
+              "top_code 0.50->0.00",
+              "users 0.50->0.00"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "voided_cells": {},
+  "base_mean": 0.5773809523809523,
+  "pass_k": {
+    "base": {
+      "1": 0.5555555555555556,
+      "2": 0.37037037037037035,
+      "3": 0.2222222222222222
+    },
+    "h2-parallel-k1/intask": {
+      "1": 0.85,
+      "2": 0.8,
+      "3": 0.8
+    },
+    "h2-parallel-k1/itt": {
+      "1": 0.625,
+      "2": 0.5416666666666666,
+      "3": 0.5
+    },
+    "h2-parallel-k1/transfer": {
+      "1": 0.5625,
+      "2": 0.375,
+      "3": 0.1875
+    }
+  },
+  "cost": {
+    "base": {
+      "exec_usd": 0.2447,
+      "tokens_in": 4679434,
+      "tokens_out": 143107,
+      "rollouts": 48,
+      "mean_wall_s": 92.9
+    },
+    "h2-parallel-k1/intask": {
+      "exec_usd": 0.1151,
+      "tokens_in": 2020148,
+      "tokens_out": 70269,
+      "rollouts": 20,
+      "mean_wall_s": 29.8
+    },
+    "h2-parallel-k1/itt": {
+      "exec_usd": 0.0865,
+      "tokens_in": 1604082,
+      "tokens_out": 50521,
+      "rollouts": 16,
+      "mean_wall_s": 49.0
+    },
+    "h2-parallel-k1/transfer": {
+      "exec_usd": 0.089,
+      "tokens_in": 1603982,
+      "tokens_out": 54654,
+      "rollouts": 16,
+      "mean_wall_s": 57.1
+    },
+    "h2-parallel-k1/variant": {
+      "exec_usd": 0.0476,
+      "tokens_in": 818236,
+      "tokens_out": 30131,
+      "rollouts": 8,
+      "mean_wall_s": 30.9
+    }
+  },
+  "improver": {
+    "sweep-parallel-k1": {
+      "usd": 0.5339,
+      "calls": 33
+    }
+  },
+  "leak_audit": {
+    "harness_literal_hits": [],
+    "blocked_escape_attempts": [
+      "/Users/me/GoogleHarness2/experiments/ablations/cc-haiku/exec/eval/h2-parallel-k1/intask/swe-m/r1/stream.jsonl",
+      "/Users/me/GoogleHarness2/experiments/ablations/cc-haiku/exec/eval/h2-parallel-k1/intask/swe-m/r2/stream.jsonl"
+    ],
+    "grader_path_mentions": [],
+    "improver_sessions_audited": 37,
+    "harnesses_audited": 9
+  }
+}

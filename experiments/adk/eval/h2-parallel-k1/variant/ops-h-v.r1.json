@@ -1,0 +1,27 @@
+{
+ "cond": "h2-parallel-k1/variant",
+ "task": "ops-h-v",
+ "rep": 1,
+ "partial": 1.0,
+ "all_pass": true,
+ "checks": {
+  "gateway.requests": true,
+  "gateway.error_rate": true,
+  "gateway.p95_ms": true,
+  "search.requests": true,
+  "search.error_rate": true,
+  "search.p95_ms": true,
+  "billing.requests": true,
+  "billing.error_rate": true,
+  "billing.p95_ms": true
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/adk/runs/hpb-adk-agg1/ops-h/harnesses/agg1",
+ "cost_usd": null,
+ "tokens_in": 6761,
+ "tokens_out": 365,
+ "wall_s": 56.9,
+ "error": "",
+ "infra_error": false,
+ "turns": null,
+ "tool_calls": 3
+}

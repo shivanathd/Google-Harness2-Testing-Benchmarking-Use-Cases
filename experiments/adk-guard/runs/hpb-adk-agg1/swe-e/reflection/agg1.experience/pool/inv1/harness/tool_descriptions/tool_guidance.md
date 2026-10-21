@@ -1,0 +1,2 @@
+- read_file returns the whole small file; list_files shows the layout. Use run_command for tests, diff and cp; each command runs from the workspace root, so prefer root-relative paths over cd.
+- write_file overwrites the whole file: only use it with full intended content, and never on tests or conftest.py. A "wrote N chars" reply says nothing about correctness; re-read or diff.

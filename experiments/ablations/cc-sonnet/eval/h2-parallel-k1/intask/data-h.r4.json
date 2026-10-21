@@ -1,0 +1,21 @@
+{
+ "cond": "h2-parallel-k1/intask",
+ "task": "data-h",
+ "rep": 4,
+ "partial": 1.0,
+ "all_pass": true,
+ "checks": {
+  "net_usd": true,
+  "transactions": true,
+  "chargebacks": true
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/ablations/cc-sonnet/runs/hpb-cc-agg1/data-h/harnesses/agg1",
+ "cost_usd": 0.005899639999999999,
+ "tokens_in": 101623,
+ "tokens_out": 3761,
+ "wall_s": 49.5,
+ "error": "error_max_turns",
+ "infra_error": false,
+ "turns": 5,
+ "tool_calls": null
+}

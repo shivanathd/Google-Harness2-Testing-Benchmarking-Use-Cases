@@ -1,0 +1,6 @@
+---
+- Fixed `stock report` to handle missing or empty files by returning an empty inventory.
+- Updated `ops.add` and `ops.remove` to raise `ValueError` for invalid inputs, leaving data unchanged.
+- Added `--low` option to `stock report` for filtering by quantity, maintaining the original sort order.
+- Updated CLI to handle errors by printing `error: <message>` to stderr and returning exit status 1.
+- Added new tests for the `--low` option and error handling in the CLI.

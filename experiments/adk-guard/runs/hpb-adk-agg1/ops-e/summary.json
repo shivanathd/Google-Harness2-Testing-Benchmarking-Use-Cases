@@ -1,0 +1,126 @@
+{
+  "task_id": "ops-e",
+  "domain": "ops",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-adk-agg1/ops-e/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/adk-guard/exec/hpb-adk-agg1/ops-e/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "ops-e",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "This fixes the rejected attempt. `skills/log-window-stats/SKILL.md` recorded this instance's own results and parameters: a miscount of 21 against a true 15, users=6, top E500, the line counts 163 and ~130, the user `bob`, and the 2026-10-03 09:00\u201312:00 window. I did not re-open the trajectory in this pass. The motivating moment is the one the earlier skill text described: the first run counted ERROR events by eye across mixed-timezone lines and got the wrong number.\n\n- **Skill text:** I removed every instance value and kept the method. The skill still says to convert every timestamp to UTC first and to treat the window as start-inclusive, end-exclusive. It also still lists the look-alike lines that are not ERROR events: indented traceback lines, INFO retry lines and WARN lines. Those traps are now written generically, with no ids or counts.\n- **Script command and deliverable step:** The example command now uses `<UTC start>`, `<UTC end>` and `<LEVEL>` placeholders. The deliverable step now says to follow the task's file name, keys and types instead of naming this task's `answer.json` keys.\n- **Script docstring:** The usage line in `scripts/log_window_stats.py` now uses placeholder timestamps. The script's logic is unchanged and it still compiles.\n- **Trigger line:** The `systemprompt.md` line that names the skill is unchanged, so the skill is still reachable.\n\nI grepped the harness afterwards and found no remaining task values (E500, 163, 15, 21, bob, 2026).",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "The previous attempt was rejected because the `log-window-stats` skill contained this task's own data. I removed it from `skills/log-window-stats/SKILL.md`:\n- The traceback-line example naming a specific user and error code is now a generic statement: continuation lines may mention a different user or code than their parent event. The INFO \"retrying\" example is also generic now.\n- The list of specific UTC offsets, the \"app.log\" file name and the specific boundary times are replaced with general rules. Offsets may be mixed, including non-whole-hour ones. The window start is inclusive and the end exclusive.\n- The specific dates in the date-prefix rule and in the example command are now `YYYY-MM-DDTHH:MM` placeholders. The same date example in the helper script's docstring (`skills/log-window-stats/scripts/log_window_stats.py`) got the same treatment.\n\nThe rules themselves are unchanged: define the event from the header line, convert to UTC, count users and the top code from the same events, and check for ties. The trigger line in `systemprompt.md` is unchanged and still names the skill. A final grep of the harness finds no remaining instance values. I did not re-read the trajectories or deliverables in this pass.\n\nThe skill's example command still uses `app.log` as the file argument. That is the argument form of the command, not a result from the data.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.1220029,
+          "cached": false,
+          "notes": "kept -> dom1 skill `log-window-stats` (SKILL.md and `scripts/log_window_stats.py`) plus its trigger line in `systemprompt.md`, adopted as the base of the merge -> The base run read the log (163 lines) and wrote `errors: 21` with no computation. Both candidates ran the script and got 15 ERROR events, 6 users and top E500. The 21 looks like an overcount from the look-alike lines (indented tracebacks, INFO \"retrying after ERROR\") and from not converting offsets. The DOM version had the same outcome as the INV version, and its text is generic. It uses no task offsets, line counts or \"first run overcounted\" anecdotes. Both rollouts delivered a file, so there is no non-delivering rollout behind this edit. Only 1 base rollout exists, so that sample is weak evidence.\ndropped -> inv1 skill text and its more robust script (problems list, per-service counts, `--start/--end` flags) -> Its rollout gave the same answer as dom1 (15/6/E500), so it adds no proven benefit. Its SKILL.md names specific offsets (+01:00, +05:30, -07:00) and says \"~150-line log \u2026 overcounted badly\", which echoes this task's data. An earlier decision had already rejected a skill for that. Two skills would also add context for no gain.\ndropped -> inv1 always-on sentence \"after writing a deliverable, read it back\" -> Neither the base nor the candidate rollouts show a failure that a read-back would have caught. Always-on text should be paid for with evidence, and there is none.\nrevised -> tie rule in the dom1 SKILL.md calculations section -> The skill said \"report the tie rather than silently picking one\", but the deliverable holds a single `top_code`. It now says to re-check the filter, then apply the task's own tie rule. If none exists, the tie is stated in the final reply and the file keeps one code. This is a wording fix for the deliverable shape. No rollout showed a tie, since E500 led with 5 against 4.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "ops-e",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 1,
+        "expected_P": 3,
+        "usd": 0.122003,
+        "rollout_usd": 0.0,
+        "session_usd": 0.122003,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "ops-e",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-adk-agg1/ops-e/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.1339998,
+      "experience": {
+        "cue": "A task asks for exact counts, distinct values or top-N over a noisy, mixed-format record file. The file has look-alike lines, such as continuation lines or quoted levels, and mixed timezone offsets. The baseline harness gives no computation guidance, so the agent reads the file and answers from the raw text.",
+        "lesson": "Add a task-agnostic skill to the harness's skills/ directory, with a helper script, and a one-line trigger in systemprompt.md. The skill should tell the agent to compute the numbers by running the script and to define an event by its header line. It should say to convert timestamps to UTC with start-inclusive, end-exclusive bounds. Keep instance values (users, codes, dates, counts, offsets) out of the text. After the change, check the trajectory for a `load_skill` and a script run before `write_file`, and for an answer that differs from the base run's by-eye number.",
+        "evidence": "Skill row and trigger-line row, both confounded. The base rollout wrote 21 after one read with no computation. The independent recount is 15. All three candidates loaded the skill, ran its script and wrote 15 / 6 / E500. The skill, script and trigger were always added together. There is one rollout per arm. The record therefore shows that this bundle moved behaviour from estimating to computing, but not which part did it. The variants (inv1's broader trigger, read-back sentence and stricter script, and the dom1/agg1 tie wording) produced no measurable difference.",
+        "confidence": "low. The contrast is a single base rollout against three candidates that all carry the same bundle, and the components are never separated.",
+        "edits": "component: skills/log-window-stats (SKILL.md plus scripts/log_window_stats.py), new in the harness tree\ncandidates: agg1, dom1, inv1\nchange: The base harness had no skills. Each candidate added a skill that defines an event as a column-0 header line. It says to convert every offset to UTC, treat the window as start-inclusive and end-exclusive, and take user and code from the header line only. A script does the filtering and counting. The agg1 text is generic and has no task values, and agg1 is the adopted harness. The dom1 text differs from agg1 only in the tie rule: dom1 says to \"report the tie\", agg1 says to re-check the filter, then apply the task's tie rule. The inv1 text is longer. It names specific offsets and says a ~150-line log \"overcounted badly\". Its script has argparse flags, per-service counts and a `problems` list.\nobserved: base1 read all 163 lines and wrote `errors: 21` with no computation. It made one `read_file` call, then `write_file`. agg1, dom1 and inv1 each called `load_skill`, then `run_command` on the script, then `write_file`. All three got 15 / 6 / E500. I recomputed the log independently and got 15 events, 6 users and E500 with 5 hits, so those values are correct. The base's 21 is wrong. The divergence is at the first action after reading the task: base reads the log and estimates, the candidates load the skill and run the script. The three candidates differ in tie wording and script robustness but gave identical outputs, so no run isolates those differences. The skill, the script and the trigger line were always added together, so none of the three can be credited alone. There is only one base rollout and one rollout per candidate.\nverdict: confounded\n\ncomponent: systemprompt.md trigger line\ncandidates: agg1, dom1 (the same line as agg1), inv1 (a broader rewrite)\nchange: agg1 and dom1 add one sentence. When a task asks for counts, users or top codes from a service log within a time window, load `log-window-stats` and compute with its script instead of counting by eye. inv1 widens the trigger to any counts, distinct values or top-N from a record file. inv1 also adds an always-on line saying to read the deliverable back after writing it.\nobserved: All three candidates loaded the skill as their first action, so the trigger fired in each. In the narrow form (agg1, dom1) and the broad form (inv1) the load happened and the answers were identical. No rollout read the file back after writing it. inv1 did not read back either, despite its added line, and agg1 and dom1 have no such line. The read-back sentence therefore changed nothing visible. Whether the trigger line was needed for loading is untested, because no candidate had the skill without the trigger.\nverdict: confounded\n\ncomponent: skills/log-window-stats tie-rule wording (agg1/current vs dom1)\ncandidates: agg1, dom1\nchange: dom1 says \"report the tie rather than silently picking one\". agg1 says to re-check the filter, then use the task's own tie rule, else state the tie in the reply while the file keeps one code.\nobserved: There was no tie in any run. E500 had 5 against 4 for the next code. The wording was never exercised.\nverdict: no observed effect\n\ncomponent: skills/log-window-stats script robustness (inv1 `--start/--end/--level`, `problems`, per-service counts, `top_tie`)\ncandidates: inv1\nchange: inv1 rewrote the script so that unparsed lines and lines with no offset are reported with exit code 1. It also added per-service counts and a `levels_in_file` summary.\nobserved: The inv1 run gave the same 15 / 6 / E500 as the simpler agg1 and dom1 scripts. The log had no malformed lines to trigger the `problems` path.\nverdict: no observed effect"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/adk-guard/exec/hpb-adk-agg1/ops-e/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "206637e8d5aad628"
+    }
+  },
+  "errors": []
+}

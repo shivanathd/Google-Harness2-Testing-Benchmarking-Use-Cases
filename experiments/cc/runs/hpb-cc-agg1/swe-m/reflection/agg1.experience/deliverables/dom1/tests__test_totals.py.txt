@@ -1,0 +1,28 @@
+import pytest
+
+from invoicing.models import LineItem
+from invoicing.totals import compute_totals
+
+
+def test_simple_us():
+    assert compute_totals([LineItem("a", 2, "10.00")], "US")["total"] == "20.00"
+
+
+def test_discounted_eu_tax_is_on_post_discount_amount():
+    result = compute_totals([LineItem("widget", 3, "19.99", 10)], "eu")
+    assert result == {
+        "subtotal": "59.97",
+        "discount": "6.00",
+        "tax": "10.79",
+        "total": "64.76",
+    }
+
+
+def test_half_up_rounding_on_unit_price():
+    result = compute_totals([LineItem("a", 1, "0.125")], "US")
+    assert result["subtotal"] == "0.13"
+
+
+def test_unknown_region_raises_value_error():
+    with pytest.raises(ValueError):
+        compute_totals([LineItem("a", 1, "1.00")], "XX")

@@ -1,0 +1,6 @@
+- Fixed `stock report` to treat non-existent or empty stock files as empty inventory.
+- Ensured `ops.remove` and `ops.add` raise ValueError for invalid operations and prevent data changes.
+- Implemented `stock report --low N` to list low-quantity SKUs as specified.
+- Updated CLI to handle errors by printing `error: <message>` to stderr and returning exit status 1.
+- Maintained backward compatibility for the standard `stock report` output format.
+- Updated tests to reflect these changes and ensure correctness.

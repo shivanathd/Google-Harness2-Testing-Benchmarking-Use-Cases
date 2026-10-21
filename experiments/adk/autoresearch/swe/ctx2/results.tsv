@@ -1,0 +1,3 @@
+iter	score	kept	notes
+0	0.200	True	baseline
+1	0.200	False	make a real change, such as strict validation that raises ValueError instead of silently skipping junk. After that it runs ad-hoc checks and the existing tests, copies the file to the output path and 

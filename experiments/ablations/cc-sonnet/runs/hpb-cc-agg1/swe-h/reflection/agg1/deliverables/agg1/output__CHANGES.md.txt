@@ -1,0 +1,23 @@
+# Changes
+
+1. **Missing or empty stock file** (`stock/store.py`): `store.load` returns `{}`
+   when the file does not exist or contains only whitespace, so `stock report`
+   no longer crashes.
+2. **Validation on add/remove** (`stock/ops.py`):
+   - `ops.add` raises `ValueError` for a quantity that is not positive.
+   - `ops.remove` raises `ValueError` for a non-positive quantity, an unknown SKU,
+     or a quantity greater than the stock on hand. All checks run before the
+     data is mutated, so a failed call leaves `data` unchanged.
+   - In `stock/cli.py`, a `ValueError` from `add`/`remove` prints `error: <message>`
+     to stderr, returns exit status 1, and does not save the file.
+3. **`stock report --low N`** (`stock/cli.py`): lists only SKUs with quantity < N,
+   sorted by quantity ascending, then SKU. Plain `stock report` output is unchanged.
+
+Public function names and signatures are unchanged (`ops.add`, `ops.remove`,
+`store.load`, `store.save`, `cli.main`).
+
+Tests added to `tests/test_cli.py` cover the missing/empty file, validation errors
+(including unchanged data and file), the exit-status path, the exact-zero boundary,
+and the strict `<` comparison and ordering of `--low`.
+
+Commands run: `python -m pytest tests` (see results below).

@@ -1,0 +1,40 @@
+--- current/skills/service-traffic-report/SKILL.md
++++ dom1/skills/service-traffic-report/SKILL.md
+@@ -0,0 +1,30 @@
++---
++name: service-traffic-report
++description: Rules for turning raw service access logs into per-service request count, error rate and latency percentile for a UTC time window, per a runbook.
++---
++
++# Service log -> traffic statistics
++
++Analytic move: filter, normalise, then calculate per service: requests, error_rate, p95. The RUNBOOK in the workspace is the controlling source for exclusions, error definition and schema changes; re-read it for each task, since its rules differ between tasks.
++
++## Population (apply in this order, per service)
++1. Parse each line independently; drop lines that are not valid JSON (shipper truncation) and any parsed value that is not an object with ts, route, status and a latency field. Count the drops per service.
++2. Drop probe routes the runbook names (here `/healthz`) before anything else. They must not count in requests, errors or latency.
++3. Convert every timestamp to UTC using its own offset, then apply the window as start-inclusive, end-exclusive. Never compare raw ts strings or ignore offsets.
++4. requests = surviving rows, including 4xx. Errors = only the status class the runbook defines (here status >= 500). error_rate = errors / requests, rounded to 4 decimals at the end only.
++
++## Latency
++- Normalise units per ROW by which field the row carries (`latency_ms` vs `latency_s`), not by file or by a guessed cut-over. Multiply seconds by 1000 before pooling. Do not assume a service-wide unit.
++- Cross-check that the cut-over in the runbook agrees with the data: no seconds rows before it, no ms rows after it, and converted values sit in the same magnitude as the other rows. Report any disagreement instead of silently picking one.
++- Nearest-rank p95: sort ascending the pooled in-window values, take the element at 1-based rank ceil(0.95 * n). No interpolation. Convert float products to int by rounding (guard against 392.99999 from float multiplication); do not truncate.
++
++## Before finishing
++- Each service's requests equals the count of latencies used for its p95.
++- 0 <= error_rate <= 1; p95_ms is an int within the observed min..max.
++- The output has exactly the services and keys the task names, with numeric values.
++- Final message states drops per service, and any assumption made.
++
++## Workspace facts (verified on the 2026-10-04 06:00-12:00 task; re-check, they may differ)
++- Timestamps in all three logs mix offsets (-03:00, +00:00, +01:00); many rows fall outside the window only after UTC conversion.
++- billing.jsonl.gz is gzip; its `latency_s` rows all fall at or after 09:00 UTC and `latency_ms` rows before it, consistent with the runbook.
++- Truncated lines occur in every service (about 5-18 per file).
+--- current/systemprompt.md
++++ dom1/systemprompt.md
+@@ -1 +1,4 @@
+ You are an assistant that completes tasks inside a workspace directory. Read the task, do the work, and write the requested deliverables under output/.
++
++
++When asked to compute traffic, error or latency statistics from service access logs, load the `service-traffic-report` skill.

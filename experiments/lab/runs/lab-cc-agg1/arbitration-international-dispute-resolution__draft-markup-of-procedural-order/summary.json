@@ -1,0 +1,126 @@
+{
+  "task_id": "arbitration-international-dispute-resolution/draft-markup-of-procedural-order",
+  "domain": "arbitration-international-dispute-resolution",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "lab-cc-agg1/arbitration-international-dispute-resolution/draft-markup-of-procedural-order/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/lab/exec/lab-cc-agg1/arbitration-international-dispute-resolution/draft-markup-of-procedural-order/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "arbitration-international-dispute-resolution/draft-markup-of-procedural-order",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.19260963000000006,
+          "cached": false,
+          "notes": "Scope: one rollout exists (base1), with its two deliverables. There is no second run or candidate, so nothing diverged. Every change below rests on a single-run moment and is a risk, not a repeated failure.\n\nCHANGED (context/harness/systemprompt.md, two bullets under \"Doing the work\"; no new components; no template braces):\n\n1. Read-back bullet. Moment: after building the cover letter (action 25), the run checked it only with `wc -w` and `len(paragraphs)` and never printed its text. Its final message says it \"could only check the files structurally.\" The base line said \"re-opens cleanly\", which the run satisfied by counting. The bullet now requires reading the extracted text back through `scripts/read_doc.py` and checking it against the assignment, and states that a count or an open-test is not a read-back.\n\n2. Traceability bullet. Moment: the redline (accepted text, para 5) and the letter (section G) both state \"Respondent has not agreed to\u2026\" for listed paragraphs. The record does not show this; the run's own final message says \"I had no March\u2013June 2024 correspondence to check this against.\" Yet the same message says the artifacts are \"written to be filed as they stand.\" The bullet now says that an unsupported sentence must be reworded to what the record shows or removed, with the gap named in the final message. It does not ask for in-artifact markers, because the deliverable's shape is not mine to change.\n\nKEEP (worked in base1, not touched): full reading of all six source files including the persisted-output file; the arithmetic check that found the 17.75-hour figure against the memo's 24.5; the date-vs-environment check; the reject-all-equals-original check on the redline; exact output filenames in output/; and the honest \"structural only\" caveat.\n\nUNRESOLVED, NOT EDITED (needs a person's decision):\n- The text view of the redline (deliverables/base1 .txt) shows accepted text only. The 22 Word comments and all deleted text are absent (deleted-text hits = 0, markup markers = 0). The objections that live in the comments therefore do not appear in the assessed view; only the cover letter carries them. Whether this is the reader's mode or a real loss cannot be settled from this run. The run never ran `read_doc.py` on its own output. Choosing visible formatting over tracked changes would change the deliverable's shape, so I did not make that call.\n- CLAUDE.md in the workspace root was listed (action 1) and never opened. I did not add a rule for it, because it is probably auto-loaded by the host and its contents are not in the mission material.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.29118053000000005,
+          "cached": false,
+          "notes": "**Change 1: `skills/procedural-order-redline/SKILL.md`, removed the \"Workspace facts (from the base run)\" block (formerly lines 63\u201377).**\nThis is the change the rejection asked for. The block held facts about this matter's files: the 24.5 vs 17.75 hour figures, the memo's wrong cross-references, the Dreier location, the Redfern and CMC dates, the draft's numbering gaps, the caption spelling, the Ansorge and Ashford addresses, the Alpstein letter, and the hearing-date arithmetic. None of it is method, and a later task on a different matter would be anchored on it. The workspace-fact warning is also the wrong form: the mission says workspace facts go in a labelled component, and this one shipped inside a skill that is meant to be reused. The method the block illustrated is already in \u00a72 (arithmetic, dates, cross-references, repeated dates) and \u00a73 (the unverified-statement rule), so nothing general was lost.\nTrajectory moment: base1 (`context/rollouts/base1.md`, ~line 1088) recomputed the hours itself (17.75 from the draft's schedule, not the memo's 24.5). That is the method the \u00a72 arithmetic check already teaches, so the removed facts added nothing the run needed.\n\n**Change 2: same file, \u00a75 (redline anatomy), \"In this workspace's text conversion, accepted insertions appear and comment bodies do not\" reworded to a method check.**\nThe sentence described this workspace's reader rather than a general rule. It is now an instruction to test how the text conversion renders tracked changes and comments on a test copy before relying on it. The underlying constraint (the objection and replacement must also appear in the cover letter) is kept.\nTrajectory moment: base1 wrote its redline with 77 tracked changes and 22 comments (rollout ~line 1200) and then had to rely on the cover letter for the grounds. The method point is what that run needed.\n\n**Change 3: same file, \u00a75 (cover letter), \"as the PO1 communications provision requires\" changed to \"as the prior order's communications provision requires.\"**\nThis is the last matter-specific reference left in the skill. It is now generic, and the reader still has to find the controlling provision in the record.\n\n**Checks run.** `grep` on the skill for matter names, party names, paragraph numbers, dates, and the figures 17.75 and 24.5 finds nothing. The skill's frontmatter (`name:` matching the directory, plus `description:`) is intact. No template braces appear in `systemprompt.md`, `guardrails.md`, or the skill. The trigger line in `systemprompt.md` (\"load the `procedural-order-redline` skill\") is unchanged, so the skill is still reachable.\n\n**Left unchanged (KEEP for the rest of the harness).** `systemprompt.md`, `guardrails.md`, `LongTermMEMORY.md` (empty), `tool_guidance.md` (empty), and the `skills/README.md`, `scripts/README.md`, and `plugin/README.md` files were not touched. No evidence in base1 called for changes to them in this pass.\n\n**Open observation, not acted on.** base1 never invoked the `procedural-order-redline` skill (no \"skill\" call in the rollout), even though `systemprompt.md` names it as a trigger. I did not change the trigger wording, because the rejection was about the workspace-fact block alone and one run cannot show whether the trigger is failing or whether that run predates it. A later candidate should show whether the skill gets loaded before any further change to the trigger line.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.15555794,
+          "cached": false,
+          "notes": "kept -> skills/procedural-order-redline/SKILL.md (DOM1 skill adopted as the base of the review procedure) -> DOM1 loaded it as its first action and its letter covered the checks the skill lists. Base1 and INV1 never raised the PO2 Redfern date (15 April in draft \u00b614.1 vs 19 April in PO2 \u00b611(d)) or the CMC date mismatch (30 Oct 2023 in PO1 \u00b66 vs 3 Nov 2023 in PO2 \u00b63). Base1's deliverables contain 0 mentions of either; INV1 and DOM1 both flagged the Redfern date. Base1 also never noted the draft's missing and out-of-order paragraph numbers, which DOM1 and INV1 both did. Base1 1/1 missed them; 2/2 candidates caught them.\n\nkept -> systemprompt.md trigger line \"When the assignment is to review a draft procedural order ... load the `procedural-order-redline` skill.\" -> required by the validation rule, and the skill name appears verbatim. DOM1 opened the skill at action 2, so the trigger worked in 1/1 candidate.\n\nkept -> guardrails.md citation line (DOM1: cite rules only from the record or a checkable source; flag other rule text in the final message) -> base1 letter cites ICC Art 25(4), Art 38, Art 39, PILA Art 182(3) and PILA Art 192 as settled law, none of which is in the supplied record. Base1 flagged only Art 192 and only in chat. DOM1's final message lists rule text it relied on but did not verify. This also matches the practice lens's requirement to tie recommendations to the supplied instrument.\n\nrevised -> systemprompt.md read-back bullet (base \"re-opens cleanly\" replaced with a text read-back via read_doc.py, and a count is not a read-back) -> base1 checked the cover letter only with word counts and len(paragraphs), and its final message says it \"could only check the files structurally\". The base wording allowed that check. INV1 read back the redline accept and reject views but still checked its letter only by word count (INV1 rollout, the letter build step near the end), so the edit did not change that moment in its one run. Kept because the base moment is specific and the cost is one bullet.\n\nrevised -> systemprompt.md traceability bullet (unsupported sentence is reworded or removed, a short bracketed placeholder is used where the lawyer must confirm, and the gap is named in the final message) -> base1 inserted \"Respondent has not agreed to paragraphs 10, 12, 14.3, 17, 18.1, 22.3, 22.4, 25.2 and 26.3\" into redline \u00b65 and into the cover letter, unbracketed. Its final message concedes \"I had no March\u2013June 2024 correspondence to check this against\". Both candidates changed this. INV1 removed the sentence and named the gap in its final message. DOM1 bracketed it in both documents. So 2/2 candidates corrected a claim that base1 (1/1) left in. The wording was tightened to a placeholder rule so it does not conflict with the skill.\n\nrevised -> skills/procedural-order-redline/SKILL.md \u00a73 and \u00a75 bracket convention (in-letter markers limited to a short placeholder; the reason goes in the final message; the \u00a73 \"no marking in the letter\" and the \u00a73 \"bracket the sentence\" instructions no longer conflict) -> DOM1's letter carries multi-sentence bracketed notes (e.g. \"[Respondent to cite the paragraphs of its quantum expert's report on which this request rests.]\"). This is a consistency edit that keeps in-artifact text to placeholders, per the shape rule, and is not driven by a failure in a run.\n\ndropped -> INV1's redline title comment (\"INTERNAL, PRIVILEGED. Delete all comments before filing\", containing memo errors and fallbacks inside the redline file) -> the redline is a Tribunal-facing deliverable, and DOM1 kept redline comments Tribunal-facing. Not merged.\n\ndropped -> Stop hook (plugin/hooks.json) to block finishing until both outputs exist and re-open -> all 3 rollouts (base1, INV1, DOM1) produced both named files, so no run shows a missing-file failure. A hook would also need testing that is not possible here (python-docx is not installed in this workspace).\n\ndropped -> a new scripts/ helper for building tracked-change redlines -> all 3 hand-rolled redlines hit mechanical bugs (base1: assert on comment-reference runs; INV1: dropped leading spaces; DOM1: caption word-splitting) but all delivered after fixes. The logged DOM1 script is clipped at about 1,500 characters, so it cannot be ported from the trajectory. A new helper could not be tested in this rig, and an untested dependency is a risk of a run that produces nothing.\n\nkept -> tool_descriptions/, plugin/, scripts/, skills/README.md, LongTermMEMORY.md (unchanged from base) -> no trajectory moment touched these components. Base files are inherited as they are.\n\nDelivery check -> all three rollouts (base1, INV1, DOM1) produced both output/po3-redline-markup.docx and output/po3-objections-cover-letter.docx, so no edit is attached to a non-delivering run. Open issue, not addressed by the harness: the text view of the redline shows accepted text only, with no comments and no deletions, identically in all three rollouts. Fixing this would change the deliverable's shape, so it is left for a person to decide.\n\nOverall -> merge (DOM1 skill and guardrail, with the INV1 read-back and traceability lines tightened into systemprompt.md) rather than adopt either candidate wholesale. INV1's wording on the always-on side is adopted; DOM1's skill and trigger are adopted; the Tribunal-facing comment approach from DOM1 is preferred over INV1's.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "arbitration-international-dispute-resolution/draft-markup-of-procedural-order",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 4,
+        "expected_P": 3,
+        "usd": 0.639348,
+        "rollout_usd": 0.0,
+        "session_usd": 0.639348,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "arbitration-international-dispute-resolution/draft-markup-of-procedural-order",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "lab-cc-agg1/arbitration-international-dispute-resolution/draft-markup-of-procedural-order/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.3729641899999999,
+      "experience": {
+        "cue": "A drafting or review assignment whose deliverable will be filed or sent, where the run must state facts about what a party said, agreed or did, and the record it was given lacks the correspondence that would show those facts.",
+        "lesson": "In the grounding bullet of systemprompt.md, make the check an edit to the artifact: before finishing, find each sentence that asserts a party's agreement, position or prior correspondence; if no source file supports it, delete it or replace it in the deliverable with a bracketed placeholder naming the fact to confirm, and list the gap in the final message. A gap named only in the final message, with the sentence left in the deliverable, does not meet the check.",
+        "evidence": "The systemprompt.md traceability row (confounded). Contrast at one moment: BASE1 left \"Respondent has not agreed to\u2026\" in redline \u00b65 and letter \u00a7G, and its final message says it had no correspondence to check that against; INV1, with this bullet and no skill, removed the sentence from \u00b65 and the letter and named the gap in its final message. AGG1 shows the operation is only partly applied in the adopted candidate: it bracketed \u00b65 but left an unbracketed denial of agreement in letter \u00a711.2.",
+        "confidence": "low. The base-versus-candidate contrast is one run each, and the adopted run also carries a skill rule covering the same point, so the attribution to the bullet is not isolated. The lesson is narrowed to the artifact-level operation that BASE1 skipped, which is the part the record shows directly.",
+        "edits": "component: systemprompt.md (Doing the work, build bullet)\ncandidates: agg1, inv1 (dom1 kept the base wording)\nchange: Replaced the base \"verify each produced file is non-empty and re-opens cleanly\" with a requirement to read each produced file back through read_doc.py and check the extracted text against the assignment, stating that a file that opens, or a word or paragraph count, is not a read-back.\nobserved: The moment the bullet targets is the cover-letter check. BASE1 checked the letter by word count and paragraph count, and its final message says it \"could only check the files structurally\" (base1.md, letter build near the end). AGG1 ran read_doc.py on the letter but printed only `head -c 3000` after a word count (agg1.md ~l.1321\u20131335), so the read covered about the first two sections. The letter edit it made was in the build script before that read, so the read did not drive any change. INV1 built the letter and checked only its word count (inv1.md ~l.1263\u20131268) and never read the letter text back, although it did read the redline accept and reject views. DOM1, which lacks the bullet, ran a keyword-presence check on the letter via python-docx (dom1.md ~l.1254). No run found or corrected a defect through a read-back. Record note: pool/inv1 and pool/dom1 harness.diff files are computed against an intermediate \"current\" harness (the adopted merge), not base; these rows compare directory contents against base_harness.\nverdict: no observed effect\n\ncomponent: systemprompt.md (Ground the work bullet, traceability)\ncandidates: agg1, inv1 (dom1 kept the base wording; dom1 reached a similar bracket through the skill's \u00a73 rule instead)\nchange: Added that before a sentence added to a deliverable goes final, the agent checks that a document it read supports it; if none does, it rewords or removes the sentence; where the lawyer must confirm a fact it uses a short bracketed placeholder and names the gap in the final message.\nobserved: The shared moment is the agreement recital in draft \u00b65 and the letter. BASE1 kept \"Respondent has not agreed to paragraphs 10, 12, 14.3, 17, 18.1, 22.3, 22.4, 25.2 and 26.3\" in redline \u00b65 and \"Respondent has not agreed to the provisions identified in the redline\" in letter \u00a7G. Its final message says \"I had no March\u2013June 2024 correspondence to check this against\" and that the files are \"written to be filed as they stand.\" INV1 removed the sentence from \u00b65 with no placeholder, has no agreement claim in its letter, and named the gap in its final message (\"Client to confirm the March\u2013June 2024 correspondence (not in the file) did not record agreement\u2026\"). AGG1 bracketed \u00b65 and has no \"has not agreed\" claim, but letter \u00a711.2 still states, unbracketed, \"Respondent does not agree that the hearing schedule, the time allocation, the expert format, the document provisions or the costs provisions were agreed.\" The record contains no such correspondence (the memo never mentions it), so the adopted letter keeps an unverified statement of the kind the bullet and the adopted skill \u00a73 both forbid. DOM1 bracketed both the \u00b65 sentence and its \"does not accept that it agreed\" line.\nverdict: confounded. The difference from base rests on one rollout per harness; in AGG1 the same point is also covered by the skill; INV1 is the only run that isolates this bullet, and it is one run. The direction is the same in all three candidates.\n\ncomponent: systemprompt.md (skill trigger line)\ncandidates: agg1, dom1 (identical wording)\nchange: Added \"When the assignment is to review a draft procedural order or to prepare a redline, comments or objections on one, load the `procedural-order-redline` skill.\"\nobserved: Both runs called Skill(\"procedural-order-redline\") as their first action (agg1.md line 1; dom1.md line 2). BASE1 and INV1 had no such skill and made no skill call. No run had the skill without the trigger line, so the trigger's effect cannot be separated from the presence of the skill file.\nverdict: confounded\n\ncomponent: guardrails.md (citation line)\ncandidates: agg1, dom1\nchange: Added \"Cite statutes and rules only from the matter record or a source you can check. If you rely on rule text that is not in the file, say so in your final message to the supervising lawyer, not in the filed document.\"\nobserved: BASE1's letter cites ICC Art 25(4) unbracketed (\u00a7E) and PILA Art 192 unbracketed (\u00a7G); only Art 192 is flagged, and only in chat. AGG1's letter brackets Art 25(4) (\"[ICC Rules Article 25(4) text to be verified before filing]\", \u00a710) and brackets the PILA point for Swiss counsel (\u00a77.1). DOM1's letter does not cite Art 25(4) at all; its final message lists ICC Arts 22, 25(2), 25(4), 38 and others as rule text relied on but not verified. INV1 has neither the guardrail line nor the skill, yet its letter also brackets Art 25(4) (\"[counsel to verify text]\"), its final message says the Art 25(4) text is not in the file, and its letter does not cite the PILA point. So the marking the line targets appears in a run without it.\nverdict: confounded. The effect the line was written for also appears in INV1 without it, so its marginal contribution is not shown.\n\ncomponent: skills/procedural-order-redline/SKILL.md (new workflow skill)\ncandidates: agg1 (adopted, merged form), dom1 (its own form; \u00a73 and \u00a75 differ on where bracketed notes may go)\nchange: New skill covering the source hierarchy, issue checks (arithmetic, dates, cross-references, repeated dates, names and caption, unilateral change), rule-text discipline, third-party and client-decision material, deliverable anatomy, and the final-message order.\nobserved: Compared with the two runs without it, the skill runs differ on three moments. (i) Alpstein letter: BASE1 put its content into the Tribunal letter (retention in September 2022, the findings), unbracketed; INV1 also put the content in, bracketed only as an enclosure note. AGG1 kept the content out and bracketed the decision (letter \u00a74.5); DOM1 bracketed it as \"[Subject to client decision on disclosure: \u2026]\". (ii) PILA Art 192: BASE1 asserts it unbracketed; AGG1 and DOM1 bracket it for Swiss counsel. (iii) Caption: the draft caption reads \"THERMOVANTURE AG\". DOM1 corrected it as a tracked change with a comment. AGG1 did not change it, although its skill lists caption under issue checks, so its redline still reads THERMOVANTURE while its own letter reads \"ThermoVenture AG\". INV1 also left the caption. Counter-evidence against a skill-only attribution: INV1, without the skill, caught the Redfern 15 vs 19 April mismatch and the draft's numbering gaps, which BASE1 did not raise in its letter. The \u00b614.5 treatment varied across all four (BASE1 unchanged; INV1 neutral rule; DOM1 limited to rejected privilege claims; AGG1 deleted), and the skill does not settle that choice. Both skill runs' final messages follow only part of \u00a76's required order (AGG1 stops after item (c); DOM1 is cut off inside item (d)).\nverdict: confounded. The skill is co-changed with the trigger line and the guardrail, and each harness has one rollout. The disclosure and rule-text patterns point in the skill's direction, but nothing isolates the skill.\n\ncomponent: skills/README.md, scripts/README.md, plugin/README.md (new)\ncandidates: agg1, dom1, inv1 (all three carry them; base has none)\nchange: One-line HTML-comment READMEs describing where skills, scripts and plugins live. plugin/README.md describes a Stop-hook format for hooks.json, but no candidate ships a hooks.json (the Stop hook was dropped), so that instruction points at nothing.\nobserved: No run opened any README in any of the four trajectories. The skill was loaded through the Skill tool, not via skills/README.md.\nverdict: no observed effect"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/lab/exec/lab-cc-agg1/arbitration-international-dispute-resolution/draft-markup-of-procedural-order/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "11f5d2aa78c6ef58"
+    }
+  },
+  "errors": []
+}

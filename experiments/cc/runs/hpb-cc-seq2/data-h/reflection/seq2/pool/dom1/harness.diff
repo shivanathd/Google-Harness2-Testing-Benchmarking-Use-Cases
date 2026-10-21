@@ -1,0 +1,34 @@
+--- current/skills/revenue-reconciliation/SKILL.md
++++ dom1/skills/revenue-reconciliation/SKILL.md
+@@ -0,0 +1,25 @@
++---
++name: revenue-reconciliation
++description: Monthly net revenue from payment-processor exports (charges, chargebacks, fx, customer flags) under a written recognition policy. Use before computing or writing any revenue figure.
++---
++
++# Analytic move
++Recognise gross revenue for one month from charges, subtract chargebacks and fees booked in that same month, report net plus the counts the task asks for. The policy file in the workspace controls; re-read it for the month, fee amount, and rules before applying anything below.
++
++# Rules to apply and check (policy wording wins if it differs)
++1. Month assignment: parse every timestamp WITH its offset and convert to UTC before taking the month. Never slice the date text. Charges and chargebacks use different columns (`captured_at` vs `chargeback_at`); chargeback timestamps may end in Z.
++2. Status: only `captured` is revenue; `authorized` and `voided` are not, whatever their date.
++3. Test customers: look up the flag in the customers file and drop those customers from revenue AND from chargebacks (a chargeback on a test customer's charge counts toward neither the net nor the chargeback count).
++4. Units: convert minor units to major per currency (zero-decimal currencies such as JPY are already whole units; do not divide by 100). Multiply by the single fx rate per currency. Use Decimal, keep full precision, round only the final net.
++5. Chargeback: reverses the FULL original charge at its USD value and ALSO costs the fee, so net change per chargeback = -(charge USD + fee). The fee is an extra deduction, never netted against the charge. The original charge may be from another month or outside the month's revenue; it still reverses in the chargeback month.
++6. Counts: `transactions` = recognised captured, non-test charges in the month, including those later charged back. `chargebacks` = non-test chargebacks whose UTC chargeback month is the target month, regardless of when the charge was captured.
++
++# Before writing the answer, confirm
++- List the recognised charge IDs and the booked chargeback IDs and check each exclusion has a named reason: wrong status, test customer, out of month in UTC.
++- Boundary check: list every captured charge whose local date and UTC date fall in different months (near month start/end with a non-zero offset) and confirm each landed on the correct side.
++- Fee sign: recompute net as gross - sum(chargeback charge USD) - fee x chargeback count and confirm it equals the loop result.
++- Output file has exactly the keys and number formats the task specifies (counts as integers, net with 2 decimals).
++
++# Workspace facts (this task's data; re-verify, they may differ next time)
++- Source files: charges.csv, chargebacks.csv, customers.csv, fx.csv, POLICY.md. Currencies USD, EUR, INR, JPY; test customers are those with is_test = true (includes some with large-value charges that must not leak into the total).
++- Earlier runs of this exact September 2026 task: the one failure was a first-pass sign slip on the fee (`usd - 15` instead of `usd + 15` being deducted), caught only by a manual sanity re-read.
+--- current/systemprompt.md
++++ dom1/systemprompt.md
+@@ -1 +1,3 @@
+ You are an assistant that completes tasks inside a workspace directory. Read the task, do the work, and write the requested deliverables under output/.
++
++When the task is a revenue, net-revenue or chargeback figure built from payment/finance exports and a policy file, load the `revenue-reconciliation` skill.

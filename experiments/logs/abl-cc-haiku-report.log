@@ -1,0 +1,56 @@
+{
+ "h2-parallel-k1/intask": {
+  "n_tasks": 5,
+  "mean_delta": 0.2,
+  "ci95": [
+   -0.2,
+   0.55
+  ],
+  "signflip_p": 0.4375,
+  "improved": 4,
+  "regressed": 1
+ },
+ "h2-parallel-k1/itt": {
+  "n_tasks": 4,
+  "mean_delta": 0.13839285714285715,
+  "ci95": [
+   0.0,
+   0.4375
+  ],
+  "signflip_p": 0.5,
+  "improved": 2,
+  "regressed": 0
+ },
+ "h2-parallel-k1/transfer": {
+  "n_tasks": 4,
+  "mean_delta": 0.25,
+  "ci95": [
+   -0.125,
+   0.625
+  ],
+  "signflip_p": 0.5,
+  "improved": 2,
+  "regressed": 0
+ },
+ "h2-parallel-k1/variant": {
+  "n_tasks": 4,
+  "mean_delta": -0.125,
+  "ci95": [
+   -0.75,
+   0.625
+  ],
+  "signflip_p": 1.0,
+  "improved": 1,
+  "regressed": 3
+ }
+}
+flips h2-parallel-k1/intask data-h: fail->pass ['chargebacks 0.50->1.00', 'net_usd 0.50->1.00', 'transactions 0.50->1.00'] pass->fail []
+flips h2-parallel-k1/intask ops-e: fail->pass [] pass->fail ['errors 0.75->0.25', 'top_code 0.75->0.25', 'users 0.75->0.25']
+flips h2-parallel-k1/intask swe-m: fail->pass ['basic_us 0.50->1.00', 'empty 0.50->1.00', 'eu_discount 0.50->1.00', 'float_cents 0.50->1.00', 'half_up_line 0.50->1.00', 'lowercase_region 0.50->1.00', 'multi_line_in 0.50->1.00', 'strings 0.50->1.00', 'tax_after_discount 0.50->1.00', 'unknown_region 0.50->1.00'] pass->fail []
+flips h2-parallel-k1/itt ops-m: fail->pass ['failed 0.00->0.50', 'top_code 0.00->0.50', 'users 0.00->0.50'] pass->fail []
+flips h2-parallel-k1/transfer ops-m: fail->pass ['failed 0.00->0.75', 'top_code 0.00->0.75', 'users 0.00->0.75'] pass->fail []
+flips h2-parallel-k1/variant data-e-v: fail->pass [] pass->fail ['net_usd 1.00->0.50', 'transactions 1.00->0.50']
+flips h2-parallel-k1/variant data-m-v: fail->pass ['net_usd 0.00->1.00', 'refunds 0.00->1.00', 'transactions 0.00->1.00'] pass->fail []
+flips h2-parallel-k1/variant data-h-v: fail->pass [] pass->fail ['chargebacks 1.00->0.50', 'net_usd 1.00->0.50', 'transactions 1.00->0.50']
+flips h2-parallel-k1/variant ops-e-v: fail->pass [] pass->fail ['errors 0.50->0.00', 'top_code 0.50->0.00', 'users 0.50->0.00']
+leak: {'harness_literal_hits': 0, 'blocked_escape_attempts': 2, 'grader_path_mentions': 0, 'improver_sessions_audited': 37, 'harnesses_audited': 9}

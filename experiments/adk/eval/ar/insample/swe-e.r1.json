@@ -1,0 +1,28 @@
+{
+ "cond": "ar/insample",
+ "task": "swe-e",
+ "rep": 1,
+ "partial": 1.0,
+ "all_pass": true,
+ "checks": {
+  "seconds": true,
+  "all_units_spaced": true,
+  "uppercase": true,
+  "zero": true,
+  "outer_space": true,
+  "empty_raises": true,
+  "unknown_unit_raises": true,
+  "garbage_raises": true,
+  "repeat_unit_raises": true,
+  "order_raises": true
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/adk/autoresearch/swe/final",
+ "cost_usd": null,
+ "tokens_in": 22200,
+ "tokens_out": 1380,
+ "wall_s": 200.0,
+ "error": "",
+ "infra_error": false,
+ "turns": null,
+ "tool_calls": 9
+}

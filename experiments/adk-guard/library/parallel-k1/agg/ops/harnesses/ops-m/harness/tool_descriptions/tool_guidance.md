@@ -1,0 +1,3 @@
+- read_file cannot read `.gz` files (binary output). Use `run_command` with `python3 -I -c` and the gzip module, or `zcat`, or a script.
+- Shell one-liners with nested quotes (awk programs) break easily; if a command errors with a quoting/syntax message, do not resend it unchanged: put the logic in a small python file or use the skill's script.
+- Large reads can be truncated in the observation; compute with scripts instead of reading raw logs.

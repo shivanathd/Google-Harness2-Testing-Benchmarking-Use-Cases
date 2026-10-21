@@ -1,0 +1,16 @@
+cc h2-parallel-k1/itt     ops-m    r1 partial=1.00 err=error_max_turns
+cc h2-parallel-k1/itt     ops-m    r2 partial=0.00 err=error_max_turns
+cc h2-parallel-k1/itt     ops-m    r4 partial=1.00 err=error_max_turns
+cc h2-parallel-k1/itt     ops-m    r3 partial=0.00 err=error_max_turns
+cc h2-parallel-k1/itt     swe-e    r1 partial=1.00 err=error_max_turns
+cc h2-parallel-k1/itt     swe-e    r3 partial=1.00 err=error_max_turns
+cc h2-parallel-k1/itt     swe-e    r4 partial=1.00 err=error_max_turns
+cc h2-parallel-k1/itt     swe-e    r2 partial=1.00 err=error_max_turns
+cc h2-parallel-k1/itt     swe-h    r1 partial=1.00 err=error_max_turns
+cc h2-parallel-k1/itt     swe-h    r2 partial=1.00 err=error_max_turns
+cc h2-parallel-k1/itt     swe-h    r3 partial=1.00 err=error_max_turns
+cc h2-parallel-k1/itt     swe-h    r4 partial=1.00 err=error_max_turns
+cc h2-parallel-k1/itt     ops-h    r1 partial=0.00 err=error_max_turns
+cc h2-parallel-k1/itt     ops-h    r2 partial=0.00 err=error_max_turns
+cc h2-parallel-k1/itt     ops-h    r3 partial=0.00 err=error_max_turns
+cc h2-parallel-k1/itt     ops-h    r4 partial=0.00 err=error_max_turns

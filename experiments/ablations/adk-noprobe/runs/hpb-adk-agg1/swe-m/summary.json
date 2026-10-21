@@ -1,0 +1,119 @@
+{
+  "task_id": "swe-m",
+  "domain": "swe",
+  "k": 1,
+  "seed": null,
+  "status": "partial",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-adk-agg1/swe-m/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/adk-noprobe/exec/hpb-adk-agg1/swe-m/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "swe-m",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "**Evidence.** There is one rollout, `base1`. It produced no deliverable. The agent made two bad path guesses (`workspace`, then `/`). It then read ISSUE.md, docs/ROUNDING.md and the test file. Its last message was a numbered plan (\"I'll implement the following steps\u2026 Let's start by implementing the fix.\"). It ended there with no edit to `invoicing/totals.py`, no test run, and no `output/CHANGES.md`. The harness had no workflow and no completion gate, so ending on a plan was allowed.\n\n**Changes, each tied to that moment:**\n1. `systemprompt.md` now has a short ordered procedure.\n   - Step 3, \"Act, do not just plan\", addresses the plan-only ending.\n   - Step 1 says paths are relative to the workspace root and to start with `list_files .`. That addresses the two failed path guesses.\n   - Steps 1\u20132 say to read the issue, the doc it references, the source and the tests, then make a checklist. The issue lists examples only, so the checklist covers every rule in the referenced doc.\n   - Step 5 says to run the issue's exact examples and inputs that must raise, because the one existing test is thin. I wrote this from the `swe-e` library lesson: passing the existing tests can still leave the bug unfixed. It is a hypothesis, not something `base1` showed.\n   - Steps 4 and 6 are standard rules from `swe-e`: don't edit existing tests, and change approach after two identical failures. `base1` never reached a point where they applied.\n   - Step 7 puts `output/CHANGES.md` last.\n   - I did not carry over the `fix-python-bug` skill. `swe-e` showed it was loaded three times and had no effect. The layout here, `invoicing/` not `src/`, also differs from that skill's assumptions.\n2. `hooks.json` adds a Stop hook that runs `scripts/check_output.py`. `base1` finished with no deliverable, which is the case the hook exists to block. The hook blocks at most 3 times. It exits 0 when CHANGES.md is real and the tests pass.\n3. `scripts/check_output.py` is new. It requires:\n   - `output/CHANGES.md` to exist, be non-empty, and name at least one existing `.py` file in the workspace;\n   - every `.py` file in the workspace to compile (I used the builtin `compile()` because `py_compile` failed writing to `/dev/null`);\n   - the tests to pass with at least one test run.\n\n   I ran it against a copy of the unfixed workspace. It exited 2 and reported the missing CHANGES.md and the failing test, because the existing test expects the string `\"20.00\"` and the unfixed code returns the float `20.0`. So an untouched workspace cannot pass the gate.\n4. `scripts/run_tests.py` is new. It puts the workspace root and `src/` on `PYTHONPATH`. It uses pytest and falls back to calling the `test_*` functions if pytest is missing. It treats zero tests collected as exit 2, not a pass. This workspace has no `src/` directory and uses the `invoicing` package, so the root path matters.\n5. I removed `scripts/README.md` because `scripts/` now holds real files.\n\nI wrote no matter facts about invoicing or rounding into the harness, and the CHANGES.md format is only what the task asked for.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "I removed the \"Workspace facts\" block from `skills/fix-spec-conformance/SKILL.md`. It held facts about this instance's files: the `invoicing/tax.py` RATES keys, the current state of `invoicing/totals.py`, the `LineItem` signature, and the hand-computed sample values.\n\nI also removed the other instance-specific references:\n- The description no longer mentions \"the verified facts of the invoicing workspace\".\n- The `invoicing/`, `tests/`, `docs/` example paths and `output/CHANGES.md` are now generic (\"the deliverable the task names\").\n- Check 2 no longer lists the three named symptoms (KeyError on lowercase region, discount before tax, half-cent rounding). It now says every symptom in ISSUE.md must be reproduced or probed.\n\nWhat stays are the checks the agent re-derives itself: reconcile ISSUE.md, the spec doc and the tests; number each spec clause and trace it to code; the Decimal rules; and the pre-finish checklist.\n\nI replaced the removed block with a short generic \"Tests\" rule. If the existing tests pass on the broken code, don't edit them. Add a new test file with hand-computed cases per clause, covering half-cent rounding, a mixed-case key, an unknown key, and empty or zero input.\n\nThe trigger line in `systemprompt.md` is unchanged and still names the skill. This edit rests on the review feedback and the harness file alone. I didn't re-open the trajectories this round.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "Neither candidate was rolled out. The only rollout is the base one, so every edit below rests on that single trajectory. It ended with no deliverable, which is why I merged both candidates' edits rather than keeping the base.\nkept -> inv1 systemprompt.md ordered procedure (steps 1\u20137) -> base1 made two bad path guesses (`workspace`, `/`), read ISSUE.md, the doc and the tests, then ended on a numbered plan (\"Let's start by implementing the fix\"). It made no edit, ran no tests and wrote no `output/CHANGES.md`. Step 1 targets the path guesses, and step 3 (\"Act, do not just plan\") targets the plan-only ending. The failure appeared in 1/1 base rollouts, so I treat it as likely rather than proven.\nkept -> inv1 hooks.json Stop hook, `scripts/check_output.py`, `scripts/run_tests.py` -> The base had no completion gate, and the empty ending was allowed. The hook blocks finishing when `output/CHANGES.md` is missing and tells the agent to fix the code first. It also checks that the code compiles and the tests pass. The library's swe-e harness uses the same hook mechanism, but that run never showed it firing, so its effect is unproven. I changed the check from a `.py` copy in `output/` to `CHANGES.md`, to match this task's stated deliverable.\nkept -> dom1 skill `fix-spec-conformance` with a trigger line added to systemprompt.md -> The base only read the docs and never traced spec clauses to code. The issue lists three symptoms, and the ROUNDING.md spec also states the per-line rounding order and the two-decimal string format. The skill covers these: reconciling issue, spec and tests, plus Decimal-from-string, half-up quantize, and `ValueError` for unknown keys. It loads on demand, so it costs nothing on unrelated tasks. The library note for `fix-python-bug` says loading a skill did not guarantee it was applied, so I expect modest value. The DOM candidate's own rollout is not available, so I cannot cite it.\ndropped -> dom1 systemprompt line \"Do not end your turn with a plan\" -> It duplicates inv1 step 3, so keeping both would only add always-on text.\nkept -> base guardrails.md, LongTermMEMORY.md, tool_guidance.md unchanged -> No trajectory moment argued for changing them.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "swe-m",
+        "k": 1,
+        "R": 2,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 0,
+        "expected_P": 3,
+        "usd": 0.0,
+        "rollout_usd": 0.0,
+        "session_usd": 0.0,
+        "rollouts": [
+          "base1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "swe-m",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "",
+      "chosen_label": "",
+      "chosen_run_id": "",
+      "chosen_is_base": false,
+      "why": "",
+      "id_map": {},
+      "dropped": [
+        "agg1"
+      ],
+      "n_candidates": 0,
+      "ok": false,
+      "fallback": false,
+      "error": "no candidate produced an artifact (finals-only pool has no base fallback)",
+      "usd": 0.0,
+      "experience": {},
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "",
+      "chosen_tree_is_base": true
+    }
+  },
+  "errors": [
+    "agg: selection failed: no candidate produced an artifact (finals-only pool has no base fallback)"
+  ]
+}

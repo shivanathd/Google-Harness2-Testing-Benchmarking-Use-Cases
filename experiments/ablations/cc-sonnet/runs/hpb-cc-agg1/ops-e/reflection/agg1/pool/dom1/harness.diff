@@ -1,0 +1,126 @@
+--- current/hooks.json
++++ dom1/hooks.json
+@@ -1 +0,0 @@
+-{"hooks": {"Stop": [{"hooks": [{"type": "command", "command": "python3 scripts/check_output.py"}]}]}}
+--- current/scripts/check_output.py
++++ dom1/scripts/check_output.py
+@@ -1,18 +0,0 @@
+-#!/usr/bin/env python3
+-"""Stop hook: refuse to finish until output/ holds a non-empty, parseable deliverable."""
+-import json, os, sys
+-d = 'output'
+-files = [f for f in os.listdir(d) if not f.startswith('.')] if os.path.isdir(d) else []
+-if not files:
+-    print('output/ has no deliverable yet. Write it now (e.g. python3 -I scripts/log_window_stats.py ... --write output/answer.json), then reopen it to check.', file=sys.stderr)
+-    sys.exit(2)
+-for f in files:
+-    p = os.path.join(d, f)
+-    if os.path.getsize(p) == 0:
+-        print(f'{p} is empty; rewrite it.', file=sys.stderr); sys.exit(2)
+-    if f.endswith('.json'):
+-        try:
+-            json.load(open(p))
+-        except Exception as e:
+-            print(f'{p} is not valid JSON ({e}); fix it.', file=sys.stderr); sys.exit(2)
+-sys.exit(0)
+--- current/scripts/log_window_stats.py
++++ dom1/scripts/log_window_stats.py
+@@ -1,54 +0,0 @@
+-#!/usr/bin/env python3
+-"""Count log events of one level inside a UTC window, from a multi-timezone log.
+-
+-usage: python3 -I scripts/log_window_stats.py LOG START END [--level ERROR] [--write output/answer.json]
+-  START inclusive, END exclusive, ISO text, naive = UTC (e.g. 2026-10-03T09:00).
+-Only lines that BEGIN with an ISO timestamp are events; indented continuation
+-lines (tracebacks, wrapped text) are never counted, even if they contain
+-"ERROR user=..." text. The level is the token right after the timestamp, so
+-"msg=retrying after ERROR" on an INFO line is not an ERROR event.
+-Prints every matched event plus counts. --write emits
+-{"errors", "users", "top_code"}; exits 1 (and writes nothing) if no event
+-matched or the top code is tied, so the tie is resolved by a human decision.
+-"""
+-import argparse, json, re, sys
+-from collections import Counter
+-from datetime import datetime, timezone
+-
+-HDR = re.compile(r'^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2}))\s+(\w+)\s+(?:\[([^\]]*)\]\s+)?(.*)$')
+-
+-def utc(s):
+-    d = datetime.fromisoformat(s.replace('Z', '+00:00'))
+-    return d.replace(tzinfo=timezone.utc) if d.tzinfo is None else d
+-
+-ap = argparse.ArgumentParser()
+-ap.add_argument('log'); ap.add_argument('start'); ap.add_argument('end')
+-ap.add_argument('--level', default='ERROR'); ap.add_argument('--write')
+-a = ap.parse_args()
+-start, end = utc(a.start), utc(a.end)
+-ev, bad = [], []
+-for n, line in enumerate(open(a.log, encoding='utf-8', errors='replace'), 1):
+-    line = line.rstrip('\n')
+-    if not line.strip() or line[0] in ' \t':
+-        continue
+-    m = HDR.match(line)
+-    if not m:
+-        bad.append((n, line)); continue
+-    if m.group(2) != a.level:
+-        continue
+-    ts = utc(m.group(1))
+-    if not (start <= ts < end):
+-        continue
+-    u = re.search(r'\buser=(\S+)', m.group(4)); c = re.search(r'\bcode=(\S+)', m.group(4))
+-    ev.append((n, ts.isoformat(), u and u.group(1), c and c.group(1)))
+-for e in ev: print(e)
+-users = {e[2] for e in ev if e[2]}
+-codes = Counter(e[3] for e in ev if e[3])
+-print('unparsed non-indented lines:', bad)
+-print('events', len(ev), 'users', len(users), 'codes', codes.most_common())
+-top = codes.most_common(2)
+-if a.write:
+-    if not ev or (len(top) > 1 and top[0][1] == top[1][1]):
+-        print('NOT WRITTEN: no events or tied top code', file=sys.stderr); sys.exit(1)
+-    json.dump({'errors': len(ev), 'users': len(users), 'top_code': top[0][0]}, open(a.write, 'w'))
+-    print('wrote', a.write, open(a.write).read())
+--- current/skills/log-incident-stats/SKILL.md
++++ dom1/skills/log-incident-stats/SKILL.md
+@@ -0,0 +1,30 @@
++---
++name: log-incident-stats
++description: Rules for turning a multi-service, multi-timezone application log into incident/traffic statistics (error counts, distinct users, top error code) for a UTC window.
++---
++
++# Log -> incident statistics: practitioner rules
++
++ANALYTIC MOVE: classify each log *event* (level, service, user, code, instant), filter by instant in UTC, then count / de-duplicate / rank. Result must be exact integers and a code string, computed by a parser, not eyeballed.
++
++## What counts as an event
++- An event is a line that STARTS with an ISO timestamp (with offset) followed by a level token. Indented lines after it (Traceback, File, RuntimeError...) belong to the previous event; they are NOT events.
++- The level is the token right after the timestamp. Text "ERROR" elsewhere in the line (e.g. a free-text `msg=` on an INFO line that quotes the word ERROR and a code) or inside an indented continuation line (an exception message that repeats `ERROR user=... code=...`) is NOT an ERROR-level event.
++- user and code come from the event's own header line. Never take user/code from a continuation line: they name a different user/code than the event and would inflate users/codes.
++- WARN lines also carry `code=`; they are not ERROR events and must not feed the code ranking.
++
++## Time window
++- Convert every timestamp to UTC using its own offset (Z, +01:00, +05:30, -07:00 ...) BEFORE comparing. File order is not time order, and the calendar date in a local timestamp may differ from the UTC date (a late-evening timestamp with a negative offset falls on the next UTC day).
++- Window is half-open: start inclusive, end exclusive. List any event within a minute of either boundary and decide it explicitly.
++- Half-hour offsets (+05:30) shift minutes, not just hours; do not round the offset.
++
++## Counting rules
++- errors = number of ERROR events in the window (each event once; do not dedupe events).
++- users = distinct user values among exactly those events (not among all users in the log, not including WARN/INFO-only users).
++- top_code = most frequent code among exactly those events. If two codes tie for first, say so explicitly in your final message rather than silently picking one; re-check the window and parsing first, since a tie often signals a parsing error.
++
++## Consistency checks before finishing
++1. Sum of per-code counts == errors; users <= errors; top_code's count is the max.
++2. Print the in-window ERROR events (line number, UTC instant, user, code) and eyeball boundary and offset cases.
++3. Count of header lines + continuation lines == total lines in file (nothing silently dropped by the regex).
++4. Output file matches the requested JSON shape exactly: integer values for counts, string for code, no extra keys. Write it as soon as the checks pass.
+--- current/systemprompt.md
++++ dom1/systemprompt.md
+@@ -1,7 +1,3 @@
+ You are an assistant that completes tasks inside a workspace directory. Read the task, do the work, and write the requested deliverables under output/.
+ 
+-Procedure for log-analysis tasks (incident and traffic statistics):
+-- Compute with a script, not by eye. For counting events of one level in a UTC window, run `python3 -I scripts/log_window_stats.py LOG START END --level ERROR` (prints every matched event for a sanity check), then add `--write output/answer.json` once the printed events look right. Treat START/END as UTC; convert each line's offset before comparing. START is inclusive, END exclusive. If the requested keys differ from errors/users/top_code, compute with the script's printed events and write the file yourself.
+-- Before trusting counts, check the log's shape: preview the head, and check whether continuation lines (indented tracebacks, wrapped text) carry look-alike "LEVEL user=... code=..." text, and whether other-level lines mention the level word in their message. An event is a line starting with a timestamp; only the level token right after the timestamp counts, and user/code come from that header line.
+-- Write the deliverable as soon as the numbers are computed, then reopen it and confirm it parses and has exactly the requested keys and types. Computing without writing is not finishing.
+-- If the script reports a tied top value or no matches, do not guess: re-check the window and level, then state the tie in your final reply and pick per the task's wording.
++When the task asks for counts, users or top error codes from a service log (especially with mixed UTC offsets or a time window), load the `log-incident-stats` skill first.

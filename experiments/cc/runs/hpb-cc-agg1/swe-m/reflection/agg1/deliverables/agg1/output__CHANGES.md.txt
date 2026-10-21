@@ -1,0 +1,22 @@
+# Changes: #142 Invoice totals wrong for discounted EU invoices
+
+Brings `invoicing.totals.compute_totals` in line with `docs/ROUNDING.md`.
+
+## `invoicing/tax.py`
+- `rate_for` normalizes the region with `.upper()`, so "eu" works.
+- Unknown regions raise `ValueError` instead of `KeyError`, as the spec requires.
+
+## `invoicing/totals.py`
+- All money is `Decimal`; float rounding is gone.
+- `line_total` rounds the line gross half-up to cents (fixes the 0.125 case, which now gives 0.13).
+- Line discount is `line gross x discount_pct / 100`, rounded half-up per line; discount is the sum of those.
+- Tax is computed on `subtotal - discount` (previously on the undiscounted subtotal).
+- `compute_totals` returns strings with two decimals. Total is `subtotal - discount + tax`.
+- Public names and signatures are unchanged. `line_total` now returns a `Decimal` instead of a float.
+
+## `tests/test_totals.py`
+- Added regression tests: lowercase EU with discount (expects subtotal 59.97, discount 6.00, tax 10.79, total 64.76), half-up rounding on 0.125, and unknown region raising `ValueError`.
+
+## Verification
+- The four tests in `tests/test_totals.py` pass when run directly with Python.
+- `python -m pytest` could not run in this environment: collection fails with a `PermissionError` while pytest walks the parent directory. This is a sandbox restriction, not a test failure.

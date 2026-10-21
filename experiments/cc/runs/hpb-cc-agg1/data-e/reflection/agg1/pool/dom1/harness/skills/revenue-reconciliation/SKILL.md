@@ -1,0 +1,28 @@
+---
+name: revenue-reconciliation
+description: Compute net settled revenue (or similar period total) from a payment-processor transaction export plus an FX rate table. Covers dedupe, status/period filtering, amount and date normalisation, currency conversion, rounding, and pre-delivery checks.
+---
+
+# Net settled revenue from a payment export + FX table
+
+ANALYTIC MOVE: reconcile raw processor rows -> one row per real transaction -> filter to the requested status and period -> convert to USD -> sum -> round once. The task text defines the inclusion rule and the output shape; follow it exactly and add nothing to the artifact.
+
+## Normalise before filtering (inspect every distinct format in the file, don't assume the head of the file is representative)
+- Dates: expect mixed formats in one column (ISO `2026-09-15` and `Sep 15, 2026`). Parse every row; a row whose date fails to parse must be surfaced, not skipped. Period test is on the parsed calendar date (check both month and year; month-boundary rows such as the 1st/last day and next-month dates are the usual traps).
+- Amounts: strip thousands separators (`"1,944.41"`), treat accounting parentheses `(954.34)` as negative, keep leading `-`. Refunds are negative and stay in the sum; do not take absolute values. Use Decimal, not float.
+- Status: compare after trim; only the exact status the task names counts (PENDING, VOID, etc. are excluded regardless of sign or date). Note whether other casings/spellings of the status exist.
+- Currency: check every currency in the transactions has a rate in the FX file; confirm direction from the column name (`usd_per_unit` => USD = amount x rate; never divide). Any currency with no rate must be flagged, not silently dropped.
+
+## Dedupe
+- "A txn_id identifies one transaction" => exports repeat rows. Collapse by txn_id BEFORE summing and counting. Compare duplicates field by field: identical copies -> keep one; copies that differ (status, amount, date) are a conflict to resolve explicitly (prefer the row the task's rule supports, e.g. latest/final status) and state the choice in the final reply.
+- The reported transaction count is the number of distinct txn_ids included, not rows.
+
+## Rounding and checks before writing
+- Convert each row at full precision, sum, round half-up to 2 decimals once at the end (do not round per row unless the task says so).
+- Cross-check by an independent route: recompute count and total with a second method (e.g. list the included ids and sum by currency, then convert each currency subtotal) and confirm they agree.
+- Confirm: included count == number of distinct included ids; every excluded settled row is excluded because of its date (list them); no duplicate id in the included list; output matches the requested JSON keys and types exactly (numbers, not strings).
+- In the final reply, state the exclusions by reason (status, out-of-period, duplicate) and any assumption that was needed.
+
+## Workspace facts (this task instance; re-verify, they will differ on other exports)
+- transactions.csv: 42 data rows, 36 distinct txn_ids, duplicates were byte-identical. Mixed ISO / "Mon DD, YYYY" dates, quoted comma amounts, parenthesised negatives. fx.csv columns `currency,usd_per_unit` with USD, EUR, INR only.
+- Settled rows dated outside September 2026 that must be excluded: T11006, T11027, T11032 (Aug), T11022 (2026-10-26). Result found and independently re-computed: 21 transactions, net 18691.64 USD.

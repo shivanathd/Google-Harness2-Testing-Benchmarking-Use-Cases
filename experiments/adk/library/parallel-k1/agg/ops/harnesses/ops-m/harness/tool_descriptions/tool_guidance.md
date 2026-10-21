@@ -1,0 +1,2 @@
+- read_file shows .gz files as binary garbage: use `python3` (gzip module) or the skill's script instead.
+- If a run_command fails with a shell syntax error, do not resend the same command: write the logic to a small .py file and run that. After two failed attempts at the same approach, switch approach.

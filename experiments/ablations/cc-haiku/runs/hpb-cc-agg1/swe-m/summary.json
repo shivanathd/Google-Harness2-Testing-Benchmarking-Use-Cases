@@ -1,0 +1,126 @@
+{
+  "task_id": "swe-m",
+  "domain": "swe",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-cc-agg1/swe-m/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-haiku/exec/hpb-cc-agg1/swe-m/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "swe-m",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.01344732,
+          "cached": false,
+          "notes": "**Change: `harness/systemprompt.md`, added a 4-step finish order after the base line.**\n\nMoment: base1 (rollout), after the second `Edit` (\"totals.py has been updated successfully\"), the run makes no further call. It never reruns `python -m pytest tests` after the edits (its only test run was the baseline, which failed), never writes `output/CHANGES.md` (the task names it, and `deliverables/base1/INDEX.md` lists only the two `.py` files), and gives no final reply. This is the only run, so I treated it as a realised completion failure, not a repeated pattern. The added order (test after last edit \u2192 write named deliverables \u2192 reopen them \u2192 short final reply) is the cheapest always-on fix for that moment. It is about 90 words, with no template braces.\n\n**No change: plugin / Stop hook.** The base1 run ended with the deliverable missing, which looks like a Stop-gate case. But the mission reserves a hook for repeated evidence, and this is one run. `plugin/README.md` also says to write a root `hooks.json`, which is not on the editable-surface table. I did not act on that note.\n\n**No change: skill, script, subagent.** The run did not hand-roll any repeated deterministic operation, and the finish step is short enough to stay in always-on text.\n\n**Checked and left alone:**\n- The solver's final code is correct for the cases I ran. I copied the deliverable `.txt` files into a scratch copy of `source/` and ran them with `python3 -I`. `compute_totals([LineItem(\"widget\",3,\"19.99\",10)],\"eu\")` gives subtotal 59.97, discount 6.00, tax 10.79, total 64.76, which matches ROUNDING.md. \"US\" with 10.00\u00d72 gives \"20.00\". An unknown region raises ValueError. I could not run pytest (not installed for that interpreter under `-I`), so the test suite itself was not re-run.\n- The run listed `CLAUDE.md` and never opened it. I did not add a rule for this. The executor appears to be Claude Code, which loads CLAUDE.md automatically, and this trajectory does not show that its content mattered.\n- No tool errors appear in base1, so `tool_guidance.md` (empty) stays empty.\n- No workspace-fact or domain content was added. That belongs to the parallel candidate.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.02783363,
+          "cached": false,
+          "notes": "Change: `skills/invoice-totals/SKILL.md` rewritten. The \"Workspace facts (issue #142 ...)\" block is removed. It held this instance's expected outputs (59.97 / 6.00 / 10.79 / 64.76), the test name and its \"20.00\" assertion, the RATES values, and the KeyError-to-ValueError mapping.\n\nReplacements, all checks the agent re-derives:\n- The issue example is now \"recompute by hand from the doc's rules and confirm the code's output matches\", with no stored numbers.\n- Rates are \"read from the code's rate table\", not listed.\n- Return types are \"check the doc and any test assertion\", not \"the test asserts a string\".\n- The unknown-region rule is generic: a dict KeyError is not the doc's named exception, so map it to the doc's type.\n- The doc path is \"locate by listing the tree (usually under docs/)\", not hard-coded.\n\nKept unchanged: the generic Decimal and float rounding traps (ROUND_HALF_EVEN default, Decimal(float) noise, round(0.125, 2) = 0.12). These are Python facts, not instance facts. The trigger line in `systemprompt.md` line 5 still names `invoice-totals`. Nothing else was edited.\n\nEvidence for keeping the skill: base1 never loaded it. It went straight to editing and never reran the tests or wrote output/CHANGES.md. The always-on prompt already covers both checks, so I did not add prose for them.\n\nAlso, the one-line deletion of an earlier \"discount base\" bullet was my own cleanup, not driven by a trajectory. It was vague and not checkable.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.020538215000000002,
+          "cached": false,
+          "notes": "revised -> systemprompt.md: replaced the one-line base with the base line plus a short tool-call budget paragraph (read the issue, docs, code and tests and run the baseline test in one command, then edit, then write output/ files and re-run tests in one command if possible, then a short final reply). Caveat: the files cannot show whether the 5-call stop is an executor cap; the line only reallocates the calls and cannot raise the cap. -> all 3 rollouts (base1, inv1, dom1) used exactly 5 tool calls and each spent 3 separate calls before its first edit (base1: ls / cat / pytest; inv1: ls / find+cat / cat+pytest; dom1: ls / cat / pytest). base1 and inv1 (2/2 delivering) ended on their second Edit observation with no post-edit test and no output/CHANGES.md, which the base line already asked for. dom1 spent its last two calls re-reading totals.py and tax.py that it had already printed in call 2.\n\ndropped -> inv1 4-step finish order (test, write, reopen, reply) -> inv1 (1/1 candidate) stopped right after its second Edit despite the same order sitting in its CLAUDE.md, so the prose did not change behaviour. Its \"reopen each written file\" step costs an extra call that a 5-call run cannot spare. The surviving parts (re-test after last edit, write named files, short reply) are merged into the revised line.\n\ndropped -> dom1 skills/invoice-totals/SKILL.md and its trigger line in systemprompt.md -> dom1 produced nothing (0 files, 0 edits, 5 calls), so this edit is UNSAFE. The skill was never invoked in that run (0/1). The knowledge gap is not shown: base1 and inv1 (2/2 delivering) both reached ROUND_HALF_UP quantize, two-decimal string output, ValueError for unknown regions and case-insensitive lookup with no skill. I ran both solver outputs in scratch copies with python3 -I: each gives 59.97 / 6.00 / 10.79 / 64.76 for the issue example, passes the existing \"20.00\" test, accepts \"Eu\", returns 0.13 for 0.125, and raises ValueError for an unknown region. Loading a skill would also spend one of the five calls.\n\ndropped -> dom1 always-on \"check each deliverable against disk and re-run tests\" line -> same non-delivering dom1 run. Its disk check costs a call, so the re-test is folded into the combined command in the revised line.\n\ndropped -> pool/inv1 and pool/dom1 wholesale adoption -> inv1's edit did not change behaviour (see above) and dom1 is non-delivering. Neither candidate's full harness is adopted; only the mechanism shared by both (end-of-run deliverables and re-test) survives, in trimmed form.\n\nkept (unchanged) -> LongTermMEMORY.md, guardrails.md, tool_descriptions/tool_guidance.md -> all empty in base; no run showed a missing domain fact or tool error beyond the pre-existing failing baseline test (3/3 rollouts), so nothing to add.\n\nnot added -> scripts/ and sub_agents/ -> no hand-rolled deterministic operation repeated in any rollout (0/3), and no bounded sub-task with a large input appeared in any run.\n\nnot added -> plugin / root hooks.json Stop gate that would block finishing until output/CHANGES.md exists -> the only missing-deliverable evidence is 2 runs that also hit the 5-call stop, which looks like a cap rather than a choice to skip the file, and a gate would only force more calls. plugin/README.md says plugin .ts files do not run in this rig and points to a root hooks.json, which is not on the editable-surface table, so I did not treat it as an enforcement route.\n\nEvidence limit: every rollout is a single sample per harness, so the revised line is supported by the 3/3 call-count pattern and not by any measured outcome difference.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "swe-m",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 4,
+        "expected_P": 3,
+        "usd": 0.061819,
+        "rollout_usd": 0.0,
+        "session_usd": 0.061819,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "swe-m",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-cc-agg1/swe-m/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.030667185,
+      "experience": {
+        "cue": "A solver run that the executor cuts off after a fixed number of tool calls, where the judged output includes a file written after the code edits and a test run after the last edit.",
+        "lesson": "In systemprompt.md, when the run has a fixed tool-call count, state that count and fold the work into the fewest calls: reads plus the baseline test in the first call, and the final code writes, the named output files and the post-edit test run in one later call. A finish-order list on its own does not change the outcome when the cap binds first, so check that the folded plan fits the count before the first edit.",
+        "evidence": "systemprompt.md row (agg1 form, verdict confounded). The contrast: the agg1 run finished in 3 calls, reading and running the baseline test in call 1 and writing the code, output/CHANGES.md and the post-edit test in call 3, and it delivered 4 files. base1 and inv1 reached the 5-call cut-off after their second Edit with no post-edit test and no CHANGES.md. inv1's finish-order form did not change this, since its path matched base1's. dom1 ended with no edit after re-reading files. Across the four runs, the one run that folded its calls was the only one to deliver a checked output file.",
+        "confidence": "low. One batched run against three unbatched runs that differ in other harness parts; each arm is one rollout. The five-call cut-off is inferred from identical endings, not from executor documentation, and the paragraph's \"five\" is a claim the record does not verify. The sequencing contrast is concrete and the pattern is consistent across the three unbatched arms, so this is recorded as a hypothesis to test, not a settled effect.",
+        "edits": "component: systemprompt.md\ncandidates: agg1 (adopted), inv1, dom1\nchange: Base file is one role sentence (152 bytes). Three forms were tried, each replacing or extending that sentence. agg1 appended a paragraph saying runs end after five tool calls and asking for these batches: reads, docs, code, tests and baseline test in one command; edits; writes under output/ and a re-run of the tests in one command; then a short reply. inv1 replaced that paragraph with a four-step finish order (test after last edit, write named files, reopen them, short reply). dom1 replaced it with two lines: check each named deliverable on disk and re-run the test after the last edit, and load the invoice-totals skill for money tasks. The pool diffs are against agg1, but inv1 and dom1 did not keep agg1's paragraph.\nobserved: agg1 (1 run): 3 tool calls. Call 1 read issue, source, tests and ran the baseline pytest. Call 2 read ROUNDING.md, CLAUDE.md and git log. Call 3 wrote tax.py, totals.py, the tests and output/CHANGES.md in one heredoc command and re-ran pytest (4 passed) in that command. Its text before call 3 says \"I'll also update the test file, write output/CHANGES.md, and re-run the tests in the same command\", which repeats the paragraph's wording. It ended with a reply and delivered 4 files. base1 (base line only): 5 calls (ls and ISSUE; cat -n; baseline pytest; Edit tax; Edit totals). It stopped after the second Edit with no post-edit test, no output/CHANGES.md and no reply; 2 files. inv1 (finish order, no paragraph): 5 calls with the same shape as base1 (ls; find and cat; cat and pytest; Edit; Edit). It stopped after the second Edit, so the four-step order was never reached: no observed effect for that form. Its exploration was not batched. dom1 (check line and skill trigger, no paragraph): 5 calls (ls; cat of docs, source, tests and SKILL.md; baseline pytest; Read totals.py; Read tax.py). The last two re-read files printed in call 2. Zero edits, zero files. Across the four runs, only agg1 wrote output/CHANGES.md or re-ran tests after its last edit. Code correctness was equal across the three delivering runs (see lead-in).\nverdict: confounded\ncomponent: skills/invoice-totals/SKILL.md\ncandidates: dom1\nchange: New skill file with frontmatter (name and description) and about 35 lines. It tells the agent to locate the rounding doc under docs/ and read it in full; warns about Decimal built from floats, ROUND_HALF_EVEN as the default, round(0.125, 2) giving 0.12, and mapping a KeyError to the doc's exception type; and lists checks before finishing (recompute total, two decimals, hand-check the issue example, case-insensitivity, test after last edit). An earlier version held this instance's expected numbers. dom1 rewrote it to remove them.\nobserved: The file reached the workspace as .claude/skills/invoice-totals/SKILL.md. The run never called the Skill tool, but read the file with cat in call 2, so its contents were in context from that point. Calls 4 and 5 then re-read totals.py and tax.py, which call 2 had already printed, and the run made no edit and produced no file. The skill was added together with the always-on lines in systemprompt.md, and only one run exists, so nothing isolates the skill's effect. Note that decisions/dom1 and decisions/agg1 say the skill was \"never invoked\"; that is true of the Skill tool only.\nverdict: confounded\ncomponent: plugin/README.md, scripts/README.md, skills/README.md\ncandidates: agg1, inv1, dom1 (identical in all three; absent from base_harness)\nchange: Comment-only README placeholders. Each is one HTML comment describing the rig's extension convention: plugin .ts files are not run, a root hooks.json Stop gate is the enforcement route, scripts/<name>.py helpers, and skills/<name>/SKILL.md. No executable content. Origin is not shown in the record.\nobserved: No run used them. None of the four workspaces contained plugin/, scripts/ or hooks.json, because these files live in the harness tree, not the workspace. The only harness-supplied artifact to reach a workspace was dom1's skill. No candidate created a hooks.json.\nverdict: no observed effect"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-haiku/exec/hpb-cc-agg1/swe-m/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "cd4804a3468eb8d7"
+    }
+  },
+  "errors": []
+}

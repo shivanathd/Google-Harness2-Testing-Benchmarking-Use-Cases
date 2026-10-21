@@ -1,0 +1,21 @@
+# Changes for #142 (discounted EU invoice totals)
+
+`invoicing/totals.py`
+- Switched all money math from float to `decimal.Decimal`, following docs/ROUNDING.md.
+- `line_total` returns the line gross quantized to cents, rounded half-up.
+- Line discounts are computed per line (gross x discount_pct / 100), rounded half-up, then summed.
+- Tax is charged on `subtotal - discount` instead of the undiscounted subtotal.
+- `total = subtotal - discount + tax`.
+- All four returned amounts are strings with two decimals, e.g. "59.97".
+
+`invoicing/tax.py`
+- `rate_for` normalizes the region with `.upper()`, so "eu" works.
+- Unknown regions raise `ValueError` instead of `KeyError`.
+
+`tests/test_totals.py`
+- Added tests for the reported discounted EU example (expected: subtotal 59.97, discount 6.00, tax 10.79, total 64.76), half-up rounding of a 0.125 unit price, and unknown-region `ValueError`.
+
+Public function names and signatures are unchanged. `line_total` now returns a `Decimal` rather than a float.
+
+Test result: `python -m pytest tests -p no:cacheprovider --rootdir=tests` → 4 passed.
+Plain `python -m pytest tests` failed during collection with a PermissionError on a parent directory (sandbox restriction), so I pinned the rootdir.

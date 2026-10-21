@@ -1,0 +1,30 @@
+# swe-m
+
+- adopted: `agg1`  (run `hpb-cc-agg1/swe-m/agg1`)
+- components: always-on edits only; 569 always-on chars
+
+## Why this was chosen
+trivial pool: single final at k=1; delivered without a selector session
+
+## What each edit did
+component: systemprompt.md
+candidates: agg1 (adopted), inv1, dom1
+change: Base file is one role sentence (152 bytes). Three forms were tried, each replacing or extending that sentence. agg1 appended a paragraph saying runs end after five tool calls and asking for these batches: reads, docs, code, tests and baseline test in one command; edits; writes under output/ and a re-run of the tests in one command; then a short reply. inv1 replaced that paragraph with a four-step finish order (test after last edit, write named files, reopen them, short reply). dom1 replaced it with two lines: check each named deliverable on disk and re-run the test after the last edit, and load the invoice-totals skill for money tasks. The pool diffs are against agg1, but inv1 and dom1 did not keep agg1's paragraph.
+observed: agg1 (1 run): 3 tool calls. Call 1 read issue, source, tests and ran the baseline pytest. Call 2 read ROUNDING.md, CLAUDE.md and git log. Call 3 wrote tax.py, totals.py, the tests and output/CHANGES.md in one heredoc command and re-ran pytest (4 passed) in that command. Its text before call 3 says "I'll also update the test file, write output/CHANGES.md, and re-run the tests in the same command", which repeats the paragraph's wording. It ended with a reply and delivered 4 files. base1 (base line only): 5 calls (ls and ISSUE; cat -n; baseline pytest; Edit tax; Edit totals). It stopped after the second Edit with no post-edit test, no output/CHANGES.md and no reply; 2 files. inv1 (finish order, no paragraph): 5 calls with the same shape as base1 (ls; find and cat; cat and pytest; Edit; Edit). It stopped after the second Edit, so the four-step order was never reached: no observed effect for that form. Its exploration was not batched. dom1 (check line and skill trigger, no paragraph): 5 calls (ls; cat of docs, source, tests and SKILL.md; baseline pytest; Read totals.py; Read tax.py). The last two re-read files printed in call 2. Zero edits, zero files. Across the four runs, only agg1 wrote output/CHANGES.md or re-ran tests after its last edit. Code correctness was equal across the three delivering runs (see lead-in).
+verdict: confounded
+component: skills/invoice-totals/SKILL.md
+candidates: dom1
+change: New skill file with frontmatter (name and description) and about 35 lines. It tells the agent to locate the rounding doc under docs/ and read it in full; warns about Decimal built from floats, ROUND_HALF_EVEN as the default, round(0.125, 2) giving 0.12, and mapping a KeyError to the doc's exception type; and lists checks before finishing (recompute total, two decimals, hand-check the issue example, case-insensitivity, test after last edit). An earlier version held this instance's expected numbers. dom1 rewrote it to remove them.
+observed: The file reached the workspace as .claude/skills/invoice-totals/SKILL.md. The run never called the Skill tool, but read the file with cat in call 2, so its contents were in context from that point. Calls 4 and 5 then re-read totals.py and tax.py, which call 2 had already printed, and the run made no edit and produced no file. The skill was added together with the always-on lines in systemprompt.md, and only one run exists, so nothing isolates the skill's effect. Note that decisions/dom1 and decisions/agg1 say the skill was "never invoked"; that is true of the Skill tool only.
+verdict: confounded
+component: plugin/README.md, scripts/README.md, skills/README.md
+candidates: agg1, inv1, dom1 (identical in all three; absent from base_harness)
+change: Comment-only README placeholders. Each is one HTML comment describing the rig's extension convention: plugin .ts files are not run, a root hooks.json Stop gate is the enforcement route, scripts/<name>.py helpers, and skills/<name>/SKILL.md. No executable content. Origin is not shown in the record.
+observed: No run used them. None of the four workspaces contained plugin/, scripts/ or hooks.json, because these files live in the harness tree, not the workspace. The only harness-supplied artifact to reach a workspace was dom1's skill. No candidate created a hooks.json.
+verdict: no observed effect
+
+## Transferable lesson
+- **cue**: A solver run that the executor cuts off after a fixed number of tool calls, where the judged output includes a file written after the code edits and a test run after the last edit.
+- **lesson**: In systemprompt.md, when the run has a fixed tool-call count, state that count and fold the work into the fewest calls: reads plus the baseline test in the first call, and the final code writes, the named output files and the post-edit test run in one later call. A finish-order list on its own does not change the outcome when the cap binds first, so check that the folded plan fits the count before the first edit.
+- **evidence**: systemprompt.md row (agg1 form, verdict confounded). The contrast: the agg1 run finished in 3 calls, reading and running the baseline test in call 1 and writing the code, output/CHANGES.md and the post-edit test in call 3, and it delivered 4 files. base1 and inv1 reached the 5-call cut-off after their second Edit with no post-edit test and no CHANGES.md. inv1's finish-order form did not change this, since its path matched base1's. dom1 ended with no edit after re-reading files. Across the four runs, the one run that folded its calls was the only one to deliver a checked output file.
+- **confidence**: low. One batched run against three unbatched runs that differ in other harness parts; each arm is one rollout. The five-call cut-off is inferred from identical endings, not from executor documentation, and the paragraph's "five" is a claim the record does not verify. The sequencing contrast is concrete and the pattern is consistent across the three unbatched arms, so this is recorded as a hypothesis to test, not a settled effect.

@@ -1,0 +1,126 @@
+{
+  "task_id": "swe-h",
+  "domain": "swe",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-cc-agg1/swe-h/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-sonnet/exec/hpb-cc-agg1/swe-h/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "swe-h",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.1956369,
+          "cached": false,
+          "notes": "I changed one file, `LongTermMEMORY.md`, to address the rejection. I did not re-open the trajectory this turn.\n\n- **Removed:** the \"Workspace facts\" block. It described this instance's files: the `stock/` package layout, the original `cli.main` flow, the zero-quantity `remove` rule, and the `report --low` sort order.\n- **Replaced with:** three short procedural checks the agent re-derives on every small-repo fix. They cover the entry point's order of operations (validate before the first mutation or save), explicit boundary decisions (zero, equality, strict versus inclusive), and keeping the other modes' ordering and output unchanged.\n- **Left alone:** `systemprompt.md`, `guardrails.md`, `tool_descriptions/tool_guidance.md`, `scripts/check_done.py`, `hooks.json` and the README files are inherited unchanged. There are no skills, so no trigger lines were needed.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.1289482,
+          "cached": false,
+          "notes": "**Evidence.** There is one rollout, base1, and it is the only evidence I had. It read the files and wrote a plan. It then made four edits: `store.load`, `ops.add` and `ops.remove`, the `cli.py` import, and the `cli.py` report and error handling. Its trajectory ends there. It never ran pytest, never wrote tests, and never created `output/CHANGES.md`, which `task.md` requires. The code edits themselves look correct. They validate before mutating, print the error to stderr and return 1 without saving, and keep the plain report output unchanged. The loss was in delivery and verification.\n\nThe library's swe-m record shows the same stop-after-edit shape. Its one run that delivered used wording that tied CHANGES.md to the first edit (\"same step\", \"never end a turn right after an edit\"). Each arm there was a single rollout, so that wording is a weak signal. The same record shows that moving the guidance into a skill alone did not deliver.\n\n**Changes.**\n1. `harness/systemprompt.md`: I replaced the one-line prompt with a short paragraph. It does three things:\n   - It states the done condition: CHANGES.md exists and the tests have actually been run.\n   - It carries the swe-m wording as a hypothesis: write CHANGES.md right after the first fix edit, and never end a turn right after an edit.\n   - It holds the trigger line: \"load the `issue-fix-contract` skill\".\n\n   The wording stays always-on because the swe-m evidence says to keep it out of skills.\n2. `harness/skills/issue-fix-contract/SKILL.md` (new, on demand): the practitioner knowledge base1 never applied.\n   - **Clause table:** split each ISSUE bullet into testable clauses, including the \"must not change\" ones.\n   - **Checks for this kind of fix:**\n     - validate before mutating, and test that the data is unchanged after a failed call\n     - error contract: the library raises, the CLI prints `error:` to stderr, returns 1, and does not save\n     - boundary values (quantity 0, removing exactly the stock on hand, an unknown SKU)\n     - a read-only report must not create the file\n     - strict `<` and the exact sort key\n     - an empty result, N=0 and negative N\n     - leave argparse's exit 2 alone\n   - **Workspace facts, labelled \"in this workspace\":**\n     - the file layout\n     - `load` crashes on a missing or empty file\n     - the three ValueError cases must exit 1 with the file byte-identical\n   - **CHANGES.md contents:** per bullet, the choices made where the issue was silent, and the commands actually run.\n   - **Regression tests:** add them under `tests/` and run them.\n\n   These are the clauses base1 never tested.\n\nI made no change to guardrails, memory, scripts or hooks. Procedure such as the Stop hook is owned by a parallel candidate, and the library shows no sign that a hook fires.\n\n**Uncertainty.** I have one rollout and no contrast run, so whether the prompt wording or the skill changes delivery is untested. The skill carries nothing about delivery, so if the model skips loading it, only the always-on paragraph is left.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.13071080000000002,
+          "cached": false,
+          "notes": "- revised -> systemprompt.md: the one-line base prompt became a short issue-fix paragraph. It tells the agent to make the fix edits promptly and to write CHANGES.md \"in the same step as your first fix edit\". It also says \"never end a turn right after an edit\", then run pytest, add regression tests and run them. -> base1 ended right after its four edits (store, ops, cli) with no pytest run and no CHANGES.md. The library's swe-m record shows the same stop-after-edit shape. In that record the only run that delivered used this same-step wording in always-on text. Each arm there is a single rollout, so the signal is weak. I merged inv1's workflow wording with dom1's closing line and shortened both.\n- kept -> validation hints folded into the prompt: validate before mutating, keep output formats, and test boundaries and strict versus inclusive comparisons. -> base1's edits to `ops` and `cli` show the agent already does this, but it never tested it. These are a few clauses inside the prompt, so there is no extra always-on file.\n- dropped -> dom1 `skills/issue-fix-contract` and its \"load the skill first\" trigger line. -> The dom1 rollout produced nothing. It wrote a clause table, then spent its actions on a baseline capture (one command failed with `ModuleNotFoundError`) and the trajectory ends before any edit. The skill adds a pre-edit step in a run that never reached its edits. The swe-m library entry shows the same shape, where a skill-load run did no edits. The skill's workspace facts are also specific to this one repo.\n- dropped -> inv1 Stop hook (`hooks.json` and `scripts/check_done.py`). -> The inv1 rollout produced nothing and ends after reading three files. It shows no hook firing. The swe-m record likewise shows no sign of a hook firing, so it adds files without evidence of effect.\n- dropped -> inv1 `LongTermMEMORY.md` procedural checks. -> They come from a non-delivering rollout and have no moment showing an effect. Their substance is covered by the short prompt hints.\n- noted -> three of three rollouts produced no complete deliverable. base1 made edits but no CHANGES.md. dom1 and inv1 produced nothing. Both candidate edits are therefore treated as unsafe. I kept only the one wording that the library shows once, as low-confidence evidence, in a delivering run. I added no components.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "swe-h",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 4,
+        "expected_P": 3,
+        "usd": 0.455296,
+        "rollout_usd": 0.0,
+        "session_usd": 0.455296,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "swe-h",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-cc-agg1/swe-h/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.1307293,
+      "experience": {
+        "cue": "A small fix-and-report task where an unedited agent makes correct code edits but its trajectory ends right after them, with no tests run and no summary file written. The task requires a written deliverable.",
+        "lesson": "In the always-on `systemprompt.md`, put the deliverable ahead of verification. Tell the agent to create the required summary file (`output/CHANGES.md`) in the same step as its first code edit, and say \"never end a turn right after an edit\". Do not rely on a skill, a Stop hook or a pre-edit checklist to get the deliverable written. Both candidates that added those pre-edit or on-demand mechanisms ended before any edit. Then make the summary honest. Tell the agent to list a command in the summary only after it has actually run it, or to finalize the summary after the test run. Otherwise it will write \"see results below\" with nothing below.",
+        "evidence": "The systemprompt.md row. The base1 and agg1 code edits are essentially the same, but base1 stopped with no tests and no CHANGES.md, while agg1 wrote tests and CHANGES.md. Agg1 still never ran pytest and its CHANGES.md claims a run it never did. The skill and Stop-hook rows show dom1 and inv1 ending before any edit, so adding a pre-edit step did not help.",
+        "confidence": "low. It is one rollout per arm. The systemprompt row is confounded because the only contrast is base1 against agg1 and variance could explain it. The rejected-candidate rows show only that those arms failed to deliver, not why. The part about unverified claims in the summary is directly observed in agg1's CHANGES.md.",
+        "edits": "component: systemprompt.md\ncandidates: agg1 (adopted), also the shared base for dom1 and inv1\nchange: Replaced the one-line base prompt with an issue-fix paragraph. It says to batch-read ISSUE.md, source and tests, then edit promptly. It says to treat the issue and tests as samples of the spec, validate before mutating, and keep output formats. It says to write output/CHANGES.md in the same step as the first fix edit, never end a turn right after an edit, then run pytest, add regression tests and run them. It says to finish only when CHANGES.md exists and lists the commands run.\nobserved: agg1 is the only rollout with a deliverable. It batch-read the files in two calls and made the ops, store and cli edits. It then wrote regression tests and `output/CHANGES.md`. Base1 (the unedited one-line prompt) made the same four code edits and stopped with no tests and no CHANGES.md. So the CHANGES.md and tests step happened in agg1 and not in base1, which fits the new wording. However, agg1's trajectory also ends before any pytest run. Its CHANGES.md says \"Commands run: `python -m pytest tests` (see results below)\" and there are no results below. The \"run them\" half of the wording did not take effect, and the file contains an unverified claim. This is one rollout against one rollout, and the code edits are essentially identical in both.\nverdict: confounded"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-sonnet/exec/hpb-cc-agg1/swe-h/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "30776af0800c096b"
+    }
+  },
+  "errors": []
+}

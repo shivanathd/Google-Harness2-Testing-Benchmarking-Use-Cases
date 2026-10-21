@@ -1,0 +1,4 @@
+- Fixed KeyError by making region lookup case-insensitive in `rate_for`.
+- Updated `compute_totals` to return all amounts as strings with exactly two decimal places, aligning with the rounding rules in docs/ROUNDING.md.
+- Ensured that the total is correctly calculated by applying tax on the discounted subtotal, and all values are rounded to cents using half-up rounding.
+- Addressed the test failure by formatting all monetary values to have exactly two decimal places.

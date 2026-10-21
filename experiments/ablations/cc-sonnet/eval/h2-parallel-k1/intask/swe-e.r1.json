@@ -1,0 +1,28 @@
+{
+ "cond": "h2-parallel-k1/intask",
+ "task": "swe-e",
+ "rep": 1,
+ "partial": 1.0,
+ "all_pass": true,
+ "checks": {
+  "seconds": true,
+  "all_units_spaced": true,
+  "uppercase": true,
+  "zero": true,
+  "outer_space": true,
+  "empty_raises": true,
+  "unknown_unit_raises": true,
+  "garbage_raises": true,
+  "repeat_unit_raises": true,
+  "order_raises": true
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/ablations/cc-sonnet/runs/hpb-cc-agg1/swe-e/harnesses/agg1",
+ "cost_usd": 0.00486379,
+ "tokens_in": 73048,
+ "tokens_out": 3313,
+ "wall_s": 134.6,
+ "error": "",
+ "infra_error": false,
+ "turns": 5,
+ "tool_calls": null
+}

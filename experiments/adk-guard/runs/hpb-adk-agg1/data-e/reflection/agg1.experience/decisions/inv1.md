@@ -1,0 +1,9 @@
+I fixed the rejection by removing everything instance-specific from `systemprompt.md`. The edit has not been tested on a full rollout. The only check I ran was that `scripts/net_revenue.py` now errors when `--month` is missing.
+
+- **`systemprompt.md`:**
+  - I deleted the "Workspace facts" block, which held the expected result (21 transactions, 18691.64), the duplicate-id count, the sample amounts and the currency list.
+  - In its place is a short method paragraph. It points to `scripts/net_revenue.py --month YYYY-MM`, and says the script handles the messy formats and counts each txn_id once. It tells the agent to check the stderr diagnostics (duplicate and conflict counts, fx direction, output keys) against the raw files, and to fix the parsing rather than rerun an unchanged failing command.
+  - The pandas/`(954.34)` remark is evidence of the failure mode from the one rollout (`base1.md`). The agent's pandas script hit `ModuleNotFoundError`, the pip install timed out, and it then crashed on `float('(954.34)')`. That run ended at the 40-call limit with no `output/answer.json`.
+  - The pandas/`(954.34)` remark names a file value as an example of that failure. If the filter treats that as task data, it can be reduced to "accounting negatives".
+- **`scripts/net_revenue.py`:** I removed the hard-coded default month (2026-09) and made `--month` required. The month now comes from the task each time, so the script holds no time window. The script's usage text now reads `YYYY-MM`.
+- **Unchanged:** `scripts/check_output.py`, `hooks.json`, and the other working rules. The Stop hook is a valid completion guard against the missing-deliverable outcome seen in `base1.md`.

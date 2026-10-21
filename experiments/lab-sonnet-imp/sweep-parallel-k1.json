@@ -1,0 +1,40 @@
+{
+  "domain": "arbitration-international-dispute-resolution",
+  "n_tasks": 4,
+  "seed": null,
+  "done": 4,
+  "failed": 0,
+  "tasks": [
+    {
+      "task": "arbitration-international-dispute-resolution/draft-markup-of-arbitration-agreement",
+      "status": "ok",
+      "library_entries_before": {
+        "agg": 0
+      }
+    },
+    {
+      "task": "arbitration-international-dispute-resolution/draft-markup-of-procedural-order",
+      "status": "ok",
+      "library_entries_before": {
+        "agg": 1
+      }
+    },
+    {
+      "task": "arbitration-international-dispute-resolution/draft-markup-of-proposed-interim-order",
+      "status": "ok",
+      "library_entries_before": {
+        "agg": 2
+      }
+    },
+    {
+      "task": "arbitration-international-dispute-resolution/identify-arbitration-agreement-issues",
+      "status": "ok",
+      "library_entries_before": {
+        "agg": 3
+      }
+    }
+  ],
+  "improver_model": "claude-sonnet-5-5",
+  "improver_usd": 6.045,
+  "improver_calls": 21
+}

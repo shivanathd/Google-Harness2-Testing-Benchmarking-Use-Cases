@@ -1,0 +1,231 @@
+*\[PRIVILEGED & CONFIDENTIAL \-- Whitmore internal review draft. Bracketed notes cite the Whitmore Arbitration Playbook v3.0 (Nov. 15, 2024) and fallback positions. Delete all notes before any circulation to Cascadian or Pinnacle Winterhaven.\]*
+
+**EXHIBIT F TO CO-INVESTMENT AGREEMENT**
+
+**ARBITRATION AGREEMENT**
+
+Dated as of January 15, 2025
+
+This Arbitration Agreement (this \"**Agreement**\") is entered into as of January 15, 2025, by and between the following parties in connection with that certain Co-Investment Agreement dated as of even date herewith (the \"**Co-Investment Agreement**\"). Capitalized terms used but not otherwise defined herein shall have the meanings ascribed to them in the Co-Investment Agreement.
+
+**[RECITALS]{.underline}**
+
+**WHEREAS**, Whitmore Capital Fund III LP, a Delaware limited partnership (\"**Whitmore**\"), an investment vehicle managed by Whitmore Capital Partners LLC, a Delaware limited liability company, with its principal office at 3400 Peachtree Road NE, Suite 1200, Atlanta, GA 30326, and Cascadian Growth Fund LP, a Delaware limited partnership (\"**Cascadian**\"), managed by its general partner, Cascadian Growth Management LLC, a Delaware limited liability company, with its principal office at 1501 Fourth Avenue, Suite 3700, Seattle, WA 98101 (each, a \"**Party**\" and together, the \"**Parties**\"), have entered into that certain Co-Investment Agreement dated as of January 15, 2025 (the \"**Co-Investment Agreement**\");
+
+**WHEREAS**, pursuant to the Co-Investment Agreement, the Parties have agreed to jointly acquire a controlling interest (approximately 72%) of Vantage Specialty Chemicals Inc., a Delaware corporation headquartered at 10200 Bellaire Boulevard, Suite 400, Houston, TX 77072 (the \"**Target**\" or the \"**Company**\"), at a total enterprise value of \$680,000,000, with Whitmore contributing \$195,000,000 in equity for a 48% equity stake and Cascadian contributing \$130,000,000 in equity for a 24% equity stake, for total equity of \$325,000,000, with the remaining \$355,000,000 in debt financing;
+
+**WHEREAS**, the Co-Investment Agreement governs, among other things, governance rights, drag-along and tag-along rights, transfer restrictions, and capital call mechanics relating to the Parties\' investment in the Company; and
+
+**WHEREAS**, the Parties desire to establish the terms and procedures by which disputes arising under or in connection with the Co-Investment Agreement shall be resolved.
+
+**NOW, THEREFORE**, in consideration of the mutual covenants and agreements set forth in the Co-Investment Agreement, and for other good and valuable consideration, the receipt and sufficiency of which are hereby acknowledged, the Parties agree as follows:
+
+**[ARTICLE I --- DEFINITIONS]{.underline}**
+
+As used in this Agreement, the following terms shall have the meanings set forth below:
+
+\"**Agreement**\" means this Arbitration Agreement, as it may be amended from time to time in accordance with its terms.
+
+\"**Arbitral Tribunal**\" or \"**Tribunal**\" means the arbitrator or arbitrators appointed pursuant to Article IV of this Agreement to resolve a Dispute.
+
+\"**Award**\" means any interim, partial, or final award rendered by the Arbitral Tribunal in connection with any Proceedings.
+
+\"**Claimant**\" means the Party initiating a Proceeding by filing a request for arbitration.
+
+\"**Co-Investment Agreement**\" or \"**CIA**\" has the meaning set forth in the Recitals.
+
+\"**Company**\" means Vantage Specialty Chemicals Inc., a Delaware corporation.
+
+\"**Dispute**\" means any dispute, controversy, or claim arising out of, relating to, or in connection with this Agreement or the Co-Investment Agreement, including any question regarding the existence, formation, validity, interpretation, performance, breach, or termination thereof.
+
+\"AAA\" means the American Arbitration Association.
+
+*\[NOTE \-- Classification: Required (Playbook s.2). Tier: Important. ICC is reserved for cross-border deals and may never administer a purely domestic U.S. transaction. All parties, the Target (Houston, TX) and the equity are U.S.-based. Fallback: JAMS Comprehensive Rules if Cascadian objects to AAA.\]*
+
+\"AAA **Rules**\" means the Commercial Arbitration Rules of the AAA in effect at the time of commencement of the arbitration.
+
+*\[NOTE \-- Classification: Preferred (Playbook s.2): AAA Commercial Rules, most current version as of submission. Conforming change.\]*
+
+\"**Party**\" and \"**Parties**\" have the meanings set forth in the Recitals.
+
+\"**Proceedings**\" means any arbitration proceedings commenced pursuant to this Agreement.
+
+\"**Respondent**\" means the Party against whom a request for arbitration is filed.
+
+\"**Seat**\" means Atlanta, Georgia, which shall be the juridical seat of any arbitration conducted under this Agreement.
+
+*\[NOTE \-- Conforming change to Section 3.1.\]*
+
+**[ARTICLE II --- AGREEMENT TO ARBITRATE; SCOPE]{.underline}**
+
+**Section 2.1 --- Agreement to Arbitrate.** Any and all disputes, controversies, or claims arising out of, relating to, or in connection with this Agreement or the Co-Investment Agreement, including but not limited to the formation, validity, interpretation, performance, breach, or termination thereof (each, a \"**Dispute**\"), shall be exclusively and finally resolved by binding arbitration administered by the American Arbitration Association in accordance with the AAA Rules in effect at the time of the filing of the request for arbitration. The Parties acknowledge and agree that this Agreement evidences a transaction involving commerce and that the Federal Arbitration Act, 9 U.S.C. §§ 1\--16, shall govern the interpretation and enforcement of this Agreement.
+
+*\[NOTE \-- Conforming change to Playbook s.2 (Required: AAA). Scope language is unchanged and already meets s.7 (Required: broad scope).\]*
+
+**Section 2.2 --- Exclusive Remedy.** Arbitration under this Agreement shall be the exclusive remedy for any Dispute, and no Party shall institute any action or proceeding in any court with respect to any Dispute, except (a) as provided in Article VI and (b) in any proceeding to confirm, enforce, or vacate an Award.
+
+*\[NOTE \-- Classification: Required (Playbook s.10). Tier: Critical. Express carve-out from the agreement to arbitrate for interim relief (Article VI), plus award enforcement and vacatur (Playbook s.9(ii)).\]*
+
+**Section 2.3 --- Individual Basis.** The Parties agree that any arbitration under this Agreement shall be conducted on an individual basis only. No Party may bring or participate in any class, collective, consolidated, or representative proceeding in arbitration or in any court. The Arbitral Tribunal shall have no authority to preside over any form of class, collective, or representative proceeding.
+
+*\[NOTE \-- Classification: Required, with no fallback (Playbook s.16). Tier: Critical. Required language used substantially verbatim. Absent from the draft. Tension: \"consolidated\" in this clause bars consolidated proceedings outright, while Section 7.1 permits consolidation with unanimous consent. Confirm whether the bar should cover class-type consolidation only.\]*
+
+**[ARTICLE III --- SEAT, LANGUAGE, AND GOVERNING LAW]{.underline}**
+
+**Section 3.1 --- Seat of Arbitration.** The seat (legal place) of arbitration shall be Atlanta, Georgia. Any hearings shall be conducted at the Seat unless otherwise agreed by the Parties or ordered by the Arbitral Tribunal.
+
+*\[NOTE \-- Classification: Required (Playbook s.3). Tier: Important. Seattle is Cascadian\'s home jurisdiction and is categorically NOT ACCEPTABLE. Atlanta is Whitmore\'s home seat. Fallback: New York, New York if Cascadian objects to Atlanta.\]*
+
+**Section 3.2 --- Language.** The language of the arbitration shall be English. All submissions, correspondence, evidence, and hearings shall be conducted in English.
+
+**Section 3.3 --- Governing Law.** This Agreement shall be governed by and construed in accordance with the laws of the State of Delaware, without regard to its conflict of laws principles.
+
+*\[NOTE \-- Classification: Required (Playbook s.6). Tier: Critical. Washington is Cascadian\'s home-state law and is categorically NOT ACCEPTABLE. Fallback: New York law. The Co-Investment Agreement must also be Delaware-governed (s.6). The CIA is not in the data room and has not been reviewed.\]*
+
+**[ARTICLE IV --- ARBITRATOR APPOINTMENT AND QUALIFICATIONS]{.underline}**
+
+**Section 4.1 --- Number of Arbitrators.** Except as provided in Section 5.4, the arbitration shall be conducted by three (3) arbitrators (each, an \"**Arbitrator**\") constituting the Arbitral Tribunal, appointed in accordance with Section 4.2 and the AAA Rules.
+
+*\[NOTE \-- Classification: Required (three-member tribunal for disputes over \$10M; Playbook s.4). Tier: Critical. Per R. Stadler (1/9/25), this is a hard requirement for a \$325M equity transaction. The sole-arbitrator fallback (disputes of \$10M or less) is not offered.\]*
+
+**Section 4.2 --- Appointment Procedure.** Each Party shall appoint one Arbitrator within thirty (30) days following the filing of the request for arbitration. The two party-appointed Arbitrators shall jointly select the presiding Arbitrator (chair) within twenty (20) days following the appointment of the second party-appointed Arbitrator. If the two party-appointed Arbitrators do not agree on the chair within such twenty (20)-day period, the AAA shall appoint the chair from its roster of qualified arbitrators in accordance with the AAA Rules.
+
+*\[NOTE \-- Mechanics classified Preferred in Playbook s.4(a)-(c), but treated as Required per R. Stadler\'s instruction (1/9/25): \"standard selection mechanics required.\" Tier: Critical. Replaces ICC appointment.\]*
+
+**Section 4.3 --- Qualifications.** Each Arbitrator, including any sole arbitrator appointed under Section 5.4, shall (a) have at least fifteen (15) years of professional experience in private equity, mergers and acquisitions, or corporate finance, including as an attorney, investment banker, or financial advisor in those fields, or as an arbitrator in disputes involving those fields; (b) be a member of the AAA\'s National Roster of Arbitrators; and (c) be a neutral individual independent of the Parties, and not have had any professional, financial, or personal relationship with any Party, any affiliate of a Party, or any counsel of record within the five (5) years preceding appointment.
+
+*\[NOTE \-- Classification: Required (Playbook s.5). Tier: Recommended. Fallback: 10 years of experience, only with prior GC approval. Not offered in this markup.\]*
+
+**[ARTICLE V --- ARBITRATION PROCEDURES]{.underline}**
+
+**Section 5.1 --- Discovery.** Discovery shall be conducted in accordance with the AAA Rules, as modified by this Section 5.1. Each Party may take up to three (3) fact depositions, each not to exceed seven (7) hours of testimony on the record; may serve up to fifteen (15) document requests (including subparts); and may retain one (1) testifying expert. Expert reports shall be exchanged simultaneously on a date set by the Arbitral Tribunal. The Arbitral Tribunal shall have the authority to manage discovery within these limits as it deems appropriate in the interests of efficiency and proportionality.
+
+*\[NOTE \-- Classification: Required (Playbook s.8 body). Tier: Recommended in the s.22 summary but Required in the s.8 body. Treated as Required; confirm with GC. Fallback: \"limited and proportional\" language, with the 3-deposition and 1-expert caps as non-negotiable minimums.\]*
+
+**Section 5.2 --- Hearings.** The Arbitral Tribunal shall hold hearings as it deems necessary and appropriate. Hearings shall be held at the Seat unless otherwise agreed by the Parties or directed by the Arbitral Tribunal.
+
+*\[NOTE \-- Conforming change to Sections 5.2 and 5.3 (\"Arbitrator\" replaced with \"Arbitral Tribunal\" for the three-member panel).\]*
+
+**Section 5.3 --- Evidence.** The Arbitral Tribunal shall have the authority to receive and consider such evidence as it deems relevant and material, including documentary evidence, witness testimony, and expert reports. The Arbitral Tribunal shall determine the admissibility, relevance, materiality, and weight of any evidence offered.
+
+**Section 5.4 --- Expedited Procedures for Capital Call, Drag-Along, and Buy-Sell Disputes.** Notwithstanding Sections 4.1, 4.2, 5.1, and 8.1, any Dispute concerning (a) the timing, amount, validity, or enforceability of a capital call; (b) the exercise, conditions, pricing, or procedural requirements of a drag-along right; or (c) the triggering, valuation, mechanics, or timing of a buy-sell (shotgun) provision (each, an \"Expedited Dispute\") shall be resolved as follows: (i) the Arbitral Tribunal shall consist of a sole arbitrator meeting the requirements of Section 4.3, agreed by the Parties or, failing agreement, appointed by the AAA, in each case within ten (10) business days after the filing of the request for arbitration; (ii) the hearing shall be conducted within thirty (30) days after the appointment of the sole arbitrator; (iii) discovery shall be limited to document production, with no depositions and no more than five (5) document requests per Party; and (iv) the Arbitral Tribunal shall render its final Award within forty-five (45) days after the filing of the request for arbitration.
+
+*\[NOTE \-- Classification: Required (Playbook s.17). Tier: Critical per R. Stadler (1/9/25); the s.22 summary lists this as Recommended. Fallback: award deadline up to 60 days, but no longer. INTERNAL TENSION: the 30-day hearing window cannot be reconciled with a 45-day award. Appointment at day 14 (10 business days) puts the hearing at day 44, leaving about one day for a reasoned award that includes findings of fact and conclusions of law. Before sending, either shorten the hearing window (e.g., to about 14 days after appointment) or accept the 60-day fallback. See cover memo.\]*
+
+**Section 5.5 --- Confidentiality.** The Parties shall keep strictly confidential (a) the existence of any Proceedings; (b) all submissions, briefs, motions, and pleadings filed in the Proceedings; (c) all evidence, testimony, exhibits, and documents produced or presented in the Proceedings; (d) all orders, rulings, and Awards issued by the Arbitral Tribunal; and (e) all communications between the Parties and the Arbitral Tribunal. This obligation does not apply to disclosures (i) required by applicable law, regulation, or order of a court of competent jurisdiction, including SEC reporting obligations, tax reporting, and regulatory inquiries; (ii) necessary for the enforcement, confirmation, or vacatur of an Award in a court of competent jurisdiction; or (iii) to attorneys, accountants, and financial advisors subject to professional duties of confidentiality, provided such advisors agree to be bound by this Section 5.5. A breach or threatened breach of this Section 5.5 may cause irreparable harm, and the non-breaching Party may seek injunctive relief, including emergency relief, in accordance with Article VI.
+
+*\[NOTE \-- Classification: Required (Playbook s.9). Tier: Important. Absent from the draft; the playbook does not permit its absence. Exceptions are limited to those in s.9. Injunctive relief for breach is included (Preferred). Liquidated damages are not included.\]*
+
+**[ARTICLE VI --- INTERIM AND EMERGENCY RELIEF]{.underline}**
+
+*\[NOTE \-- Classification: Required; waiver of court interim relief is NOT ACCEPTABLE (Playbook s.10). Tier: Critical. Deleted in full, with the carve-out in Section 6.2 substituted. R. Stadler (1/9/25) identifies this as non-negotiable. Any counter-proposal restricting court relief goes to the GC immediately.\]*
+
+**Section 6.2 --- Court Interim Relief Preserved.** Notwithstanding Sections 2.1 and 2.2, any Party may at any time before, during, or after the arbitration seek provisional, interim, conservatory, or injunctive measures, including temporary restraining orders, preliminary injunctions, attachments, and asset-freezing orders, from any court of competent jurisdiction. Seeking such relief shall not constitute a waiver of the right to arbitrate, is not inconsistent with this Agreement, and shall not be deemed a submission to the jurisdiction of such court for any purpose other than the relief sought.
+
+*\[NOTE \-- Classification: Required (Playbook s.10), with the Preferred anti-waiver statement included. Tier: Critical. Preserves court relief for the scenarios R. Stadler identified: breach of exclusivity, unauthorized transfers, and confidentiality violations.\]*
+
+**Section 6.3 --- Emergency Arbitrator.** Before the Arbitral Tribunal is constituted, any Party may apply for emergency measures of protection under the AAA Optional Rules for Emergency Measures of Protection in effect at the time of the application. An emergency arbitrator order does not substitute for relief from a court under Section 6.2, and a Party may seek relief from a court under Section 6.2 whether or not an emergency arbitrator application has been made.
+
+*\[NOTE \-- Classification: Required (Playbook s.10): incorporate the administering institution\'s emergency arbitrator provisions. Tier: Critical. Supplements court relief and does not replace it.\]*
+
+**[ARTICLE VII --- CONSOLIDATION AND JOINDER]{.underline}**
+
+**Section 7.1 --- Consolidation.** No arbitration under this Agreement shall be consolidated with any other arbitration, whether arising out of or in connection with the Co-Investment Agreement, any other agreement between the Parties, or involving a party to this Agreement, except with the prior written consent of all Parties to all proceedings proposed to be consolidated. The Arbitral Tribunal shall have no authority to order consolidation absent such consent, and no Party may compel consolidation over the objection of another Party.
+
+*\[NOTE \-- Classification: Required (Playbook s.11). Tier: Important. The tribunal\'s discretionary consolidation power is removed. Fallback: consent of all claimants and respondents across all proceedings, plus approval by the tribunal(s).\]*
+
+**Section 7.2 --- Joinder of Third Parties.** No third party may be joined to any arbitration under this Agreement except with the prior written consent of all existing Parties to the arbitration and the written consent of the third party to be joined. Any joined third party shall agree in writing to be bound by this Agreement and by all procedural orders previously issued by the Arbitral Tribunal.
+
+*\[NOTE \-- Classification: Required (Playbook s.12). Tier: Important. Joinder at the tribunal\'s discretion is NOT ACCEPTABLE. No fallback: unanimous consent is non-negotiable.\]*
+
+**[ARTICLE VIII --- AWARD]{.underline}**
+
+**Section 8.1 --- Timing and Form of Award.** Except as provided in Section 5.4, the Arbitral Tribunal shall render its final Award within ninety (90) days of the close of Proceedings, which shall be the date on which the last post-hearing submission is filed or the hearing transcript is received by the Arbitral Tribunal, whichever is later. The Award shall be in writing and shall set forth detailed findings of fact and conclusions of law. Failure to render the Award within such period shall not affect the validity of the Award or the jurisdiction of the Arbitral Tribunal.
+
+*\[NOTE \-- Classification: Required (Playbook s.18: 90 days; findings of fact and conclusions of law). Tier: Recommended. The draft\'s 120-day period is the playbook fallback and is not offered. Fallback: up to 120 days, but findings of fact and conclusions of law are non-negotiable.\]*
+
+**Section 8.2 --- Finality.** Subject to Section 8.4, the Award of the Arbitral Tribunal shall be final and binding upon the Parties and shall not be subject to appeal, except as otherwise provided by applicable law. Judgment upon the Award may be entered in any court of competent jurisdiction. The Parties hereby waive, to the fullest extent permitted by law, any right to appeal or challenge the Award, except on the limited grounds set forth in the Federal Arbitration Act or as provided in Section 8.4.
+
+*\[NOTE \-- Conforming change to Section 8.4 (appellate arbitration).\]*
+
+**Section 8.3 --- Remedies.** The Arbitral Tribunal shall have the authority to award any remedy or relief that a court of competent jurisdiction could grant, including but not limited to specific performance, injunctive relief, and monetary damages, subject to Section 8.5.
+
+*\[NOTE \-- Conforming change. The deleted sentence (no limit on types or amounts of damages) conflicts with the damages waiver in Section 8.5 (Playbook s.13).\]*
+
+**Section 8.4 --- Optional Appellate Arbitration.** For any Award (or series of Awards in a single Proceeding) that exceeds \$25,000,000 in aggregate monetary relief, including damages, interest, fees, and costs, either Party may elect to appeal under the AAA Optional Appellate Arbitration Rules by filing a notice of appeal within thirty (30) days after issuance of the Award. The appellate panel shall consist of three (3) arbitrators drawn from the AAA\'s appellate roster, and the standard of review shall be as set forth in such rules. The Award shall not become final and enforceable until the appeal period has expired without a notice of appeal having been filed, or until the appellate panel has issued its decision.
+
+*\[NOTE \-- Classification: Required for awards over \$25M (Playbook s.19). Tier: Important. This transaction (\$325M equity) is above the threshold. Fallback: appellate arbitration by post-award mutual written consent, if Cascadian objects to mandatory appeal.\]*
+
+**Section 8.5 --- Damages Limitations.** To the fullest extent permitted by law, each Party waives any right to recover from the other Party punitive, exemplary, or consequential damages, including lost profits, lost opportunities, diminution in value of other investments, and reputational harm, arising out of or relating to any Dispute, whether under contract, tort, equity, or otherwise. This waiver shall not apply in cases of fraud or willful misconduct, in which case the Arbitral Tribunal may award any damages available under applicable law.
+
+*\[NOTE \-- Classification: Required (Playbook s.13), with the fraud/willful misconduct carve-out required. Tier: Important. Mutual, applies regardless of legal theory (Preferred). Fallback: punitive and exemplary waiver only, with the carve-out preserved. Escalate to GC before accepting a narrower waiver.\]*
+
+**[ARTICLE IX --- COSTS AND FEES]{.underline}**
+
+**Section 9.1 --- Allocation of Costs.** The substantially prevailing Party shall be entitled to recover from the non-prevailing Party its reasonable attorneys\' fees, expert witness fees, arbitrator fees, administrative fees, and other costs of the arbitration, as determined by the Arbitral Tribunal in the Award.
+
+*\[NOTE \-- Classification: Required (Playbook s.14). Tier: Important. Draft\'s \"each Party bears its own costs regardless of outcome\" is NOT ACCEPTABLE. Preferred: tribunal determines the substantially prevailing party and reasonableness. Fallback: tribunal discretion to allocate by relative success (GC escalation before accepting).\]*
+
+**Section 9.2 --- Administrative Costs.** The administrative fees and expenses of the AAA and the fees and expenses of the Arbitral Tribunal shall be advanced equally by the Parties, subject to reallocation in the Award in accordance with Section 9.1.
+
+*\[NOTE \-- Conforming change to Section 9.1; ICC reference replaced with AAA.\]*
+
+**[ARTICLE X --- LIMITATIONS PERIOD]{.underline}**
+
+**Section 10.1 --- Statute of Limitations.** Nothing in this Agreement shortens or otherwise modifies the statute of limitations applicable to any claim subject to arbitration under this Agreement, which shall be the period provided under the governing law set forth in Section 3.3.
+
+*\[NOTE \-- Classification: Required (Playbook s.15). Tier: Critical. The one-year limitations period is NOT ACCEPTABLE. It is shorter than the 3-year Delaware statutory period (10 Del. C. s.8106) and could expire before quarterly and annual reporting reveals a breach. Replaced with tracking language (Preferred: silent). Fallback: a contractual period no shorter than the longer of the statutory period and 3 years.\]*
+
+**[ARTICLE XI --- DOCUMENT RETENTION]{.underline}**
+
+**Section 11.1 ---** **Document** Retention**.** The Parties shall not destroy, and shall retain for a minimum of seven (7) years following the issuance of the final Award (or, if applicable, the final appellate award under Section 8.4), all documents, materials, evidence, submissions, transcripts, orders, Awards, and other records produced, created, or exchanged during the arbitration. This obligation shall survive the termination of this Agreement and shall be binding upon each Party\'s officers, directors, employees, agents, and representatives.
+
+*\[NOTE \-- Classification: Required; destruction clauses are NOT ACCEPTABLE at any time period (Playbook s.20). Tier: Important. The destruction and certification obligation is deleted and replaced with a 7-year retention requirement. Fallback: return (not destruction) of produced documents to the producing Party, with all other materials retained for 7 years.\]*
+
+**[ARTICLE XII --- GENERAL PROVISIONS]{.underline}**
+
+**Section 12.1 --- Notices.** All notices, requests, demands, and other communications under this Agreement shall be delivered in the manner provided in Section 11.4 of the Co-Investment Agreement to the Parties at the addresses set forth therein or such other address as a Party may designate in writing from time to time in accordance with the provisions of the Co-Investment Agreement.
+
+*\[NOTE \-- No change proposed. Cross-reference to CIA Section 11.4 is not verified: the CIA is not in the data room.\]*
+
+**Section 12.2 --- Entire Agreement.** This Agreement constitutes the entire agreement between the Parties with respect to the subject matter hereof and supersedes all prior negotiations, representations, warranties, commitments, offers, and agreements (whether oral or written) with respect to the subject matter hereof.
+
+**Section 12.3 --- Amendment and Waiver.** This Agreement may not be amended, modified, or supplemented except by a written instrument signed by both Parties. No waiver of any provision of this Agreement shall be effective unless in writing signed by the waiving Party. No failure or delay by any Party in exercising any right, power, or privilege hereunder shall operate as a waiver thereof, nor shall any single or partial exercise thereof preclude any other or further exercise thereof or the exercise of any other right, power, or privilege.
+
+**Section 12.4 --- Severability.** If any provision of this Agreement is held to be invalid, illegal, or unenforceable in any respect, such invalidity, illegality, or unenforceability shall not affect any other provision of this Agreement, and this Agreement shall be construed as if such invalid, illegal, or unenforceable provision had never been contained herein. The Parties shall negotiate in good faith to replace any such invalid, illegal, or unenforceable provision with a valid, legal, and enforceable provision that, to the greatest extent possible, achieves the original intent and economic effect of the invalid provision.
+
+**Section 12.5 --- Counterparts.** This Agreement may be executed in counterparts, each of which shall be deemed an original, and all of which together shall constitute one and the same instrument. Execution and delivery of this Agreement by facsimile or electronic transmission (including in .pdf format) shall be deemed to be, and shall have the same legal effect as, execution and delivery of an original.
+
+**Section 12.6 --- Relationship to Co-Investment Agreement.** This Agreement is Exhibit F to and is incorporated into the Co-Investment Agreement. In the event of a conflict between the terms of this Agreement and the arbitration-related provisions of the Co-Investment Agreement, the terms of this Agreement shall control.
+
+*\[NOTE \-- The Co-Investment Agreement (not in the data room) must also be Delaware-governed and must not conflict with the arbitration provisions above (Playbook s.6). Confirm against the CIA before circulation.\]*
+
+**Section 12.7 --- Survival.** This Agreement shall survive the termination or expiration of the Co-Investment Agreement with respect to any Dispute arising prior to or upon such termination or expiration.
+
+*\[Signature Page Follows\]*
+
+**IN WITNESS WHEREOF**, the Parties have executed this Arbitration Agreement as of the date first written above.
+
+**WHITMORE CAPITAL FUND III LP**
+
+By: Whitmore Capital Partners LLC, its General Partner
+
+By: **\_\_\_\_\_\_\_\_**
+
+Name: **\_\_\_\_\_\_\_\_**
+
+Title: **\_\_\_\_\_\_\_\_**
+
+Date: **\_\_\_\_\_\_\_\_**
+
+**CASCADIAN GROWTH FUND LP**
+
+By: Cascadian Growth Management LLC, its General Partner
+
+By: **\_\_\_\_\_\_\_\_**
+
+Name: **\_\_\_\_\_\_\_\_**
+
+Title: **\_\_\_\_\_\_\_\_**
+
+Date: **\_\_\_\_\_\_\_\_**

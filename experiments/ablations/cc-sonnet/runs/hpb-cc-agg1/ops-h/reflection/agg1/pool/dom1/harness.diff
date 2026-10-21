@@ -1,0 +1,209 @@
+--- current/hooks.json
++++ dom1/hooks.json
+@@ -1 +0,0 @@
+-{"hooks": {"Stop": [{"hooks": [{"type": "command", "command": "python3 scripts/check_output.py"}]}]}}
+--- current/scripts/check_output.py
++++ dom1/scripts/check_output.py
+@@ -1,18 +0,0 @@
+-#!/usr/bin/env python3
+-"""Stop hook: refuse to finish until output/ holds a non-empty, parseable deliverable."""
+-import json, os, sys
+-d = 'output'
+-files = [f for f in os.listdir(d) if not f.startswith('.')] if os.path.isdir(d) else []
+-if not files:
+-    print('output/ has no deliverable yet. Write the requested file now (e.g. python3 -I scripts/traffic_report.py logs START END --write output/answer.json), then reopen it to check.', file=sys.stderr)
+-    sys.exit(2)
+-for f in files:
+-    p = os.path.join(d, f)
+-    if os.path.getsize(p) == 0:
+-        print(f'{p} is empty; rewrite it.', file=sys.stderr); sys.exit(2)
+-    if f.endswith('.json'):
+-        try:
+-            json.load(open(p))
+-        except Exception as e:
+-            print(f'{p} is not valid JSON ({e}); fix it.', file=sys.stderr); sys.exit(2)
+-sys.exit(0)
+--- current/scripts/traffic_report.py
++++ dom1/scripts/traffic_report.py
+@@ -1,69 +0,0 @@
+-#!/usr/bin/env python3
+-"""Per-service traffic stats from JSON-lines access logs (plain or .gz).
+-
+-usage: python3 -I scripts/traffic_report.py LOGDIR START END [--write output/answer.json]
+-  START inclusive, END exclusive, ISO text, naive = UTC (e.g. 2026-10-04T06:00).
+-One service per file: logs/<service>.jsonl or <service>.jsonl.gz.
+-Per line: skip blank / invalid-JSON (truncated) / non-object lines; parse ts and
+-convert any UTC offset to UTC; apply the half-open window; drop route /healthz;
+-requests = remaining rows; errors = status >= 500; latency = latency_ms, or
+-latency_s * 1000 when only latency_s is present (decided per row, by key).
+-p95_ms = nearest rank: sorted[ceil(0.95*n)-1], as an integer.
+-Prints counts, skipped-line tallies and anomalies per service. --write emits
+-{service: {"requests","error_rate"(4dp),"p95_ms"}} and exits 1 without writing
+-if any service has zero rows or a row has no usable latency/status/ts.
+-"""
+-import argparse, glob, gzip, json, math, os, sys
+-from datetime import datetime, timezone
+-
+-def utc(s):
+-    d = datetime.fromisoformat(str(s).replace('Z', '+00:00'))
+-    return d.replace(tzinfo=timezone.utc) if d.tzinfo is None else d.astimezone(timezone.utc)
+-
+-ap = argparse.ArgumentParser()
+-ap.add_argument('logdir'); ap.add_argument('start'); ap.add_argument('end'); ap.add_argument('--write')
+-a = ap.parse_args()
+-start, end = utc(a.start), utc(a.end)
+-out, problems = {}, []
+-for p in sorted(glob.glob(os.path.join(a.logdir, '*.jsonl*'))):
+-    svc = os.path.basename(p).split('.jsonl')[0]
+-    op = gzip.open if p.endswith('.gz') else open
+-    n_bad = n_health = n_out = n_anom = n_s = 0
+-    lats, errs = [], 0
+-    with op(p, 'rt', encoding='utf-8', errors='replace') as f:
+-        for line in f:
+-            if not line.strip():
+-                continue
+-            try:
+-                r = json.loads(line)
+-            except ValueError:
+-                n_bad += 1; continue
+-            try:
+-                if not isinstance(r, dict):
+-                    raise ValueError
+-                t = utc(r['ts']); status = int(r['status']); route = r['route']
+-                if 'latency_ms' in r:
+-                    lat = float(r['latency_ms'])
+-                else:
+-                    lat = round(float(r['latency_s']) * 1000, 6); n_s += 1
+-            except (KeyError, ValueError, TypeError):
+-                n_anom += 1; continue
+-            if not (start <= t < end):
+-                n_out += 1; continue
+-            if route == '/healthz':
+-                n_health += 1; continue
+-            lats.append(lat); errs += status >= 500
+-    n = len(lats)
+-    print(f'{svc}: file={os.path.basename(p)} in_window_requests={n} errors={errs} truncated_skipped={n_bad} '
+-          f'healthz_excluded={n_health} out_of_window={n_out} latency_s_rows_converted={n_s} unusable_rows={n_anom}')
+-    if not n or n_anom:
+-        problems.append(svc); continue
+-    s = sorted(lats); v = s[math.ceil(0.95 * n) - 1]
+-    out[svc] = {'requests': n, 'error_rate': round(errs / n, 4), 'p95_ms': int(round(v))}
+-print(json.dumps(out, indent=1))
+-if a.write:
+-    if problems:
+-        print('NOT WRITTEN: zero rows or unusable rows in', problems, file=sys.stderr); sys.exit(1)
+-    os.makedirs(os.path.dirname(a.write) or '.', exist_ok=True)
+-    json.dump(out, open(a.write, 'w'))
+-    print('wrote', a.write, open(a.write).read())
+--- current/skills/traffic-report/SKILL.md
++++ dom1/skills/traffic-report/SKILL.md
+@@ -0,0 +1,25 @@
++---
++name: traffic-report
++description: Per-service traffic report (requests, error_rate, p95 latency) from multi-timezone JSONL access logs for a UTC window, following a runbook. Use for any request-count / error-rate / percentile task over service logs.
++---
++
++# Traffic report from access logs
++
++ANALYTIC MOVE: calculate per-service requests, error_rate and p95 over a UTC window from raw log lines. The RUNBOOK.md in the workspace controls the definitions; re-read it first, because exclusions, error threshold and schema changes are set there, not by convention.
++
++## Counting rules (check each against RUNBOOK.md)
++1. Parse: skip lines that are not valid JSON objects (shipper truncation). Do not repair them, and do not count them toward requests. Report the skipped count per service.
++2. Window: convert every `ts` to UTC using its own offset (offsets can be mixed within one file) BEFORE comparing. START inclusive, END exclusive. File order is not time order; never slice by line position or by the local hour text.
++3. Exclude the probe route (the route the runbook names, typically `/healthz`) from requests, errors AND latency, after window filtering.
++4. Errors: status >= 500 only. 4xx (404, 429) are not errors but remain in the requests denominator.
++5. Latency unit: take `latency_ms` as-is; where only `latency_s` exists multiply by 1000. Decide per record by which key it has, not by service or file position. Then confirm the cut-over: cross-tab in-window records by UTC hour and key, and check the switch falls where the runbook says (UTC time, not local hour text). Confirm gzip-compressed log files were read too.
++6. p95 nearest-rank: sort ascending, take element number ceil(0.95*n) (1-based). No interpolation. Round to integer only at the end (round, not truncate, after the x1000 float conversion).
++7. error_rate = errors / requests, rounded to 4 decimals, as a number.
++
++## Helper
++`python3 -I skills/traffic-report/scripts/traffic_stats.py LOGDIR START END` prints the audit line per service (START/END are ISO text, naive = UTC, copied from the runbook/task); add `--write output/answer.json` to emit {service: {requests, error_rate, p95_ms}}. The output keys and order must match the task's wording exactly; if the task names different keys or services, write the file yourself from the printed numbers.
++
++## Before finishing
++- output file exists, parses, has exactly the services and the three keys asked for, requests/p95_ms are ints, error_rate is a float with <= 4 decimals.
++- requests + healthz + invalid-JSON + out-of-window lines account for each file's line count (no silent drops).
++- Final reply states the skipped-line counts and the unit conversion applied.
+--- current/skills/traffic-report/scripts/traffic_stats.py
++++ dom1/skills/traffic-report/scripts/traffic_stats.py
+@@ -0,0 +1,70 @@
++#!/usr/bin/env python3
++"""Per-service traffic stats (requests, error_rate, p95_ms) from JSONL access logs.
++
++usage: python3 -I traffic_stats.py LOGDIR START END [--write output/answer.json]
++  START inclusive, END exclusive, ISO text, naive = UTC (e.g. 2026-10-04T06:00).
++Reads LOGDIR/<service>.jsonl and LOGDIR/<service>.jsonl.gz. Skips lines that are not
++valid JSON objects, excludes /healthz, converts every ts offset to UTC, counts
++status >= 500 as errors, takes latency_ms as-is or latency_s * 1000, and uses
++nearest-rank p95 (ceil(0.95*n)-th smallest) rounded to an integer.
++Prints an audit table per service; --write emits {service: {requests, error_rate, p95_ms}}.
++Exits 1 and writes nothing if any in-window record has no usable latency/status/ts.
++"""
++import argparse, glob, gzip, json, math, os, sys
++from datetime import datetime, timezone
++
++def utc(s):
++    d = datetime.fromisoformat(s.replace('Z', '+00:00'))
++    return d.replace(tzinfo=timezone.utc) if d.tzinfo is None else d.astimezone(timezone.utc)
++
++ap = argparse.ArgumentParser()
++ap.add_argument('logdir'); ap.add_argument('start'); ap.add_argument('end'); ap.add_argument('--write')
++a = ap.parse_args()
++start, end = utc(a.start), utc(a.end)
++files = sorted(glob.glob(os.path.join(a.logdir, '*.jsonl')) + glob.glob(os.path.join(a.logdir, '*.jsonl.gz')))
++out, problems = {}, 0
++for f in files:
++    svc = os.path.basename(f).split('.jsonl')[0]
++    op = gzip.open if f.endswith('.gz') else open
++    n_bad = n_out = n_hz = n_prob = 0
++    keys, lat, errs = {}, [], 0
++    with op(f, 'rt', encoding='utf-8', errors='replace') as fh:
++        for line in fh:
++            if not line.strip():
++                continue
++            try:
++                r = json.loads(line)
++                assert isinstance(r, dict)
++            except Exception:
++                n_bad += 1; continue
++            try:
++                ts = utc(r['ts'])
++            except Exception:
++                n_prob += 1; continue
++            if not (start <= ts < end):
++                n_out += 1; continue
++            if r.get('route') == '/healthz':
++                n_hz += 1; continue
++            try:
++                st = int(r['status'])
++                if 'latency_ms' in r:
++                    v = float(r['latency_ms']); k = 'latency_ms'
++                else:
++                    v = float(r['latency_s']) * 1000; k = 'latency_s'
++            except Exception:
++                n_prob += 1; continue
++            keys[k] = keys.get(k, 0) + 1
++            errs += st >= 500
++            lat.append(v)
++    problems += n_prob
++    lat.sort(); n = len(lat)
++    p95 = int(round(lat[math.ceil(0.95 * n) - 1])) if n else None
++    rate = round(errs / n, 4) if n else None
++    out[svc] = {'requests': n, 'error_rate': rate, 'p95_ms': p95}
++    print(f'{svc}: requests={n} errors={errs} error_rate={rate} p95_ms={p95} | skipped invalid-JSON={n_bad} '
++          f'out-of-window={n_out} healthz-in-window={n_hz} unusable={n_prob} latency-keys={keys}')
++if problems:
++    print('NOT WRITTEN: in-window records with missing/odd ts, status or latency', file=sys.stderr); sys.exit(1)
++if a.write:
++    json.dump(out, open(a.write, 'w'))
++    print('wrote', a.write, open(a.write).read())
+--- current/systemprompt.md
++++ dom1/systemprompt.md
+@@ -1,7 +1,3 @@
+ You are an assistant that completes tasks inside a workspace directory. Read the task, do the work, and write the requested deliverables under output/.
+ 
+-Procedure for log-analysis tasks (incident and traffic statistics):
+-- Read RUNBOOK.md first; its rules (excluded probe routes, what counts as an error, schema changes) override your defaults. Compute with a script, not by eye.
+-- For per-service traffic stats over JSON-lines access logs (logs/<service>.jsonl, .gz allowed), run `python3 -I scripts/traffic_report.py logs START END` (START inclusive, END exclusive, UTC, e.g. 2026-10-04T06:00). It skips truncated lines, converts mixed UTC offsets to UTC, drops /healthz, treats status >= 500 as errors, converts latency_s to ms per row, and prints requests, error_rate and nearest-rank p95_ms per service plus skipped-line tallies. If the task's keys or rules differ, adapt the script rather than starting over.
+-- Check the logs against RUNBOOK.md before trusting defaults: timestamps may carry mixed UTC offsets (apply the window after converting to UTC), and a schema change may switch a latency key or unit partway through (e.g. billing latency_s from 09:00 UTC, earlier rows latency_ms). Apply every RUNBOOK rule and exclude nothing else.
+-- Write the deliverable as soon as the numbers are computed: add `--write output/answer.json` to the same command, then reopen the file and confirm it parses and has exactly the requested keys and types. Computing and printing without writing is not finishing; a run that ended on a printout with output/ empty is the known failure here. Do not spend further turns on side investigations once the numbers are cross-checked once.
++When the task asks for request counts, error rates or latency percentiles from service access logs (or follows a RUNBOOK.md for log analysis), load the `traffic-report` skill first. Computing without writing output/ is not finishing: write the file, reopen it, confirm its keys and types.

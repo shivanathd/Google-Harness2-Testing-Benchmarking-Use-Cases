@@ -1,0 +1,107 @@
+**PRIVILEGED & CONFIDENTIAL --- ATTORNEY-CLIENT COMMUNICATION / ATTORNEY WORK PRODUCT**
+
+**DRAFT FOR D. OSTRANDER REVIEW**
+
+# MEMORANDUM
+
+  ------------------------------ ----------------------------------------------------------------------------------------------------------------------------------------
+  **To:**                        Rebecca Stadler, General Counsel, Whitmore Capital Partners LLC
+
+  **From:**                      Hargrove, Wynn & Calloway LLP (Vantage deal team)
+
+  **Date:**                      January \[●\], 2025
+
+  **Re:**                        Vantage Specialty Chemicals / Cascadian co-investment: markup of proposed Arbitration Agreement (Exhibit F to Co-Investment Agreement)
+  ------------------------------ ----------------------------------------------------------------------------------------------------------------------------------------
+
+## 1. Summary
+
+Pinnacle Winterhaven's January 8 draft departs from the Whitmore Arbitration Playbook (v3.0, Nov. 15, 2024) on 18 of the playbook's 20 topics. Only scope (§7) and English language (§21) are acceptable as drafted. The redline (`redlined-arbitration-agreement.docx`) makes every change as a tracked revision, with bracketed notes that cite the playbook section and classify each position as Required, Preferred, or Fallback.
+
+Your three priorities are addressed as follows:
+
+1.  **Three-member panel** (§4): sole arbitrator replaced; party-appointed arbitrators select the chair; AAA backstop.
+2.  **Court interim relief** (§6): waiver deleted; carve-out and emergency arbitrator provisions added.
+3.  **Expedited track** (§5.5): capital call, drag-along, and buy-sell disputes; sole arbitrator; 45-day award.
+
+The internal notes in the redline reveal fallback positions. **The redline must not go to Pinnacle Winterhaven in this form** (see Section 4, item 1).
+
+## 2. Changes by Priority
+
+**Critical (non-negotiable, Playbook §22)**
+
+  -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  \#         Issue                  Cascadian draft                            Markup                                                                                              Playbook        Fallback
+  ---------- ---------------------- ------------------------------------------ --------------------------------------------------------------------------------------------------- --------------- ----------------------------------------------------
+  1          Court interim relief   §6.1 waives all court provisional relief   Waiver deleted; carve-out in §6.1; emergency arbitrator in §6.2                                     §10, Required   None
+
+  2          Tribunal composition   Sole arbitrator (§4.1)                     Three arbitrators; party appointments; chair selected by co-arbitrators, AAA backstop (§4.1--4.2)   §4, Required    Sole arbitrator only for disputes of \$10M or less
+
+  3          Governing law          Washington (§3.3)                          Delaware (§3.3)                                                                                     §6, Required    New York law
+
+  4          Limitations period     One year, discovery-based (§10.1)          Shortening deleted; statutory period applies (§10.1)                                                §15, Required   Longer of statutory period or three years
+
+  5          Class waiver           None                                       Individual-proceedings clause added (§7.3)                                                          §16, Required   None
+  -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**Important (strongly preferred, Playbook §22)**
+
+  -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  \#         Issue                       Cascadian draft                      Markup                                                                                                                Playbook                                     Fallback
+  ---------- --------------------------- ------------------------------------ --------------------------------------------------------------------------------------------------------------------- -------------------------------------------- --------------------------------------------------------------------------------
+  6          Administering institution   ICC (§§1, 2.1, 4.2, 9.2)             AAA Commercial Rules                                                                                                  §2, Required (ICC not acceptable)            JAMS
+
+  7          Seat                        Seattle (§3.1)                       Atlanta (§3.1)                                                                                                        §3, Required (Seattle not acceptable)        New York, NY
+
+  8          Confidentiality             None                                 Added (§5.4) with the required categories and exceptions                                                              §9, Required                                 Award and financial/proprietary information only
+
+  9          Damages                     None; tribunal unrestricted (§8.3)   Mutual waiver of punitive, exemplary, and consequential damages, with fraud and willful-misconduct carve-out (§8.4)   §13, Required                                Punitive and exemplary waiver only
+
+  10         Fee-shifting                Each party bears own costs (§9.1)    Prevailing-party recovery (§9.1)                                                                                      §14, Required (own-costs not acceptable)     Tribunal discretion on relative success
+
+  11         Joinder and consolidation   Tribunal discretion (§§7.1--7.2)     Unanimous consent of parties; third-party consent for joinder (§§7.1--7.2)                                            §§11--12, Required                           Consolidation with tribunal approval (consolidation only; no joinder fallback)
+
+  12         Document retention          Destruction within 30 days (§11.1)   Seven-year retention; destruction deleted (§11.1)                                                                     §20, Required (destruction not acceptable)   Return of produced documents; seven-year retention of all else
+
+  13         Appellate review            Award final, no appeal (§8.2)        Optional appellate arbitration for awards over \$25M (§8.5)                                                           §19, Required                                Appeal by post-award mutual consent
+  -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**Recommended (Playbook §22)**
+
+  -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  \#         Issue                       Cascadian draft                                  Markup                                                                                            Playbook                                         Fallback
+  ---------- --------------------------- ------------------------------------------------ ------------------------------------------------------------------------------------------------- ------------------------------------------------ ----------------------------------------------------------------------------------
+  14         Arbitrator qualifications   "Neutral and independent" only (§4.3)            15 years PE/M&A; AAA roster; five-year conflict lookback (§4.3)                                   §5, Required text (listed in Recommended tier)   10 years, with prior GC approval
+
+  15         Discovery                   ICC Rules without modification (§5.1)            Three depositions (7 hours each); 15 document requests; one expert, simultaneous reports (§5.1)   §8, Required                                     "Limited and proportional" standard, but the 3-deposition and 1-expert caps stay
+
+  16         Award timing and content    "Best efforts" 120 days; reasoned award (§8.1)   90 days; findings of fact and conclusions of law (§8.1)                                           §18, Required                                    120 days, but findings and conclusions are non-negotiable
+
+  17         Expedited track             None                                             Capital call, drag-along, and buy-sell disputes (§5.5)                                            §17, Required                                    60-day award
+  -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**Compliant (retained):** scope (§2.1, §7) and English language (§3.2, §21). Recitals figures reconcile: \$195M + \$130M = \$325M equity; \$325M + \$355M = \$680M enterprise value; 48% + 24% = 72%.
+
+## 3. Points Where the Playbook Needs Clarification
+
+1.  **Expedited sub-deadlines conflict (§17).** A 10-business-day appointment followed by a hearing up to 30 days after appointment can place the hearing about day 44, leaving about one day before the 45-day award. The draft keeps the playbook terms and brackets an outside hearing date in §5.5(b). Recommend setting that date (for example, before day 30 after filing) so the 45-day award is achievable. The 60-day fallback would also fix the timing but is a concession. Please choose.
+2.  **Confidentiality exceptions vs. LP reporting (§9 vs. §20).** Section 9 allows only three exceptions and omits LP reporting. Section 20 cites LP reporting as a reason to keep arbitration records. Cascadian may ask for an LP-reporting exception, so please decide whether Whitmore wants to request one.
+3.  **Class waiver vs. consolidation (§16 vs. §11).** The playbook's required waiver language bars "consolidated" proceedings, which conflicts with consensual consolidation. The draft adds a last sentence in §7.3 preserving consented consolidation. Please confirm.
+4.  **Qualification tier (§5 vs. §22).** Section 5 says "Required," but §22 lists qualifications under "Recommended." We treated them as Required.
+
+## 4. Open Items Before Sending
+
+1.  **Remove the internal notes.** The redline cites the playbook, labels positions, and discloses fallbacks. Sending it to Pinnacle Winterhaven would disclose Whitmore's negotiating room and privileged material. We have not prepared an external version; we recommend one, with all bracketed WHITMORE NOTES and the banner removed, after your review.
+2.  **Approved language (playbook §23).** The playbook directs use of the GC's approved forms for confidentiality, damages, class waiver, expedited procedures, and appellate arbitration. Those forms are not in the deal file. The inserted provisions are drafted from the playbook text and should be compared against the approved forms.
+3.  **Rules and titles to verify.** We could not verify from the deal file the current titles of the AAA Commercial Rules, the AAA Optional Rules for Emergency Measures of Protection, or the AAA Optional Appellate Arbitration Rules, or the AAA National Roster. The redline references them by these names.
+4.  **Co-Investment Agreement not reviewed.** The playbook requires the CIA's governing law and dispute provisions to be Delaware and consistent with Exhibit F (§§6, 22). The CIA is not in the file. The notice cross-reference to CIA §11.4 (§12.1) is unverified.
+5.  **Default appointment (§4.2(d)).** The AAA default appointment if a party fails to appoint is our addition, consistent with the playbook's AAA backstop. Please confirm.
+6.  **Transmittal check.** Pinnacle's January 8 cover email is addressed to David at "hargovewynncalloway.com" (the firm domain is hargrovewynn.com) and signed "Pinnacle Winterhaven LLP," but was sent from a pinnaclebracewell.com address. Confirm the transmittal and contact details before responding.
+7.  **Deadline.** The internal timetable differs by document: David's January 9 note sets January 11 for the draft; Rebecca's note and David's reply set January 12 for her review, with the markup due to Pinnacle on January 13. We suggest treating January 11 as the target.
+
+## 5. Assumptions
+
+- Whitmore is Hargrove, Wynn & Calloway's client under the playbook (v3.0 is current, per your instructions).
+- The transaction is domestic: all parties and the Target are U.S.-organized or headquartered, so the playbook's ICC exception does not apply.
+- Expedited Disputes are carved out of the three-member panel, discovery, and award-timing provisions, as the playbook requires. The playbook does not say whether §8.5 appellate review applies to them; the draft is silent.
+- Items with no playbook position (notices, entire agreement, amendment and waiver, severability, counterparts, survival) are unchanged, apart from the CIA cross-reference noted above.

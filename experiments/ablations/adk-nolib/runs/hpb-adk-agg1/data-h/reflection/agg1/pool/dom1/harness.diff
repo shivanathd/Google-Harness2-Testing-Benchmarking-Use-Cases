@@ -1,0 +1,150 @@
+--- current/hooks.json
++++ dom1/hooks.json
+@@ -1 +0,0 @@
+-{"hooks": {"Stop": [{"hooks": [{"type": "command", "command": "python3 scripts/check_output.py"}]}]}}
+--- current/scripts/check_output.py
++++ dom1/scripts/check_output.py
+@@ -1,99 +0,0 @@
+-#!/usr/bin/env python3
+-"""Recompute the monthly net revenue figure from the workspace CSVs and check output/answer.json.
+-
+-Usage: python3 scripts/check_output.py [--show]   (run from the workspace root)
+-  --show : print the recomputation breakdown and exit 0.
+-  default: Stop-hook mode. Exit 2 (reason on stderr) if output/answer.json is missing,
+-           not plain JSON, lacks the three keys, or disagrees with the recomputation.
+-           Exit 0 when it matches, or when the inputs are not in the expected shape
+-           (the check never blocks a run it cannot evaluate).
+-Policy encoded (this workspace's POLICY.md): captured only, month by UTC timestamp, minor units
+-(JPY whole yen; USD/EUR/INR /100), fx.csv usd_per_unit, is_test customers excluded everywhere,
+-chargeback reverses full original charge + 15.00 fee in the month of chargeback_at, round last.
+-"""
+-import csv, json, os, sys
+-from datetime import datetime, timezone
+-from decimal import Decimal, ROUND_HALF_UP
+-
+-MONTH = (2026, 9)
+-FEE = Decimal("15.00")
+-ZERO_DEC = {"JPY"}
+-
+-
+-def rows(name):
+-    with open(name, newline="") as f:
+-        return list(csv.DictReader(f))
+-
+-
+-def utc(ts):
+-    return datetime.fromisoformat(ts.strip().replace("Z", "+00:00")).astimezone(timezone.utc)
+-
+-
+-def compute():
+-    fx = {r["currency"]: Decimal(r["usd_per_unit"]) for r in rows("fx.csv")}
+-    test = {r["customer_id"] for r in rows("customers.csv") if r["is_test"].strip().lower() == "true"}
+-    charges = {r["charge_id"]: r for r in rows("charges.csv")}
+-
+-    def usd(c):
+-        amt = Decimal(c["amount_minor"])
+-        if c["currency"] not in ZERO_DEC:
+-            amt = amt / 100
+-        return amt * fx[c["currency"]]
+-
+-    def in_month(ts):
+-        d = utc(ts)
+-        return (d.year, d.month) == MONTH
+-
+-    log, gross, n_tx = [], Decimal(0), 0
+-    for cid, c in charges.items():
+-        if c["status"].strip() == "captured" and c["customer_id"] not in test and in_month(c["captured_at"]):
+-            gross += usd(c); n_tx += 1
+-            log.append(f"  rev  {cid} {c['customer_id']} {c['currency']} {c['amount_minor']} -> {usd(c):.4f}")
+-    rev_cb, n_cb = Decimal(0), 0
+-    for r in rows("chargebacks.csv"):
+-        c = charges.get(r["charge_id"])
+-        if c is None:
+-            log.append(f"  WARN {r['chargeback_id']}: charge {r['charge_id']} not in charges.csv")
+-            continue
+-        if c["customer_id"] in test or not in_month(r["chargeback_at"]):
+-            continue
+-        rev_cb += usd(c); n_cb += 1
+-        log.append(f"  cb   {r['chargeback_id']} {r['charge_id']} {c['customer_id']} -> -{usd(c):.4f} (status {c['status']})")
+-    net = (gross - rev_cb - FEE * n_cb).quantize(Decimal("0.01"), ROUND_HALF_UP)
+-    log.append(f"  gross={gross:.4f} reversed={rev_cb:.4f} fees={FEE * n_cb}")
+-    return net, n_tx, n_cb, log
+-
+-
+-def main():
+-    show = "--show" in sys.argv
+-    try:
+-        net, n_tx, n_cb, log = compute()
+-    except Exception as e:  # inputs not as expected: do not block
+-        print(f"check_output: cannot recompute ({e!r})", file=sys.stderr)
+-        return 0
+-    if show:
+-        print("\n".join(log)); print(json.dumps({"net_usd": float(net), "transactions": n_tx, "chargebacks": n_cb}))
+-        return 0
+-    path = os.path.join("output", "answer.json")
+-    exp = {"net_usd": float(net), "transactions": n_tx, "chargebacks": n_cb}
+-    try:
+-        got = json.load(open(path))
+-        assert isinstance(got, dict)
+-    except Exception as e:
+-        print(f"output/answer.json is missing or not plain valid JSON ({e}). Write the raw object, "
+-              f"with no backslash-escaped quotes, e.g. {json.dumps(exp)}", file=sys.stderr)
+-        return 2
+-    bad = [k for k in exp if not isinstance(got.get(k), (int, float)) or isinstance(got.get(k), bool)]
+-    if bad:
+-        print(f"answer.json keys missing or non-numeric: {bad}", file=sys.stderr); return 2
+-    if abs(got["net_usd"] - exp["net_usd"]) > 0.005 or got["transactions"] != n_tx or got["chargebacks"] != n_cb:
+-        print("answer.json disagrees with a scripted recomputation from the CSVs under POLICY.md.\n"
+-              f"You wrote {got}; recomputed {exp}.\nBreakdown:\n" + "\n".join(log) +
+-              "\nFind which rows or rule differ from your working, fix it, and rewrite output/answer.json. "
+-              "If you can show the script misreads POLICY.md, keep your value and say why.", file=sys.stderr)
+-        return 2
+-    return 0
+-
+-
+-if __name__ == "__main__":
+-    sys.exit(main())
+--- current/skills/revenue-reconciliation/SKILL.md
++++ dom1/skills/revenue-reconciliation/SKILL.md
+@@ -0,0 +1,28 @@
++---
++name: revenue-reconciliation
++description: Reconcile payment-processor charges, chargebacks, customer flags and FX tables into a monthly net revenue figure under a written recognition policy (POLICY.md). Use for any month-end revenue / net revenue / chargeback task over CSV exports.
++---
++
++# Monthly net revenue from charges + chargebacks + FX
++
++ANALYTIC MOVE: calculate + reconcile. Inputs: charges, chargebacks, customers (test flags), fx, and the written policy. Result: net USD for the target month, plus the counts the task asks for. The policy file overrides your accounting habits; re-read it and apply each numbered rule literally.
++
++## Method (do it row by row, in writing, never from memory)
++1. Policy rules to extract first: recognition trigger (status), which timestamp decides the month and in which timezone, minor-unit rules per currency, FX basis, test-customer exclusion scope, chargeback treatment (amount, fee, booking month), rounding point.
++2. Revenue set: keep only rows with the recognised status. Convert EVERY timestamp to UTC before taking the month; offsets (+05:30, -05:00, +09:00) move rows across month boundaries in both directions. Write each candidate row's UTC datetime next to it, especially rows within ~1 day of a month edge.
++3. Exclude test customers by joining charges.customer_id to the customers flag. Drop their charges AND any chargeback whose original charge belongs to them.
++4. Amount in USD = amount_minor / minor-unit divisor (100 for cents/paise currencies, 1 for zero-decimal such as JPY) x fx rate. Do not round per row; round only the final net figure.
++5. Chargebacks: select by the chargeback timestamp's UTC month, NOT by the original charge's month. Look up each chargeback's original charge by charge_id (any month, any status in the file), skip it if the customer is a test customer, subtract the full original USD amount plus the flat fee. A chargeback on a prior-month charge still reduces this month; a chargeback booked next month does not.
++6. Counts: "transactions" = recognised, non-test charges in the month, INCLUDING those later charged back (do not net them out). "chargebacks" = non-test chargebacks booked in the month.
++7. net = sum(recognised USD) - sum(charged-back USD) - fee x chargeback count. Recompute the sum a second time in a different order (or per-currency subtotals) and confirm both agree.
++
++## Checks to re-derive from the files (do not assume)
++- List the distinct currencies in charges and confirm each has exactly one rate in the FX table; confirm which minor-unit divisor the policy gives each.
++- Read the customers file and list which customers carry the test flag; look for unusually large round-amount charges and confirm whether they belong to a flagged customer before dropping or keeping them.
++- Check each timestamp column's offset format separately (charges may carry local offsets while chargebacks may be UTC "Z"); list rows within a day of a month edge with their UTC conversion.
++- Classify every chargeback in a table: booked in target month (count) / booked in another month (exclude) / test customer (exclude) / original charge in a prior month (still counts). Reconcile every chargeback.charge_id to a row in charges before counting; flag any with no match.
++
++## Before writing the artifact
++- Final answer must come from the computed rows. Never write a placeholder, round-number or guessed value; if you cannot finish a calculation, keep working on it rather than writing an estimate.
++- Write output exactly in the shape the task names (keys, order, types: numbers not strings, net with 2 decimals). Write raw JSON, with plain quotes, no backslash-escaped quotes; then read the file back and confirm it parses and every key is present.
++- Sanity checks: transactions >= chargebacks-on-this-month's-charges; net is plausible against the sum of the listed rows; counts are integers.
+--- current/systemprompt.md
++++ dom1/systemprompt.md
+@@ -1,8 +1,4 @@
+ You are an assistant that completes tasks inside a workspace directory. Read the task, do the work, and write the requested deliverables under output/.
+ 
+-Working method for figure-from-exports tasks:
+-- Read every source file in full first (POLICY.md and every CSV). Never write a number you did not derive from the rows; placeholder or guessed values are a failed run.
+-- You may have only list_files, read_file and write_file, with no shell. Then compute by hand, but explicitly: write one line per row that matters (id, status, timestamp converted to UTC, amount in major units, USD value) and tally from those lines. Convert every timestamp with its offset to UTC before assigning a month; a local date near a month boundary often lands in the neighbouring month.
+-- Apply each policy rule as written, and check each exclusion rule (test customers, non-captured statuses) against both the charge list and the chargeback list.
+-- Write the deliverable as raw JSON in the exact shape the task gives: real double quotes, no backslash escapes, numbers not strings. Then read output/answer.json back and confirm it parses and the values match your tally.
+-- When you try to finish, a check script recomputes the figure from the CSVs. If it reports a mismatch, reconcile row by row against its breakdown and rewrite the file; do not just copy its numbers without understanding the difference.
++
++When the task is to compute revenue, net revenue or chargebacks from payment/finance CSV exports under a policy file, load the `revenue-reconciliation` skill first and compute from the actual rows; never write a guessed figure.

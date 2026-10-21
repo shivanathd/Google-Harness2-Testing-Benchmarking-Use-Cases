@@ -1,0 +1,20 @@
+{
+ "cond": "base",
+ "task": "data-e",
+ "rep": 3,
+ "partial": 1.0,
+ "all_pass": true,
+ "checks": {
+  "net_usd": true,
+  "transactions": true
+ },
+ "harness": "base",
+ "cost_usd": 0.00468626,
+ "tokens_in": 121968,
+ "tokens_out": 1888,
+ "wall_s": 41.7,
+ "error": "",
+ "infra_error": false,
+ "turns": 6,
+ "tool_calls": null
+}

@@ -1,0 +1,242 @@
+{
+ "schema_version": 2,
+ "diagram_type": "workflow",
+ "meta": {
+  "title": "How We Tested Harness\u00b2: Method and Mental Model",
+  "quality_profile": "showcase",
+  "output": ".archify/workflow-method-20261021-0825/method.html"
+ },
+ "lanes": [
+  {
+   "id": "question",
+   "label": "Claim and verdict"
+  },
+  {
+   "id": "build",
+   "label": "Build the rig"
+  },
+  {
+   "id": "measure",
+   "label": "Measure"
+  },
+  {
+   "id": "guard",
+   "label": "Guard the result",
+   "variant": "exception"
+  }
+ ],
+ "phases": [
+  {
+   "id": "build-phase",
+   "label": "Build + calibrate",
+   "fromCol": 0,
+   "toCol": 2
+  },
+  {
+   "id": "measure-phase",
+   "label": "Measure + audit",
+   "fromCol": 3,
+   "toCol": 4,
+   "variant": "emphasis"
+  },
+  {
+   "id": "stress-phase",
+   "label": "Stress-test the claim",
+   "fromCol": 5,
+   "toCol": 5,
+   "variant": "dashed"
+  }
+ ],
+ "mainPath": [
+  "claim",
+  "bench",
+  "calibrate",
+  "review",
+  "study1",
+  "leak",
+  "study2",
+  "ablations",
+  "lab",
+  "verdicts"
+ ],
+ "nodes": [
+  {
+   "id": "claim",
+   "lane": "question",
+   "col": 0,
+   "type": "external",
+   "label": "The claim",
+   "sublabel": "agent improves, model fixed",
+   "width": 158
+  },
+  {
+   "id": "verdicts",
+   "lane": "question",
+   "col": 5,
+   "type": "external",
+   "label": "Five verdicts",
+   "sublabel": "CI + held-out first",
+   "width": 158
+  },
+  {
+   "id": "bench",
+   "lane": "build",
+   "col": 1,
+   "type": "backend",
+   "label": "Own benchmark",
+   "sublabel": "9 tasks, hidden graders",
+   "tag": "+6 fresh seeds",
+   "width": 158
+  },
+  {
+   "id": "calibrate",
+   "lane": "build",
+   "col": 2,
+   "type": "backend",
+   "label": "Calibrate",
+   "sublabel": "tiers + weak agent",
+   "tag": "CC hit 27/27",
+   "width": 158
+  },
+  {
+   "id": "study1",
+   "lane": "measure",
+   "col": 3,
+   "type": "messagebus",
+   "label": "Study 1",
+   "sublabel": "Harness\u00b2 vs autoresearch",
+   "width": 158
+  },
+  {
+   "id": "study2",
+   "lane": "measure",
+   "col": 4,
+   "type": "messagebus",
+   "label": "Study 2",
+   "sublabel": "guarded rerun",
+   "tag": "fresh data +0.97",
+   "width": 158
+  },
+  {
+   "id": "ablations",
+   "lane": "measure",
+   "col": 5,
+   "type": "messagebus",
+   "label": "Ablations",
+   "sublabel": "self, probe, library",
+   "width": 158
+  },
+  {
+   "id": "lab",
+   "lane": "build",
+   "col": 5,
+   "type": "cloud",
+   "label": "Google LAB tasks",
+   "sublabel": "held-out legal matters",
+   "width": 158
+  },
+  {
+   "id": "review",
+   "lane": "guard",
+   "col": 2,
+   "type": "security",
+   "label": "Review first",
+   "sublabel": "adversarial + security",
+   "tag": "8 bugs pre-run",
+   "width": 158
+  },
+  {
+   "id": "leak",
+   "lane": "guard",
+   "col": 3,
+   "type": "security",
+   "label": "Leak audit",
+   "sublabel": "answers in 6/8 skills",
+   "tag": "guard v1 + v2",
+   "width": 158
+  }
+ ],
+ "edges": [
+  {
+   "id": "claim-bench",
+   "from": "claim",
+   "to": "bench",
+   "label": "test it",
+   "variant": "emphasis"
+  },
+  {
+   "id": "bench-calibrate",
+   "from": "bench",
+   "to": "calibrate",
+   "variant": "default"
+  },
+  {
+   "id": "calibrate-review",
+   "from": "calibrate",
+   "to": "review",
+   "label": "before any run",
+   "variant": "security"
+  },
+  {
+   "id": "review-study1",
+   "from": "review",
+   "to": "study1",
+   "label": "cleared",
+   "variant": "default",
+   "fromSide": "top",
+   "toSide": "left"
+  },
+  {
+   "id": "study1-leak",
+   "from": "study1",
+   "to": "leak",
+   "label": "too good?",
+   "variant": "security"
+  },
+  {
+   "id": "leak-study2",
+   "from": "leak",
+   "to": "study2",
+   "label": "guard on",
+   "variant": "emphasis"
+  },
+  {
+   "id": "study2-ablations",
+   "from": "study2",
+   "to": "ablations",
+   "variant": "default"
+  },
+  {
+   "id": "ablations-lab",
+   "from": "ablations",
+   "to": "lab",
+   "variant": "default"
+  },
+  {
+   "id": "lab-verdicts",
+   "from": "lab",
+   "to": "verdicts",
+   "variant": "emphasis"
+  }
+ ],
+ "cards": [
+  {
+   "dot": "cyan",
+   "title": "Mental model",
+   "items": [
+    "Harness = everything around a fixed model",
+    "Improver edits it; executor runs it; grader stays hidden",
+    "Score on data the improver never saw"
+   ]
+  },
+  {
+   "dot": "rose",
+   "title": "Assume it is wrong until checked",
+   "items": [
+    "Pre-register; amend in writing, with time",
+    "A/A check exposed a fake +0.11 from a login glitch",
+    "Sandbox every agent: no tokens, graders or .git"
+   ]
+  }
+ ]
+}

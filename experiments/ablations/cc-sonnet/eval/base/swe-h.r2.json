@@ -1,0 +1,32 @@
+{
+ "cond": "base",
+ "task": "swe-h",
+ "rep": 2,
+ "partial": 1.0,
+ "all_pass": true,
+ "checks": {
+  "load_missing": true,
+  "load_empty": true,
+  "add_accumulates": true,
+  "add_nonpositive": true,
+  "remove_ok": true,
+  "remove_too_many": true,
+  "remove_unknown": true,
+  "remove_keeps_data": true,
+  "report_format": true,
+  "report_missing_file": true,
+  "cli_remove_error": true,
+  "cli_add_bad": true,
+  "report_low": true,
+  "add_then_report": true
+ },
+ "harness": "base",
+ "cost_usd": 0.00640241,
+ "tokens_in": 96772,
+ "tokens_out": 5353,
+ "wall_s": 121.5,
+ "error": "error_max_turns",
+ "infra_error": false,
+ "turns": 5,
+ "tool_calls": null
+}

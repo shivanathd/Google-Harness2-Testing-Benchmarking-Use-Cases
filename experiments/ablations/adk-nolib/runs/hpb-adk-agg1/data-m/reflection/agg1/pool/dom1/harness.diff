@@ -1,0 +1,188 @@
+--- current/hooks.json
++++ dom1/hooks.json
+@@ -1 +0,0 @@
+-{"hooks": {"Stop": [{"hooks": [{"type": "command", "command": "python3 scripts/check_output.py"}]}]}}
+--- current/scripts/check_output.py
++++ dom1/scripts/check_output.py
+@@ -1,13 +0,0 @@
+-#!/usr/bin/env python3
+-"""Stop hook / manual check: output/answer.json must exist and parse with the required keys.
+-Exit 2 (stderr = instruction to the agent) when it does not; exit 0 otherwise."""
+-import json, sys
+-try:
+-    a = json.load(open("output/answer.json"))
+-    assert isinstance(a["net_usd"], (int, float)) and not isinstance(a["net_usd"], bool)
+-    assert isinstance(a["transactions"], int) and isinstance(a["refunds"], int)
+-except Exception as e:
+-    print("output/answer.json is missing or invalid (%s). Compute the figures now and write "
+-          'it as {"net_usd": <2dp number>, "transactions": <int>, "refunds": <int>} '
+-          "(see systemprompt.md), then re-open it to confirm." % e, file=sys.stderr)
+-    sys.exit(2)
+--- current/scripts/revenue_recon.py
++++ dom1/scripts/revenue_recon.py
+@@ -1,77 +0,0 @@
+-#!/usr/bin/env python3
+-"""Compute monthly net USD revenue from transactions/refunds/fx CSVs and write answer.json.
+-
+-usage: python3 scripts/revenue_recon.py <data_dir> <YYYY-MM> [out_path]
+-  data_dir  holds transactions.csv, refunds.csv, fx_daily.csv
+-  out_path  default output/answer.json
+-
+-Rules: dedupe transactions by txn_id (first row kept; conflicting duplicates are reported),
+-amounts may contain thousands commas, only status SETTLED with settled_on in the month counts
+-(rate on settled_on); refunds dated in the month reduce revenue (rate on refunded_on, currency of
+-the original transaction). Exits 1 on a missing fx rate, zero rate, unknown refund txn or bad amount;
+-nothing is written in that case. Prints a per-row breakdown to stdout.
+-"""
+-import csv, json, os, sys
+-from decimal import Decimal as D, ROUND_HALF_UP
+-
+-
+-def die(msg):
+-    print("ERROR: " + msg, file=sys.stderr)
+-    sys.exit(1)
+-
+-
+-def num(s):
+-    try:
+-        return D(s.replace(",", "").strip())
+-    except Exception:
+-        die("bad amount %r" % s)
+-
+-
+-def main():
+-    if len(sys.argv) < 3:
+-        die(__doc__)
+-    d, month = sys.argv[1], sys.argv[2]
+-    out = sys.argv[3] if len(sys.argv) > 3 else "output/answer.json"
+-    rd = lambda n: list(csv.DictReader(open(os.path.join(d, n), newline="")))
+-    txns, refunds, fxrows = rd("transactions.csv"), rd("refunds.csv"), rd("fx_daily.csv")
+-    fx = {(r["date"].strip(), r["currency"].strip()): D(r["usd_per_unit"]) for r in fxrows}
+-
+-    def rate(date, cur):
+-        r = fx.get((date, cur))
+-        if r is None or r <= 0:
+-            die("no usable fx rate for %s %s" % (date, cur))
+-        return r
+-
+-    uniq = {}
+-    for r in txns:
+-        k = r["txn_id"].strip()
+-        if k in uniq:
+-            if uniq[k] != r:
+-                print("WARN conflicting duplicate txn_id %s: %s vs %s" % (k, uniq[k], r))
+-            continue
+-        uniq[k] = r
+-    print("rows=%d unique_txn_ids=%d" % (len(txns), len(uniq)))
+-
+-    total, n = D(0), 0
+-    for k, r in uniq.items():
+-        if r["status"].strip().upper() == "SETTLED" and r["settled_on"].strip().startswith(month):
+-            usd = num(r["amount"]) * rate(r["settled_on"].strip(), r["currency"].strip())
+-            total += usd; n += 1
+-            print("TXN %s %s %s %s -> %.4f" % (k, r["settled_on"], r["amount"], r["currency"], usd))
+-    rtotal, m = D(0), 0
+-    for r in refunds:
+-        if r["refunded_on"].strip().startswith(month):
+-            t = uniq.get(r["txn_id"].strip())
+-            if t is None:
+-                die("refund %s references unknown txn %s" % (r["refund_id"], r["txn_id"]))
+-            usd = num(r["amount"]) * rate(r["refunded_on"].strip(), t["currency"].strip())
+-            rtotal += usd; m += 1
+-            print("REF %s %s %s %s %s -> %.4f" % (r["refund_id"], r["txn_id"], r["refunded_on"], r["amount"], t["currency"], usd))
+-    net = (total - rtotal).quantize(D("0.01"), ROUND_HALF_UP)
+-    print("gross=%.4f refunds=%.4f net=%s txns=%d refunds_applied=%d" % (total, rtotal, net, n, m))
+-    os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
+-    json.dump({"net_usd": float(net), "transactions": n, "refunds": m}, open(out, "w"))
+-    print("wrote", out)
+-
+-
+-main()
+--- current/skills/revenue-reconciliation/SKILL.md
++++ dom1/skills/revenue-reconciliation/SKILL.md
+@@ -0,0 +1,22 @@
++---
++name: revenue-reconciliation
++description: Reconcile payment/transaction, refund and daily-FX exports into one month's net USD revenue (recognition date, FX conversion, dedupe, refunds). Use for any "net revenue for month X" task over CSV exports.
++---
++# Net revenue from transaction + refund + FX exports
++
++ANALYTIC MOVE: calculate. Inputs: transactions (id, settled date, amount, currency, status), refunds (txn_id, refunded date, amount), daily FX (usd_per_unit). Result: net USD = recognised gross minus refunds, for the month asked.
++
++Rules (apply in this order, check each):
++1. Dedupe on the entity key (txn_id) BEFORE anything else. Exact repeated rows count once; if duplicates conflict, say which you kept.
++2. Recognise a transaction only if status is exactly SETTLED and the recognition date (settled_on, not created_on) falls in the month. PENDING/VOID/blank settled_on never count. A transaction created in one month and settled in another belongs to the settled month.
++3. Parse amounts as text first: strip thousands separators ("2,845.66") and whitespace before float(). A naive parse silently drops or breaks those rows.
++4. Convert at the rate for the event's own date (settled_on for sales, refunded_on for refunds), by currency. usd_per_unit means USD = amount * rate. Refund currency = the original transaction's currency, looked up by txn_id (refunds.csv has no currency column). Never reuse the sale's rate for the refund.
++5. A refund counts in the month of refunded_on regardless of when the sale settled. Refunds dated outside the month are excluded, even for in-month sales.
++6. Round only the final net figure (2 decimals); keep full precision per line. Counts: "transactions" = distinct recognised txn_ids; "refunds" = refunds applied in month.
++7. Check FX coverage: every needed (date, currency) must exist and be non-zero. A 0 rate is a data defect - if it falls on a date you need, stop and flag it; if outside the month, ignore it.
++
++Run `python3 skills/revenue-reconciliation/scripts/recon.py <dir with the 3 CSVs> YYYY-MM output/answer.json` (adapt column names in the script if headers differ). It prints dropped duplicates and warnings; read them, then sanity-check by hand-listing the recognised rows.
++
++Data-shape checks to run on any such export set (do not assume; confirm from the files): repeated rows for the same txn_id (identical copies count once); amounts with thousands commas; multiple currencies; mixed statuses; a refunds file with no currency column (take currency from the original transaction); refunds dated outside the requested month (exclude them even if the sale is in-month); FX coverage window and any zero rates, judged only against the dates you need.
++
++Deliverable: output/answer.json exactly {"net_usd": number, "transactions": int, "refunds": int} (net_usd as a number, 2 decimals). Write it before doing any extra analysis; a run that ends with only a plan and no file delivers nothing.
+--- current/skills/revenue-reconciliation/scripts/recon.py
++++ dom1/skills/revenue-reconciliation/scripts/recon.py
+@@ -0,0 +1,42 @@
++#!/usr/bin/env python3
++"""Monthly net revenue in USD from transactions, refunds and daily FX.
++usage: python3 recon.py SRC_DIR YYYY-MM [OUT_JSON]
++Prints every exclusion/anomaly so each can be reviewed; writes OUT_JSON if given."""
++import csv, json, sys
++src, month = sys.argv[1], sys.argv[2]
++out = sys.argv[3] if len(sys.argv) > 3 else None
++num = lambda s: float(s.replace(",", "").strip())
++fx = {(r["date"], r["currency"].strip().upper()): float(r["usd_per_unit"])
++      for r in csv.DictReader(open(f"{src}/fx_daily.csv"))}
++def rate(d, c):
++    v = fx.get((d, c.strip().upper()))
++    if not v:
++        print(f"WARN missing/zero fx {c} {d}: {v}"); raise SystemExit(1)
++    return v
++seen, tx, cur = {}, 0.0, {}
++n = 0
++for r in csv.DictReader(open(f"{src}/transactions.csv")):
++    t = r["txn_id"].strip()
++    if t in seen:
++        same = seen[t] == r
++        print(f"DUP txn {t} ({'identical' if same else 'CONFLICTING - decide'}): dropped later row")
++        continue
++    seen[t] = r
++    cur[t] = r["currency"].strip().upper()
++    if r["status"].strip().upper() == "SETTLED" and r["settled_on"].startswith(month):
++        tx += num(r["amount"]) * rate(r["settled_on"], r["currency"]); n += 1
++    elif r["status"].strip().upper() == "SETTLED" and not r["settled_on"]:
++        print(f"WARN settled without date {t}")
++rf, m = 0.0, 0
++for r in csv.DictReader(open(f"{src}/refunds.csv")):
++    t = r["txn_id"].strip()
++    if t not in cur:
++        print(f"WARN refund {r['refund_id']} has no transaction {t}"); continue
++    if r["refunded_on"].startswith(month):
++        rf += num(r["amount"]) * rate(r["refunded_on"], cur[t]); m += 1
++        if seen[t]["status"].strip().upper() != "SETTLED":
++            print(f"WARN refund {r['refund_id']} on non-SETTLED txn {t}")
++res = {"net_usd": round(tx - rf, 2), "transactions": n, "refunds": m}
++print(f"gross={tx:.4f} refunds={rf:.4f}", res)
++if out:
++    json.dump(res, open(out, "w"))
+--- current/systemprompt.md
++++ dom1/systemprompt.md
+@@ -1,13 +1,3 @@
+-You are an assistant that completes tasks inside a workspace directory. Read the task, do the work, and write the requested deliverables under output/.
++You are an assistant that completes tasks inside a workspace directory. Read the task, do the work, and write the requested deliverables under output/. Always actually compute and write the file (run code, don't just describe a plan) and confirm it exists before finishing.
+ 
+-Work procedure:
+-- Act, don't narrate. A reply that only states a plan is a failed run; the task is done only when output/answer.json (or the requested file) exists, has been re-read, and its values match your computation. Never end a turn on a plan.
+-- Inputs are small: read each CSV once in full, note oddities (duplicate ids, quoted amounts with thousands commas like "2,845.66", blank dates, a zero or missing fx rate), then compute.
+-- Compute with code, not mental arithmetic: for revenue reconciliation run `python3 scripts/revenue_recon.py . YYYY-MM` (data dir, target month taken from the task; writes output/answer.json and prints a per-row breakdown). If it exits 1, read the error, fix the input handling once, and rerun; do not hand-write answers around it. If no shell is available, compute by hand row by row in your reply, then write the file with the file-write tool.
+-- After writing, run `python3 scripts/check_output.py` (or read the file back) and confirm the key names, counts and 2-decimal net.
+-
+-Checks to re-derive from the data each run (do not assume values):
+-- Count duplicate txn_ids and confirm whether duplicates are identical rows; count each txn_id once.
+-- Amounts may be quoted with thousands commas. Check fx_daily.csv for zero or missing rates and whether any fall inside the target month.
+-- Refunds may lack a currency column: take currency from the original transaction, and check each refund's original transaction and date against the target month.
+-- Before finishing, compare the script's transaction and refund counts with your own row-level tally.
++When the task is to compute net revenue / reconcile transaction, refund and FX exports for a period, load the `revenue-reconciliation` skill.

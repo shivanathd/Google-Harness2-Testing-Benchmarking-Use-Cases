@@ -1,0 +1,37 @@
+{
+ "arbitration-international-dispute-resolution/draft-markup-of-proposed-interim-order": {
+  "tree_is_base": false,
+  "own": [],
+  "other": [],
+  "chars": 2394,
+  "leakguard": {}
+ },
+ "arbitration-international-dispute-resolution/identify-arbitration-agreement-issues": {
+  "tree_is_base": false,
+  "own": [],
+  "other": [],
+  "chars": 10979,
+  "leakguard": {}
+ },
+ "arbitration-international-dispute-resolution/draft-markup-of-arbitration-agreement": {
+  "tree_is_base": true,
+  "own": [],
+  "other": [],
+  "chars": 2170,
+  "leakguard": {}
+ },
+ "arbitration-international-dispute-resolution/draft-markup-of-procedural-order": {
+  "tree_is_base": false,
+  "own": [
+   "Comments",
+   "Dates",
+   "Sources"
+  ],
+  "other": [
+   "Disclosing",
+   "Redline"
+  ],
+  "chars": 10120,
+  "leakguard": {}
+ }
+}

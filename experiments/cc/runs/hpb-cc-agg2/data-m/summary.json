@@ -1,0 +1,168 @@
+{
+  "task_id": "data-m",
+  "domain": "data",
+  "k": 2,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-cc-agg2/data-m/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/cc/exec/hpb-cc-agg2/data-m/base1"
+    },
+    {
+      "label": "base2",
+      "run_id": "hpb-cc-agg2/data-m/base2",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/cc/exec/hpb-cc-agg2/data-m/base2"
+    }
+  ],
+  "modes": {
+    "seq": {
+      "mode": "seq",
+      "task_id": "data-m",
+      "k": 2,
+      "finals": [
+        "c1",
+        "c2"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [
+        "inv1",
+        "dom1",
+        "c1",
+        "inv2"
+      ],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.0777402,
+          "cached": false,
+          "notes": "KEEP_BASE. I made no changes to the harness.\n\n- **Both rollouts agree.** base1 and base2 wrote the identical `output/answer.json`: `{\"net_usd\": 24317.47, \"transactions\": 16, \"refunds\": 5}`. The file is valid JSON with the three requested keys and 2-decimal net. base1 re-parsed the file after writing it.\n- **Workspace traps handled.** Both runs deduplicated the exact-duplicate rows (S028, S004, S026) and stripped the thousands-separator commas from amounts. They counted only SETTLED rows with September `settled_on`. They converted refunds at the refund-day rate in the original transaction's currency. Both used a Decimal script, and base2 added an assertion that duplicate rows are identical.\n- **No procedural divergence.**\n  - Both did the same preview, read, script and write sequence. Neither hit a tool error, timeout or budget problem.\n  - The `ls: ..: Operation not permitted` line in base1 was harmless and didn't change anything.\n  - The only differences are in the final summaries. Rounding was not a divergence: base2's per-line rounding printed the same total as base1's unrounded sum.\n- **Nothing to fix.**\n  - There is no repeated failure, so a skill, script or plugin would only add context cost.\n  - Always-on prose would add cost with nothing observed to correct.\n  - I did not record workspace facts (S028/S004/S026 duplicates, 16 and 5 counts) because the runs got the answer right without them.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.07300720000000001,
+          "cached": false,
+          "notes": "KEEP_BASE. I left every file in the checkpoint unchanged.\n\n- **Both runs agree.** base1 and base2 wrote identical deliverables: `{\"net_usd\": 24317.47, \"transactions\": 16, \"refunds\": 5}`. With no divergence, there is no gap to close.\n- **Both handled the traps unaided.**\n  - Duplicated txn_id rows: S028, S004 and S026 each appear twice with identical rows. Both runs counted each once. base2 asserted that duplicates were identical, and base1 flagged any conflicting ones.\n  - Comma-formatted amounts such as \"203,738.40\": both stripped the commas.\n  - PENDING and VOID rows: both excluded them.\n  - Recognition date: both recognised on `settled_on`.\n  - FX: both converted at the settle-day or refund-day rate.\n  - Refund currency: both took it from the original transaction.\n  - Refund month: both applied refunds by the month they were issued.\n- **Counts in the output.** Both read `transactions` and `refunds` as counts, which matches the task wording \"recognised transactions\" and \"refunds applied\". base1 stated this in its summary.\n- **No weak spot to fix.** Neither run showed wasted effort, a missing FX rate, or a wrong deliverable shape.\n- **Why I did not add a skill.** A skill on duplicate handling or rounding would be speculative. No trajectory moment shows a failure it would have changed. Always-on prose would also cost context on every run for no evidence-backed benefit.",
+          "error": ""
+        },
+        {
+          "label": "c1",
+          "dim": "COMPOSE",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.0557934,
+          "cached": false,
+          "notes": "KEEP_BASE. I left every file in `context/harness/` unchanged. No earlier-round edits exist, and neither candidate adds any.\n\n- **Candidates match the base.** `pool/inv1/harness.diff` and `pool/dom1/harness.diff` are empty. Both candidates' harness trees are the base harness, and `decisions/inv1.md` and `decisions/dom1.md` each record KEEP_BASE. Nothing was adopted, merged or restored.\n- **The base runs agree.** base1 and base2 wrote the identical `output/answer.json`: `{\"net_usd\": 24317.47, \"transactions\": 16, \"refunds\": 5}`. Both handled every data trap unaided:\n  - They counted the duplicate `txn_id` rows (S004, S026, S028) once.\n  - They stripped thousands-separator commas from amounts.\n  - They excluded PENDING and VOID rows.\n  - They converted at the settle-day or refund-day rate.\n  - They applied refunds by `refunded_on` month.\n- **dom1 matches the base.** Its rollout ended with `{\"net_usd\": 24317.47, \"transactions\": 16, \"refunds\": 5}`, rounding only the final net.\n- **inv1 differs by one cent.** It wrote `{\"net_usd\": 24317.48, ...}`. Its script rounded each line to cents before summing (gross 26983.87, refunds 2666.39), where the other runs summed unrounded values and rounded once. The harness was identical, so this is run-to-run variation, not an effect of an edit.\n- **Why I added nothing for the rounding.** The task says \"converted at that day's rate\" and asks for 2 decimals on `net_usd`. It does not say whether to round per line or once at the end. Four of five runs produced 24317.47, and base2's per-line rounding also printed .47. A rule pinning the rounding would be a judgment call the evidence cannot settle, and it would cost always-on context on every run.\n- **Why I added no skill, script or plugin.** No trajectory moment shows a failure, a tool error, wasted effort or a wrong deliverable shape that one would have changed.",
+          "error": ""
+        },
+        {
+          "label": "inv2",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.0633691,
+          "cached": false,
+          "notes": "KEEP_BASE. I left every file in the checkpoint unchanged.\n\n- **Base runs:** base1 and base2 agree. Both wrote `{\"net_usd\": 24317.47, \"transactions\": 16, \"refunds\": 5}`. Neither hit a tool error, and both finished with a verified deliverable.\n- **Traps handled without help:** both runs dealt with all of these on their own.\n  - The duplicate `txn_id` rows (S004, S028, S026).\n  - The comma thousands separators in amounts.\n  - The PENDING and VOID rows.\n  - The settle-day and refund-day FX rates.\n  - The refund currency, which comes from the original transaction.\n  - The 2-decimal answer shape.\n- **One divergence:** the `inv1` pool rollout wrote `24317.48`. Its script rounded each converted line to cents before summing: gross 26983.87 and refunds 2666.39. base1 summed unrounded values and rounded once, giving `.47`. base2 rounded per line and still printed `.47`, so the cent difference comes from how each script rounded, not from an unclear procedure.\n- **No rounding rule added:** the task asks for 2 decimals only on `net_usd` and says nothing about per-line rounding. The evidence can't settle which is intended, so a rule would be a guess. It would also add always-on text to every run for a one-cent variance.\n- **No skill, script or plugin added:** no trajectory moment shows a failure that one would have changed.",
+          "error": ""
+        },
+        {
+          "label": "dom2",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.0878031,
+          "cached": false,
+          "notes": "**Change: `LongTermMEMORY.md` was empty and now has two short always-on lines.**\n\n- **Rounding.** Convert each line at full precision, sum unrounded, and round the reported total once.\n- **Counts.** Take the transaction and refund counts from the same filtered, de-duplicated set the total came from.\n\n**Why:** the one divergence in the evidence is rounding. The inv1 rollout (`pool/inv1/rollout.md`, around line 195) rounded each converted line to cents with `quantize(ROUND_HALF_UP)` before summing. That gave 24317.48. base1, base2, dom1 and c1 summed unrounded values and rounded once, giving 24317.47. I recomputed the figures from `source/*.csv` and got 24317.468 (gross 26983.856, refunds 2666.388), which rounds to 24317.47. So the single-rounding convention is the more defensible one, and inv1's version came out a cent off.\n\n**Not changed:**\n- **Matter facts.** I left out the duplicate txn_ids, the comma-formatted amounts and the 16 and 5 counts. All runs handled these unaided, and this task's facts would be wrong anchors for the next task.\n- **Skills, scripts, plugins.** No trajectory shows a failure one would have fixed.\n- **Other files.** `systemprompt.md`, `guardrails.md` and the tool guidance are untouched.",
+          "error": ""
+        },
+        {
+          "label": "c2",
+          "dim": "COMPOSE",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.0682852,
+          "cached": false,
+          "notes": "**Decision:** ADOPT dom2's `LongTermMEMORY.md`, which is a two-line rounding and counts convention. Every other file is unchanged. The current checkpoint was the empty base. Rounds 1 and 2 changed nothing except dom2's edit.\n\n**Evidence across rounds:**\n- All seven rollouts reached the same figures: 16 transactions, 5 refunds, 24317.47 net. They also handled every data trap unaided. The traps were duplicate txn_ids (S004, S026, S028), comma-formatted amounts, PENDING and VOID rows, settle-day and refund-day FX rates, and refund currency taken from the original transaction. No trajectory shows a tool error or a wrong deliverable shape.\n- The one divergence is rounding. inv1 and inv2 rounded each converted line to cents before summing (gross 26983.87, refunds 2666.39), so their net was 24317.48. base1, dom1, dom2 and c1 summed unrounded values and rounded once, giving 24317.47. dom2's own computation was 26983.8564 \u2212 2666.3883 = 24317.4681, which rounds to .47. base2 rounded per line and still printed .47, so its path was not the problem.\n\n**Why adopt the memory lines:**\n- The harness was identical across the runs that diverged, so two of the seven landed a cent off through run-to-run variation. Two always-on lines pin the more defensible single-rounding convention.\n- The cost is about 60 words and the rule is generic finance practice. It names no task-specific facts, such as the duplicate IDs or the 16 and 5 counts.\n- The task text does not settle per-line against single rounding, so this is a judgment call. I took the convention that matched five of the seven runs, including the base rollouts.\n- dom2's rollout shows the rule applied correctly: it wrote the correct JSON and the same counts.\n\n**Dropped or not added:**\n- No skill, script, plugin or subagent. Nothing in any trajectory shows a failure one would have fixed.\n- No matter-specific facts in always-on text, because they would be wrong anchors for other tasks.",
+          "error": ""
+        }
+      ],
+      "similarity": null,
+      "ledger": {
+        "mode": "seq",
+        "task_id": "data-m",
+        "k": 2,
+        "R": 8,
+        "expected_R": 8,
+        "P": 6,
+        "session_attempts": 6,
+        "expected_P": 6,
+        "usd": 0.425998,
+        "rollout_usd": 0.0,
+        "session_usd": 0.425998,
+        "rollouts": [
+          "base1",
+          "base2",
+          "inv1",
+          "dom1",
+          "c1",
+          "inv2",
+          "dom2",
+          "c2"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "c1",
+          "inv2",
+          "dom2",
+          "c2"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "seq": {
+      "task_id": "data-m",
+      "mode": "seq",
+      "k": 2,
+      "chosen_id": "A",
+      "chosen_label": "c1",
+      "chosen_run_id": "hpb-cc-seq2/data-m/c1",
+      "chosen_is_base": false,
+      "why": "Both candidates contain exactly the same output/answer.json: {\"net_usd\": 24317.47, \"transactions\": 16, \"refunds\": 5}. They match on delivery, shape, and values, so nothing separates them. I did not recompute the figures against the source, so I can't say whether the shared answer is correct.",
+      "id_map": {
+        "A": "c1",
+        "B": "c2"
+      },
+      "dropped": [],
+      "n_candidates": 2,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.12838090000000002,
+      "experience": {},
+      "trivial": false,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/cc/exec/hpb-cc-seq2/data-m/c1",
+      "chosen_tree_is_base": true,
+      "harness_fingerprint": "020675403b27bd72"
+    }
+  },
+  "errors": []
+}

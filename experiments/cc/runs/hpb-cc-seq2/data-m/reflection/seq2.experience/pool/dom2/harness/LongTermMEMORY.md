@@ -1,0 +1,3 @@
+Finance-export reconciliation conventions:
+- Convert each line at full precision (Decimal), sum unrounded, and round only the final reported total once. Rounding each converted line first can shift the total by a cent.
+- Report counts (recognised transactions, refunds applied) from the same filtered, de-duplicated set the total was summed from.

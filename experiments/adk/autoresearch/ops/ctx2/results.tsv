@@ -1,0 +1,3 @@
+iter	score	kept	notes
+0	0.333	True	baseline
+1	0.000	False	ead of eyeballing, read the whole file, and use the script for log-window questions. The baseline agent estimated by eye and wrote 24/10/E500. On the sample log the script gives 15 errors and 6 users 

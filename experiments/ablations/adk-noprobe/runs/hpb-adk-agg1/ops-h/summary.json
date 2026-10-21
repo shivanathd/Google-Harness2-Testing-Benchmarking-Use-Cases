@@ -1,0 +1,124 @@
+{
+  "task_id": "ops-h",
+  "domain": "ops",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-adk-agg1/ops-h/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/adk-noprobe/exec/hpb-adk-agg1/ops-h/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "ops-h",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.19930329999999996,
+          "cached": false,
+          "notes": "I ran the new script on the workspace logs and it wrote a complete `answer.json` with all three services. I did not run a full agent rollout against the edited harness.\n\n**Evidence.** In `base1` (the only rollout), the agent only ever called `list_files` and `read_file`. It made 12 `list_files` and 28 `read_file` calls, repeatedly re-reading `gateway.jsonl` and `search.jsonl` (260 lines each). It hit \"Max number of llm calls limit of 40 exceeded\" with no deliverable. It never opened `RUNBOOK.md`, which holds the `/healthz` exclusion, the status >= 500 rule and the billing `latency_s` change at 09:00 UTC. It guessed `logs/billing.jsonl` and got a FileNotFoundError, since the real file is `billing.jsonl.gz`. The logs have mixed offsets (-03:00, +00:00, +01:00), truncated lines and `/healthz` records, so counting by eye was never going to work.\n\n**Changes:**\n1. **New skill `skills/log-traffic-stats/SKILL.md`.** It gives the order of work: read the runbook, peek at a few lines, run the script once over all files, check the tallies, then reopen the answer file. It also records facts verified in this workspace:\n   - Offsets are mixed within each file.\n   - Each file has 5\u201318 truncated lines.\n   - `/healthz` records carry every status, including 500.\n   - Billing switches to `latency_s` at 09:00 UTC.\n   - Billing's `lat_ms` and `lat_s` tallies should both be non-zero for this window.\n\n   The skill also has a no-shell fallback that reads each file once and writes the answer anyway. This is not tied to the evidence, since base1 never showed whether a shell existed.\n2. **New script `skills/log-traffic-stats/scripts/traffic_stats.py`.** It reads gzip by magic bytes and skips invalid JSON. It tests the window on the UTC instant and drops `/healthz` before any statistic. Errors are status >= 500. Latency is `latency_ms`, or `latency_s` \u00d7 1000. p95 is nearest rank, `ceil(0.95n)`, computed with integers. It writes `{service: {requests, error_rate, p95_ms}}`, and refuses to write if there are warnings such as zero requests or a missing latency field. On the workspace logs it printed:\n   - gateway: 96 requests, 0.1354, 334\n   - search: 119 requests, 0.1513, 192\n   - billing: 124 requests, 0.1613, 393\n3. **`systemprompt.md`.**\n   - The prompt now names the `log-traffic-stats` skill, as the validation trigger rule requires.\n   - It says to read any instruction file the task names first, because base1 never opened `RUNBOOK.md`.\n   - It says to read each source file at most once, because of the 40-call loop.\n   - It keeps the \"reopen the deliverable\" completion rule.\n4. **`tool_descriptions/tool_guidance.md`.** Added three rules:\n   - `read_file` can't read `.gz` files and truncates long ones.\n   - Move failing multi-step commands into a `.py` file, and don't resend an identical command.\n   - Don't repeat an identical read or list call, given the roughly 40-call budget.\n\nI made no plugin or Stop-hook change. The failure in base1 was running out of calls, which a Stop hook can't fix.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.0725605,
+          "cached": false,
+          "notes": "This revision fixes the rejection. I did not re-read the trajectories; the edit only removes the instance data and keeps the method.\n\n- I deleted the \"Workspace facts\" block from `skills/service-traffic-stats/SKILL.md`. It held this task's results: the per-service requests, error rates and p95 values for the 06:00\u201312:00Z window, the 09:03 and 08:53 UTC unit-switch times, and the service names and the ~25% `/healthz` share. I replaced it with one line telling the agent to re-derive which services carry which latency field, whether any service mixes both units in the window, and that the probe route is removed before counting.\n- I replaced the hard-coded window in the helper command with `<START_UTC> <END_UTC>`.\n- I generalised the offset example to \"a +01:00 stamp is one hour earlier in UTC\".\n- I generalised the units check to \"the `units=` census shows which fields each service carries; a service that switched units must show both\".\n- I changed the final check from \"exactly the three service keys\" to \"one key per service file\".\n- The method rules are unchanged. These are the RUNBOOK precedence, half-open UTC window, probe exclusion, error = status \u2265 500, per-record unit conversion with whole-ms rounding, nearest-rank p95, and the 4-decimal error rate.\n- The trigger line in `systemprompt.md` is unchanged, and the helper script already ships under `skills/service-traffic-stats/scripts/`. A grep of the helper for the removed values and the instance service names found nothing. The only date in it is a generic example in its usage docstring, so I left it.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.1897277,
+          "cached": false,
+          "notes": "Evidence limits: there is one base rollout (base1) and no candidate was rolled out. base1 produced nothing: it hit \"Max number of llm calls limit of 40 exceeded\" with no `output/answer.json`. Both candidates' evidence is therefore indirect (an argument from base1's failure, not an observed improvement), and a \"no-shell\" scenario is untested. base1 only ever called `list_files` and `read_file`, so I never saw whether a shell exists. The earlier library entries (ops-m, ops-e) did use shell and skill loading, so I assumed it does.\n\nkept -> dom1 skill `skills/service-traffic-stats/SKILL.md` and its helper `scripts/traffic_stats.py`, with all instance data already removed in dom1's revision -> base1 read `gateway.jsonl` and `search.jsonl` (260 lines each) repeatedly through `read_file` (28 reads, 12 lists) and ran out of calls. The helper handles `.gz` by magic bytes, mixed offsets, truncated lines, `/healthz` exclusion, status >= 500, per-record `latency_s` conversion and nearest-rank p95. I chose dom1's version over inv1's for the skill because inv1's skill hard-codes this task's window, expected tallies and billing's 09:00 switch, and the library lesson says to keep instance facts out. The two scripts are logically equivalent. I tested the kept script on a synthetic gzip file with mixed offsets, a truncated line, a `/healthz` record and a `latency_s` record, and it gave the expected counts.\n\nrevised -> helper script gets `os.makedirs` before `--write`, and the skill's no-shell fallback now says to read each file once and write the answer -> in base1 the agent never reached a write step. `output/` may not exist, and a failed write would repeat the empty outcome. The fallback wording is taken from inv1 because dom1's \"listing every counted record\" would spend more of the 40-call budget.\n\nkept -> inv1's `systemprompt.md` additions, merged with dom1's trigger line (one trigger naming `service-traffic-stats`): read the named instruction files first, read each source file at most once, finish only after reopening the deliverable -> base1 never opened `RUNBOOK.md`, even though it listed the root and saw it. It also re-read the same two files. The skill name appears verbatim in the prompt, so validation passes. There are no template braces.\n\nkept -> `tool_guidance.md`: `read_file` can't read `.gz` and dumps whole files; put non-trivial code in a `.py` file and don't resend failed or identical calls -> base1 guessed `logs/billing.jsonl.gz` wrongly and repeated identical reads. I merged the two candidates' bullets into two lines. The library entry ops-m has the same bullets, but its rollout never exercised them, so the effect is untested.\n\ndropped -> inv1's skill `log-traffic-stats` (a duplicate skill) and its separate instance-specific hazard list -> it duplicates dom1's skill and embeds this task's window and expected values, so it would carry results into the library. I also dropped inv1's `--list` flag to keep a single helper. This costs the agent a spot-check feature, which I judged less valuable than keeping the skill generic.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "ops-h",
+        "k": 1,
+        "R": 2,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 3,
+        "expected_P": 3,
+        "usd": 0.461591,
+        "rollout_usd": 0.0,
+        "session_usd": 0.461591,
+        "rollouts": [
+          "base1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "ops-h",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-adk-agg1/ops-h/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.08703469999999999,
+      "experience": {
+        "cue": "A solver is given a data-analysis task over raw files (logs, mixed formats, compressed or truncated records) with a hard model-call budget. The base run spent the whole budget viewing raw files through a read tool and never wrote the deliverable.",
+        "lesson": "In the harness, add a generic skill (a SKILL.md plus a deterministic helper script that parses the files, applies the rules and writes the output file), and add a line to systemprompt.md that names the skill and says when to load it. Keep window bounds and expected values out as placeholders. A solver that loads the skill can finish in a few calls, instead of reading data by hand until the budget runs out.",
+        "evidence": "Skill and helper row, plus systemprompt row. base1 made 40 calls (28 `read_file`, 12 `list_files`) with no output. agg1 made `load_skill`, `list_files` and one `run_command`, and wrote a complete answer.json whose counts include per-record unit handling, truncated-line skipping and probe exclusion. The contrast is a single rollout per arm. The skill and the trigger line were never tested separately.",
+        "confidence": "medium. The contrast is large and its mechanism is visible in the trajectories (skill loaded, helper run). However, there is one rollout per arm, the edits were bundled, and nothing shows the helper's rules were checked against the RUNBOOK in the run itself.",
+        "edits": "component: skills/service-traffic-stats/SKILL.md and skills/service-traffic-stats/scripts/traffic_stats.py (new skill with a helper script)\ncandidates: agg1\nchange: Added a skill that describes the method: half-open UTC window, probe-route exclusion, error = status >= 500, per-record latency unit conversion, nearest-rank p95. It ships with a helper script that reads gzip by magic bytes, skips truncated JSON lines, applies those rules, prints skip and unit tallies, and writes answer.json. The skill has no instance data, with window values as placeholders. It includes a no-shell fallback.\nobserved: In base1 the agent never reached a computation. It made 12 `list_files` and 28 `read_file` calls, re-read the 260-line logs, hit the 40-call limit and produced no deliverable. In agg1 the first action was `load_skill`. One `run_command` of the helper then produced all three services, including billing's mixed `latency_ms` (68) and `latency_s` (56) records, and wrote `output/answer.json`. The whole run took about 3 tool calls. The `units=` census and `invalid_json` tallies printed in the output.\nverdict: helped (the strongest candidate for the cause of the base1-to-agg1 contrast, but the systemprompt edit was needed to trigger it, and there is one rollout per arm)"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/ablations/adk-noprobe/exec/hpb-adk-agg1/ops-h/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "6fb076c118fe3702"
+    }
+  },
+  "errors": []
+}

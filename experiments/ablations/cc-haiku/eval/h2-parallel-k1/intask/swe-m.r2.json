@@ -1,0 +1,28 @@
+{
+ "cond": "h2-parallel-k1/intask",
+ "task": "swe-m",
+ "rep": 2,
+ "partial": 1.0,
+ "all_pass": true,
+ "checks": {
+  "basic_us": true,
+  "eu_discount": true,
+  "lowercase_region": true,
+  "half_up_line": true,
+  "float_cents": true,
+  "multi_line_in": true,
+  "tax_after_discount": true,
+  "unknown_region": true,
+  "strings": true,
+  "empty": true
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/ablations/cc-haiku/runs/hpb-cc-agg1/swe-m/harnesses/agg1",
+ "cost_usd": 0.0074095,
+ "tokens_in": 103250,
+ "tokens_out": 6459,
+ "wall_s": 36.9,
+ "error": "error_max_turns",
+ "infra_error": false,
+ "turns": 5,
+ "tool_calls": null
+}

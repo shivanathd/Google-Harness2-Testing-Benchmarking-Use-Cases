@@ -1,0 +1,121 @@
+{
+  "task_id": "swe-m",
+  "domain": "swe",
+  "k": 1,
+  "seed": null,
+  "status": "partial",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-adk-agg1/swe-m/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/adk/exec/hpb-adk-agg1/swe-m/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "swe-m",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.15173370000000003,
+          "cached": false,
+          "notes": "**Evidence:** There is one rollout, base1. It made a few exploratory calls. It first guessed `workspace` and `/` as paths, and both failed. It then read ISSUE.md, docs/ROUNDING.md and tests/test_totals.py. It never opened `invoicing/*.py`, never ran the tests, and never edited anything. It ended its turn with a prose plan (\"Let's start by implementing the fix\"). The deliverable file `output/CHANGES.md` was never written. The earliest divergence is that the agent treated a description of the plan as the end of its turn.\n\n**Changes:**\n1. **`systemprompt.md`** (was a one-line role statement). This is the only always-on prose change.\n   - A reply that only describes a plan ends the run with nothing done, so the agent must always edit the source and write the deliverable. This targets the base1 ending.\n   - Start with `list_files` on \".\" and don't guess paths. This avoids the two failed list calls at the start of base1.\n   - A five-step workflow: read the issue, the spec and all source and tests; get a baseline and reproduce the symptom; make the smallest edit without touching existing tests; check each requirement by running code; write CHANGES.md and run the gate script.\n   - The issue's bullets and the spec's rules are treated as separate requirements, because the ISSUE has three bullets and the spec has more rules.\n   - A bounded rule for repeated command failures: change one thing, then move on.\n   - The prose carries over the delivery gate and the ban on editing tests from the library's swe-e harness, which showed no sign of skipped steps. It drops the \"only claim what you verified\" pattern, which swe-e's rollouts ignored.\n2. **`scripts/run_tests.py`** (new). It runs pytest from the workspace root and sets `sys.path`. If pytest is missing, it runs the plain `test_*` functions directly. It exits 2 if no tests are found. The task said \"pytest if available, or plain python\", so this removes a possible failure at that step.\n3. **`scripts/check_done.py`** (new). A mechanical end-of-task check. It confirms `output/CHANGES.md` exists and is non-trivial, and that the suite passes. It exits 1 and prints the failures otherwise. I ran it on a copy of the source: it printed \"CHANGES.md is missing\" and the failing test, and exited 1. I did not add a `plugin/*.ts` exit hook, because one run is not repeated evidence and the gate script plus the prose should be enough.\n4. **`LongTermMEMORY.md`** (new, labelled as workspace facts read from the source files).\n   - The layout, and that the paths are relative to the workspace root.\n   - The bug spans two modules. `tax.py::rate_for` does a case-sensitive lookup that raises KeyError. `totals.py` uses float and applies tax before discount.\n   - `unit_price` is a string and all four returned amounts must be two-decimal strings.\n   - The existing test already fails at baseline, because it gets float 20.0 and expects \"20.00\". That is why it must not be edited.\n\nI added no skill, so no trigger line is needed. I left `guardrails.md` and `tool_guidance.md` empty.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.1531082,
+          "cached": false,
+          "notes": "**Evidence.** I had one rollout, base1, and it produced no deliverable. The agent listed files and read ISSUE.md, docs/ROUNDING.md and tests/test_totals.py. It then wrote a plan (\"I'll implement the following steps\u2026\") and the run ended. It made no edit to invoicing/*.py and wrote no output/CHANGES.md. The base harness is a single sentence, with no domain knowledge and no skills.\n\n**Changes.**\n1. `systemprompt.md` (appended two lines):\n   - An act-don't-plan rule: edit the files and write the requested deliverable before ending the turn. This answers the plan-only stop in base1.\n   - A trigger line: \"When resolving an issue or bug in a Python codebase against a written spec\u2026, load the `fix-python-bug` skill\". This makes the new skill discoverable.\n2. New skill `skills/fix-python-bug/SKILL.md`. It holds the practitioner knowledge base1 never got to use:\n   - **Analytic move.** Reconcile the issue symptoms, the controlling spec (docs or docstring) and the existing tests, which are only a regression floor. Enumerate every spec clause and every issue bullet, and read all modules, not just the one named. This covers the case where the issue lists three symptoms and the spec has more clauses (rounding mode, output format, error type).\n   - **Money and Decimal rules.**\n     - Build Decimals from strings.\n     - Use `quantize` with `ROUND_HALF_UP`, because `round()` is banker's rounding on floats.\n     - Round at the spec's named points and in its order.\n     - Return 2-decimal strings, with \"0.00\" for empty input.\n     - Fold case in lookups and raise the spec's exception type, not KeyError.\n   - **Workspace facts.** Labelled as verified from the files:\n     - Root causes in the invoicing package: `rate_for` has no case folding and leaks KeyError, tax is charged on the undiscounted subtotal, and float and `round()` are used throughout.\n     - Hand-computed expected values for `LineItem(\"widget\", 3, \"19.99\", 10)` with region \"eu\": subtotal \"59.97\", discount \"6.00\", tax \"10.79\", total \"64.76\".\n     - Edge cases to run: a 0.125 unit price gives \"0.13\", \"Eu\" works, \"XX\" raises ValueError, an empty list gives all \"0.00\", and the existing US test still passes.\n   - **Finish.** Run the existing tests plus a new test file, never edit existing tests, and write output/CHANGES.md with root causes, files changed, tests added and judgement calls.\n\nI did not touch `guardrails.md`, `LongTermMEMORY.md`, tool guidance or scripts. The trajectory showed no tool-usage problems, and a parallel candidate owns procedure. I took the act-don't-plan idea from the library's swe-e harness but copied none of its source-specific facts.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.18995069999999997,
+          "cached": false,
+          "notes": "Only one of the three rollouts delivered anything, so every edit below rests on thin evidence. I ran none of the merged harness's code.\n\n- kept -> systemprompt rule \"every turn must end with a tool call; a plan-only reply is a failed run\" (inv1 and dom1 both had a version of it) -> base1 and inv1 each ended on prose (\"Let's start/make these changes\") with no edits and no CHANGES.md, so the plan-only stop happened in 2 of 3 rollouts. I strengthened the wording to name that exact phrase. inv1 still stalled with a prose rule alone, so the prose is not sufficient. dom1 delivered files, but only after its first action was `load_skill`.\n- kept -> dom1 `fix-python-bug` skill, with its trigger line in systemprompt -> dom1 loaded it as its first action and went on to edit three source files and write CHANGES.md. Its code was still wrong, so the skill's facts did not prevent bugs. The skill carries the Decimal/ROUND_HALF_UP rules and the root causes of #142. Those facts are specific to this workspace and I could not verify them independently.\n- revised -> skill \"Keep every public name\u2026\" and \"Finish\" sections -> dom1's rollout shows four failures:\n  - `write_file` clobbered `tests/test_totals.py` with a broken test (bad relative import, no `LineItem` import).\n  - `totals.py` uses `discount` before assigning it.\n  - CHANGES.md was written before the code and lists \"Next Steps: run the tests\".\n  - The tests never ran, because pytest failed on a missing `pygments` and the agent tried to install it. The skill now forbids overwriting existing tests, gives the correct test imports, and says to import and run the edited modules directly. It also requires CHANGES.md to describe only what was actually run.\n- kept -> inv1 `scripts/run_tests.py` and `scripts/check_done.py` -> dom1's run hit a broken pytest three times in a row and never got a baseline. run_tests.py falls back to plain python when pytest can't be imported. check_done.py gates on CHANGES.md existing and tests passing. In inv1's own rollout pytest worked and the stall came later, so this tests only the pytest-failure half of the evidence.\n- revised -> inv1 systemprompt workflow, shortened and merged with dom1's two lines -> inv1's 5-step workflow stayed because it had no failure in evidence. I added \"read a file before `write_file`\" and \"never pip install\", from dom1's clobbered files and pygments detour.\n- dropped -> inv1 `LongTermMEMORY.md` -> its facts duplicate the skill's workspace section, and always-on text is the expensive option.\n- dropped -> inv1's rule about retrying a command that fails twice -> no trajectory shows a retry loop in inv1. dom1's repeated pytest failures are covered by the fallback script and the \"never pip install\" line.\n- no plugin added -> a hook forcing a tool call before ending a turn would address the base1/inv1 stall directly. I can't confirm the plugin API here, and a faulty hook risks a run that produces nothing.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "swe-m",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 3,
+        "expected_P": 3,
+        "usd": 0.494793,
+        "rollout_usd": 0.0,
+        "session_usd": 0.494793,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "swe-m",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "",
+      "chosen_label": "",
+      "chosen_run_id": "",
+      "chosen_is_base": false,
+      "why": "",
+      "id_map": {},
+      "dropped": [
+        "agg1"
+      ],
+      "n_candidates": 0,
+      "ok": false,
+      "fallback": false,
+      "error": "no candidate produced an artifact (finals-only pool has no base fallback)",
+      "usd": 0.0,
+      "experience": {},
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "",
+      "chosen_tree_is_base": true
+    }
+  },
+  "errors": [
+    "agg: selection failed: no candidate produced an artifact (finals-only pool has no base fallback)"
+  ]
+}

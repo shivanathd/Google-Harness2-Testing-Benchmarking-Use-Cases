@@ -1,0 +1,16 @@
+# Changes
+
+1. **`stock report` on missing or empty stock file** (`stock/store.py`)
+   `store.load` returns `{}` when the file does not exist or contains only whitespace.
+
+2. **Quantity validation** (`stock/ops.py`, `stock/cli.py`)
+   - `ops.add` raises `ValueError` when `qty <= 0`.
+   - `ops.remove` raises `ValueError` when `qty <= 0`, when the SKU is unknown (no more silent SKU creation), or when the result would go below zero. All checks run before the data is modified.
+   - `cli.main` catches `ValueError` from `add`/`remove`, prints `error: <message>` to stderr, returns 1, and does not save, so the file is unchanged.
+
+3. **`stock report --low N`** (`stock/cli.py`)
+   Adds an optional `--low` integer to `report`. It lists only SKUs with quantity < N, sorted by quantity then SKU. Plain `report` output is unchanged (`SKU<TAB>QTY`, sorted by SKU).
+
+Public function names and signatures are unchanged.
+
+Tests: added cases to `tests/test_cli.py` for each behavior. All 5 tests pass. Pytest could not run in this sandbox (collection hits a permission error outside the workspace), so I ran the test functions with a small standalone runner instead. Running `python -m pytest tests` outside the sandbox is still worth doing.

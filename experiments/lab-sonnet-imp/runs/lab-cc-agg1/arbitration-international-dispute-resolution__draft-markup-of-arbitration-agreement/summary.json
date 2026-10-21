@@ -1,0 +1,126 @@
+{
+  "task_id": "arbitration-international-dispute-resolution/draft-markup-of-arbitration-agreement",
+  "domain": "arbitration-international-dispute-resolution",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "lab-cc-agg1/arbitration-international-dispute-resolution/draft-markup-of-arbitration-agreement/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/lab-sonnet-imp/exec/lab-cc-agg1/arbitration-international-dispute-resolution/draft-markup-of-arbitration-agreement/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "arbitration-international-dispute-resolution/draft-markup-of-arbitration-agreement",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.7125834999999999,
+          "cached": false,
+          "notes": "The only change is to `LongTermMEMORY.md`, to address the rejection. I did not re-read the trajectories this turn, and I changed nothing else in the harness.\n\n- **Removed:** the \"Workspace facts\" block, which held matter-specific content about the Whitmore / Cascadian data room. That covered the filenames, the party and firm names, the section numbers, the specific dates, and the named priority items such as the three-member panel, the court-relief waiver and the 45-day expedited track. It also covered the specific expedited sub-deadlines and the note that the Co-Investment Agreement was missing.\n- **Replaced with:** method-only notes on seven points.\n  - Establish the baseline and the controlling instructions first.\n  - Mark any agreement the documents refer to but that isn't in the data room as unverifiable.\n  - Calibrate comments to the side we act for.\n  - Reconcile playbook tiers against the client's and partner's stated priorities using the source hierarchy, and keep multiple labelling axes distinct.\n  - Report date, name and reference conflicts rather than correcting them.\n  - Test the playbook's own positions against each other, for example whether expedited sub-deadlines fit inside the overall time limit.\n  - Check what tools are installed, and use one bounded fallback rather than repeating a failing command.\n- **Skills and scripts:** `redline-docx` is still named in `systemprompt.md`, and its scripts are unchanged.\n- **Template braces:** nothing I wrote contains template braces.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.39979600000000004,
+          "cached": false,
+          "notes": "I added one skill, `skills/arbitration-playbook-redline/SKILL.md`, and a one-line trigger for it in `systemprompt.md`. I changed nothing else. There is a single rollout (base1). It was strong, so the edit is narrow and aimed at the gaps I found.\n\n**Evidence base**\n- I read the task, the source documents (playbook v3.0, the two emails, the proposed form), both base1 deliverables as converted text, and base1's trajectory.\n- base1 covered all 19 playbook topics. It used real `w:ins`/`w:del` tracked changes. It checked the accept and reject views. It computed the expedited-track timing collision, and it flagged the sender-domain mismatch, the conflicting deadlines and the CIA \u00a711.4 cross-reference it could not verify.\n\n**What motivated each part of the skill**\n1. **Tier consistency (\u00a71 of the skill).** The memo puts the expedited track (#17) in \"Recommended\". The redline note on \u00a75.5 says \"Required; Critical tier; specifically requested by R. Stadler\". Rebecca Stadler's Jan 9 email calls it critical, while playbook \u00a722 lists it as Recommended. The skill tells the agent to reconcile the playbook, the instruction emails and the client's tiers up front, and to check at the end that the redline and memo use the same tier for the same item. I recorded the tier mismatches I found in this workspace as labelled facts: expedited procedures, \u00a75 qualifications, AAA and seat, and \u00a715 Preferred versus the Required 3-year floor.\n2. **Accept-all view hides deletions.** The converted redline shows only final text, because the reader hides tracked deletions. base1's notes mostly name the deleted term, but not every one does. The skill requires each comment to say what the form said and what it became, so the baseline is visible in either view.\n3. **Conforming changes and collisions (\u00a73).** base1 caught the expedited timing, class waiver versus consolidation, and confidentiality versus LP reporting. It also left appellate review for expedited awards silent. The skill makes the dependency trace a standing check: defined terms, exclusivity, finality, remedies, and the expedited override of discovery and award timing. Unresolved collisions must be drafted around or raised as open decisions.\n4. **No invented authority.** base1 flagged unverified AAA rule titles. The skill makes that a rule: use only the playbook's wording and mark everything else \"verify before sending\". It also says to treat the main agreement (CIA) as not reviewed when it is not in the record.\n5. **Memo audience and structure.** base1 addressed the memo to Rebecca Stadler but stamped it \"Draft for D. Ostrander review\". The instruction email routes the draft to David Ostrander first. The skill says to address the memo as the instructions direct and to state who reviews before it goes out. It also lists the anomaly checks to run every time, including weekday arithmetic for conflicting deadlines.\n\nNo always-on text was cut. The trigger line is a single sentence. Nothing in the skill changes the deliverable shape the task specified.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.31280399999999997,
+          "cached": false,
+          "notes": "kept -> INV `redline-docx` skill, its two scripts, and the trigger line in `systemprompt.md` -> inv1 delivered both files with tracked changes. Its bracketed notes appear as visible inline paragraphs (31 in the reader output). The reject-all check passed. The base run hand-rolled WordprocessingML after finding python-docx missing (base1 rollout, line ~1039). The base redline also had inline notes (25 hits). Evidence is one rollout per side, so this is a modest reliability gain. The skill costs nothing until it is loaded.\nkept -> INV `systemprompt.md` rewrite (inventory first, source hierarchy, plan outputs early, verify the artifact) -> in inv1 the memo's \"Source Hierarchy and Conflicts\" table surfaced the tier conflicts and the deadline conflict (Jan 11 vs Jan 12). I kept it because it is short and procedural, and it contains no matter-specific facts.\nkept -> INV `LongTermMEMORY.md` method-only notes -> these are generic and carry no workspace facts. This was the earlier-rejected version, already cleaned. I made no further change.\nkept -> DOM `arbitration-playbook-redline` skill, with its trigger line added to `systemprompt.md` -> dom1's memo was addressed to Ostrander for first review, as his email directs. Base1 and inv1 both addressed the memo to Stadler and stamped it \"draft for D. Ostrander review\". dom1 also caught the expedited sole arbitrator vs Stadler's \"non-starter\" conflict, appellate review of expedited awards, the 48%/24% stake anomaly, and the sender-domain mismatch. Base1 and inv1 each caught only some of these.\nrevised -> DOM skill \u00a74 on comment format -> dom1's 31 comments are Word comment balloons (comments.xml, `commentReference`). The assessed reader output for dom1's redline shows no comment text at all. The instruction email asked for bracketed comments in the redline, and base1 and inv1 delivered them inline. The skill now requires inline bracketed tracked paragraphs and names the `redline-docx` skill. The skill's earlier wording (\"use bracketed comments\") did not stop dom1 from using balloons. I treated this as the main regression risk in adopting dom1 wholesale.\nrevised -> DOM skill tier-reconciliation bullet -> I replaced the Whitmore/Cascadian-specific section numbers with a generic description of typical tier mismatches, so the skill is reusable in the area library.\nrevised -> DOM skill memo-audience line -> it now reads \"address as the assignment email directs; the partner first, the client as onward recipient\". This follows the base1/inv1 miss and dom1's correct handling.\ndropped -> adopting dom1 wholesale (Word-comment redline approach) -> in the dom1 rollout the comment text did not survive the review reader. I kept only its content checklist.\nSafety note -> all three rollouts (base1, dom1, inv1) delivered both named files. No edit comes from a non-delivering rollout. I checked that no template braces appear in the always-on files. Each skill directory name appears in `systemprompt.md`, and both scripts ship under `skills/redline-docx/scripts/`.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "arbitration-international-dispute-resolution/draft-markup-of-arbitration-agreement",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 4,
+        "expected_P": 3,
+        "usd": 1.425183,
+        "rollout_usd": 0.0,
+        "session_usd": 1.425183,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "arbitration-international-dispute-resolution/draft-markup-of-arbitration-agreement",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "lab-cc-agg1/arbitration-international-dispute-resolution/draft-markup-of-arbitration-agreement/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.2118837,
+      "experience": {
+        "cue": "A document-review or redline task whose assignment email names a specific recipient or comment convention, the review tool cannot read some constructs, and the environment lacks an expected library.",
+        "lesson": "In the review-skill component (here skills/arbitration-playbook-redline/SKILL.md), state the output-format conventions as explicit operations and do not rely on \"use the format the email asked for\". Require the memo to be addressed to the recipient the assignment email names, with the client as onward recipient. Require explanatory comments as inline bracketed tracked paragraphs, not Word comment balloons. Pair this with a working builder in a separate skill (skills/redline-docx), so the agent does not hand-roll XML or install packages. Keep the playbook skill generic, without matter-specific section numbers.",
+        "evidence": "The memo-audience row: base1 and inv1 (no playbook skill) addressed the memo to the client GC, while dom1 and agg1 (skill with audience instruction) addressed it to the partner. The tooling row: dom1 had only the loose \"format the email asked for\" wording and no builder, and delivered balloon comments the reader could not see. agg1 had the explicit inline instruction and the builder, and delivered visible bracketed notes. Both contrasts are single rollouts with bundled edits.",
+        "confidence": "low. Both contrasts rest on one rollout per arm, and the agg1 harness changed several components at once. The memo-audience pattern is the stronger of the two, since it holds across two skill-bearing runs against two without.",
+        "edits": "component: skills/redline-docx/ (SKILL.md plus tracked_redline.py and check_redline.py)\ncandidates: inv1, agg1\nchange: Added a tested JSON-spec builder for tracked changes. It also adds a checker (reject-all equals original, no leftover terms, accepted-view dump). The skill says python-docx is missing and bracketed notes should be inserted as tracked paragraphs.\nobserved: base1 found python-docx missing and hand-wrote WordprocessingML (base1 around line 1026\u20131039). dom1 had no skill, hit missing lxml and python-docx, built a venv, and delivered Word comment balloons (comments.xml, 31 comments). The reviewer reader showed no comment text for dom1's redline. inv1 and agg1 used the builder and delivered inline bracketed notes visible in the reader (31 in inv1, 28 in agg1) with a passing reject-all check. inv1's first build crashed on malformed spec JSON and was then fixed. This is a plausible reliability and visibility gain. Each side has only one rollout, and the memo-audience difference also separates the runs, so the effect is not isolated.\nverdict: confounded\n\ncomponent: skills/arbitration-playbook-redline/SKILL.md\ncandidates: dom1, agg1\nchange: Added a checklist: clause map, gap list and tier reconciliation up front. It also calls for conforming-change and collision tests, no invented rule titles, and anomaly checks (deadlines, sender domain, missing main agreement). The memo is to be addressed to the person the assignment email names. dom1's version had Whitmore/Cascadian section numbers hard-coded and vaguer comment-format wording. agg1's version is generic and requires inline bracketed tracked paragraphs.\nobserved: base1 and inv1 (no skill) addressed the memo to Stadler with a \"draft for Ostrander review\" stamp. dom1 and agg1 addressed it to Ostrander first, with Stadler as onward recipient. dom1 and agg1 also raised the appellate-timing issue for expedited awards. agg1 additionally raised the 48%/24% anomaly, the Jan 11 vs Jan 12 deadline conflict, and the domain mismatch. dom1 caught the expedited sole arbitrator vs \"non-starter\" conflict. base1 and inv1 each raised only some of these. dom1's looser comment-format wording (\"format the email asked for\") did not prevent balloon comments. agg1's explicit inline-paragraph wording plus the builder gave visible notes. Single rollouts, and the skill is bundled with the other edits, so the attribution is not isolated.\nverdict: confounded\n\ncomponent: systemprompt.md (rewrite: inventory first, source hierarchy, plan outputs, verify artifact; trigger lines for both skills)\ncandidates: inv1 (rewrite with redline-docx trigger), dom1 (base prompt plus playbook trigger only), agg1 (rewrite with both triggers)\nchange: inv1 and agg1 replaced the base prompt's generic steps with a numbered procedure. It covers an inventory of all files including emails, a source hierarchy applied in both deliverables, early output planning, and read-back verification. It also adds notes that python-docx is absent and that .eml bodies need decoding. dom1 only appended one trigger line for the playbook skill.\nobserved: inv1 and agg1 surfaced a \"source hierarchy and conflicts\" table or section, with tier conflicts and the Jan 11/12 deadline conflict. dom1 reached the Ostrander routing through the skill, not the prompt. agg1 loaded the playbook skill on its first action (Skill call at line 2). inv1 had no trigger line for the playbook skill, so the prompt rewrite alone did not give the Ostrander routing. The hierarchy's effect cannot be separated from the skills.\nverdict: confounded\n\ncomponent: LongTermMEMORY.md (method-only notes)\ncandidates: inv1, agg1\nchange: Added seven generic method bullets. They cover baseline and instructions first, mark unverifiable agreements, reconcile tiers, report conflicts without silently correcting them, test the playbook's positions against each other, and check the tooling.\nobserved: No distinct behavior can be traced to this file. It largely duplicates the systemprompt and skill content. Neither inv1 nor agg1 cites it, and dom1 and base1 behaved comparably on the points it covers where those were already in the prompt or skill.\nverdict: no observed effect"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/lab-sonnet-imp/exec/lab-cc-agg1/arbitration-international-dispute-resolution/draft-markup-of-arbitration-agreement/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "ffaff99a21fa9265"
+    }
+  },
+  "errors": []
+}

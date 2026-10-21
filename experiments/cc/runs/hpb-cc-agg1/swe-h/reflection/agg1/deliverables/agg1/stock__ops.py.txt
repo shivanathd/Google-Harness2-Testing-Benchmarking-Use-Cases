@@ -1,0 +1,17 @@
+def add(data, sku, qty):
+    if qty <= 0:
+        raise ValueError(f"quantity must be positive, got {qty}")
+    data[sku] = data.get(sku, 0) + qty
+    return data
+
+
+def remove(data, sku, qty):
+    if qty <= 0:
+        raise ValueError(f"quantity must be positive, got {qty}")
+    if sku not in data:
+        raise ValueError(f"unknown SKU: {sku}")
+    left = data[sku] - qty
+    if left < 0:
+        raise ValueError(f"cannot remove {qty} of {sku}: only {data[sku]} in stock")
+    data[sku] = left
+    return data

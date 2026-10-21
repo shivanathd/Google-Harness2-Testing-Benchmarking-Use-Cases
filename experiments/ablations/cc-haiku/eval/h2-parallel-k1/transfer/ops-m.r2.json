@@ -1,0 +1,21 @@
+{
+ "cond": "h2-parallel-k1/transfer",
+ "task": "ops-m",
+ "rep": 2,
+ "partial": 0.0,
+ "all_pass": false,
+ "checks": {
+  "failed": false,
+  "users": false,
+  "top_code": false
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/ablations/cc-haiku/runs/hpb-cc-agg1/ops-e/harnesses/agg1",
+ "cost_usd": 0.00513771,
+ "tokens_in": 99697,
+ "tokens_out": 2843,
+ "wall_s": 55.9,
+ "error": "error_max_turns",
+ "infra_error": false,
+ "turns": 5,
+ "tool_calls": null
+}

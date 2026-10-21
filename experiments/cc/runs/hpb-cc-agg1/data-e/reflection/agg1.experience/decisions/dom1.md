@@ -1,0 +1,10 @@
+- The single base run (base1) wrote `{"net_usd": 18691.64, "transactions": 21}`. I recomputed the figure independently from `source/` and got the same result (18691.6368, 21 transactions). The run handled every trap in the data: mixed date formats, quoted comma amounts, parenthesised negatives, 6 byte-identical duplicate rows, out-of-period SETTLED rows, and non-SETTLED statuses. I found nothing to fix.
+- I still added one on-demand skill, `skills/revenue-reconciliation/SKILL.md`, because the base harness has no domain knowledge at all, and the run's success rested on the solver's own judgment. A trigger line in `systemprompt.md` makes the skill loadable. The run does not show it is needed.
+- The skill adds these practitioner checks, none of which the run had been told to do:
+  - Collapse duplicates by txn_id before summing or counting, and compare duplicate copies field by field. The run did compare its duplicates, and they were identical. If copies conflict, the choice must be stated, not hidden.
+  - Check that every currency has an FX rate, and that the rate column's direction (`usd_per_unit`) means multiply.
+  - Use Decimal and round once at the end.
+  - Cross-check the total and count by a second route.
+  - Report exclusions by reason.
+- I labelled the workspace facts as instance-specific. They are the 42 rows, 36 distinct ids, the formats seen, and the excluded settled rows (T11006, T11027, T11032 and T11022). The result is 21 transactions and 18691.64 USD. I verified all of these against the source. The skill does not change the deliverable shape: `answer.json` keeps exactly the two requested keys.
+- No always-on prose was added beyond the one trigger line.

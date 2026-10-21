@@ -1,0 +1,123 @@
+{
+  "task_id": "ops-h",
+  "domain": "ops",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-cc-agg1/ops-h/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/cc/exec/hpb-cc-agg1/ops-h/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "ops-h",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [
+        "inv1",
+        "agg1"
+      ],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.0808702,
+          "cached": false,
+          "notes": "KEEP_BASE: I made no changes to `context/harness/`.\n\n- **Rollout:** `base1` is the only rollout. It read RUNBOOK.md and sampled all three logs, including the gzip billing file. It then wrote one script covering every runbook rule. The rules were: skip invalid-JSON lines, drop `/healthz`, count errors as status >= 500, filter the 06:00\u201312:00 UTC window after converting mixed offsets (-03:00, +01:00, +00:00), and multiply billing `latency_s` by 1000. Nearest-rank p95 used ceil(0.95n). It ran a second check on the billing unit conversion, wrote `output/answer.json`, and summarised its method.\n- **My check:** I recomputed all three services independently from `source/logs`, with the same rules and the latencies rounded to 6 decimals to absorb float noise. The results match `deliverables/base1/output__answer.json.txt` exactly:\n  - gateway: 96 requests, error_rate 0.1354, p95 334\n  - search: 119 requests, error_rate 0.1513, p95 192\n  - billing: 124 requests, error_rate 0.1613, p95 393\n- **Why not edit:** I found no divergence, tool error, repeated failure or visible risk in the trajectory. The runbook already carries the workspace facts that matter, and the run applied them correctly.\n- **Possible residual risk (not edited):** the run did not reopen the written file. It also did not round the `latency_s * 1000` values before the nearest-rank selection, so float noise (for example 392.99999) could in principle shift a p95 after an int cast. Here it did not matter. A single clean run does not justify adding always-on text or a skill for either point.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.104857,
+          "cached": false,
+          "notes": "**Base run (base1).** It produced a correct answer. I recomputed the figures independently from the source logs and got the same numbers:\n- gateway: 96 requests, error rate 0.1354, p95 334\n- search: 119 requests, error rate 0.1513, p95 192\n- billing: 124 requests, error rate 0.1613, p95 393\n\nI also checked the billing schema change. All `latency_s` rows fall at or after 09:00 UTC, and no `latency_ms` rows fall after it. The run did the following right:\n- It converted mixed UTC offsets before windowing.\n- It skipped truncated lines.\n- It excluded `/healthz`.\n- It counted only status \u2265 500 as errors.\n- It converted seconds to milliseconds per row.\n- It used nearest-rank p95.\n\nI found nothing to fix, so the base behaviour is preserved.\n\n**Added `skills/service-traffic-report/SKILL.md`.** This is a low-risk, on-demand skill for the next log-statistics task in this ops domain. It gives the order of operations (parse, drop probes, convert to UTC, apply a start-inclusive and end-exclusive window, then count). It also carries:\n- the per-row unit normalisation and a check that the runbook's cut-over agrees with the data;\n- nearest-rank p95 with float-safe rounding;\n- a pre-finish consistency check, plus the workspace facts verified here, labelled as such.\n\nThe motivating moments in the trajectory:\n- the mixed `-03:00`, `+01:00` and `+00:00` offsets, which the runbook never mentions;\n- the sanity check of `latency_s` against `latency_ms` ranges;\n- the truncated lines.\n\n**Trigger line.** I appended one line to `systemprompt.md` so the skill is named in the always-on text.\n\nI made no other edits: no always-on prose beyond that one line, and no scripts, since procedure belongs to the parallel candidate.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.0647292,
+          "cached": false,
+          "notes": "kept -> base harness (KEEP_BASE; no files edited) -> base1 produced a correct answer on the first pass, 1/1 rollouts. It read RUNBOOK.md, sampled all three logs including the gzip billing file, and converted mixed offsets (-03:00, +01:00, +00:00) to UTC before windowing. It skipped truncated lines, excluded /healthz, and counted errors as status >= 500 only. It converted billing `latency_s` to ms per row and sanity-checked the unit change against the `latency_ms` ranges. It used nearest-rank p95 and wrote `output/answer.json` in the requested shape. The inv1 decision note independently recomputed gateway 96 / 0.1354 / 334, search 119 / 0.1513 / 192 and billing 124 / 0.1613 / 393 and matched exactly. No tool error, retry or budget problem appears in the trajectory.\ndropped -> dom1: `skills/service-traffic-report/SKILL.md` plus a trigger line in `systemprompt.md` -> Every rule in it is something base1 already did correctly: per-row unit normalisation, UTC window with end exclusive, nearest-rank p95, and the cut-over cross-check. No moment in the base trajectory shows a failure it would have prevented. Its \"Workspace facts\" section is specific to this one task's data and could mislead on a different log set. The cost is an always-on line plus a skill load on a task the base harness already solves. I had only dom1's own single rollout (pool/dom1/rollout.md) and did not use it to justify the edit.\ndropped -> inv1: no-change candidate (KEEP_BASE, no harness diff) -> it found no divergence from the base run. Its one residual-risk note, that float products like 392.99999 could shift a p95 after an int cast, did not occur here (1/1 clean), so it does not justify added text.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "ops-h",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 3,
+        "expected_P": 3,
+        "usd": 0.250456,
+        "rollout_usd": 0.0,
+        "session_usd": 0.250456,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "ops-h",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-cc-agg1/ops-h/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.061069500000000006,
+      "experience": {},
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/cc/exec/hpb-cc-agg1/ops-h/agg1",
+      "chosen_tree_is_base": true,
+      "harness_fingerprint": "020675403b27bd72"
+    }
+  },
+  "errors": []
+}

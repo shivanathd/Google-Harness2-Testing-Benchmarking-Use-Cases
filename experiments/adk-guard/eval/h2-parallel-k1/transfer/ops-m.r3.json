@@ -1,0 +1,21 @@
+{
+ "cond": "h2-parallel-k1/transfer",
+ "task": "ops-m",
+ "rep": 3,
+ "partial": 0.0,
+ "all_pass": false,
+ "checks": {
+  "failed": false,
+  "users": false,
+  "top_code": false
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/adk-guard/runs/hpb-adk-agg1/ops-e/harnesses/agg1",
+ "cost_usd": null,
+ "tokens_in": 4926,
+ "tokens_out": 187,
+ "wall_s": 119.3,
+ "error": "",
+ "infra_error": false,
+ "turns": null,
+ "tool_calls": 3
+}

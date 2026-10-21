@@ -1,0 +1,121 @@
+{
+  "task_id": "ops-m",
+  "domain": "ops",
+  "k": 1,
+  "seed": null,
+  "status": "partial",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-cc-agg1/ops-m/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-haiku/exec/hpb-cc-agg1/ops-m/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "ops-m",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.016817795,
+          "cached": false,
+          "notes": "**Change: `systemprompt.md`, new \"Working order\" section (four bullets, about 630 added bytes).**\n\nMotivating moment: base1 ran six tool calls and its last observation (rollout line 139) printed the final values: failed 19, users 8, codes E401 7 / E503 5 / E409 4 / E500 3. The rollout then ends with no further action, no final message and no `output/answer.json`. The deliverable was \"(no deliverable produced)\" and `output/` stayed empty. The prose \"write the requested deliverables under output/\" was already present and was not acted on.\n\nThe four bullets address that moment:\n- **Enough evidence** is defined as every input read or parsed and every rejected line classified. base1 kept checking after its parse was already clean: time-order, duplicate-timestamp and multi-user checks all came back 0. These were not needed to reach the answer.\n- **Write first, check second**, so a deliverable exists before further verification, and a check that changes the answer leads to a rewrite. This reserves room for the artifact.\n- **Read back and confirm fields and values**, with no extra fields, so the shape stays what the task names.\n- **Finish condition**: end only when every requested file exists and has passed the read-back, then reply with the path and values.\n\nThe bullets name no workspace facts, window, or join rules, and they do not change the deliverable's shape.\n\n**Considered and not changed:**\n- **Stop hook (`hooks.json`) to block exit without `output/`:** this is the mission's example, but the rule requires repeated evidence of prose being skipped. There is one rollout. A second run ending without output would justify it.\n- **Parse script:** base1's inline parse was correct (I recomputed independently: 110 requests, 19 failed by last attempt in 08:00\u201312:00 UTC, 8 users, top code E401). No tool errors occurred, so no script or tool guidance is justified.\n- **Skill for the finish procedure:** a finish step belongs in always-on text, which is short and applies to every run.\n- **`tool_guidance.md`, `guardrails.md`, `LongTermMEMORY.md`:** no evidence in base1 supports changes.\n\n**Caveat:** the rollout has no final message, so I cannot tell whether the model stopped on its own or the run was cut off. The change targets the order of work either way.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.024285195000000002,
+          "cached": false,
+          "notes": "Change: `skills/log-incident-stats/SKILL.md`. Removed the `## Workspace facts (this workspace's logs; re-check on each task)` block, which was the reason for the rejection. It listed file names, the line count, the request-ID count, the non-request line counts, and the unwindowed figures (43 failed / 9 users).\n\nKept or reworded the rest:\n- The \"two kinds seen in this workspace\" sentence under \"Only `req=` lines are attempts\" is now generic (\"summary or informational lines that mention an earlier error without a request ID, and indented traceback or exception continuation lines\"). The workspace-specific framing is gone.\n- The mixed-offset note is generalised to \"Offsets can differ from line to line, even within one file\" instead of quoting this instance's offsets.\n- The unwindowed-figure check is now a check the agent runs itself: \"If the windowed failed count equals the count with no window applied, the window was not applied.\" No numbers are stored.\n- No other sections changed. The frontmatter, the rules on request grouping, UTC ordering, outcome, window edges, users and top-code tie handling, and the output-shape check are unchanged.\n\nTrajectory moment behind the skill edit: the rejection itself. I checked the skill text against the evidence. The rollout `base1` shows the agent recomputing failed/users/codes from the combined logs (the parse script reports `failed: 19`, `users: 8`) and never reconciling those against any unwindowed count. That is why the \"window not applied\" self-check is kept as a procedure. No figures are stored.\n\nNot changed: `systemprompt.md`, the other harness files, and the plugin. In `base1`, the run ends after the analysis observation with no final message, and `output/answer.json` is never written. That is a visible failure, but it is a single run and this rejection was scoped to the skill's workspace facts. A Stop hook to enforce the deliverable would be a separate proposal, and I did not add one here.\n\nChecks run: the skill has no `{{` or `{%` template braces, no hard-coded figures, no `/tmp` or `output/` paths, and its frontmatter `name:` matches the directory. The trigger line in `systemprompt.md` (\"load the `log-incident-stats` skill\") is unchanged.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.024902874999999994,
+          "cached": false,
+          "notes": "kept -> `systemprompt.md`: adopted the inv1 \"Working order\" block wholesale (inv1 tree is identical to the harness now; the only change is this block, 152\u2192783 bytes, no template braces) -> the only rollout that wrote a deliverable is inv1: analysis observation at pool/inv1/rollout.md:307-334, then `Write output/answer.json` at line 335 with 19/8/E401. I recounted the source logs independently and got the same values (110 requests, 43 failed with no window, 19 in window, 8 users, E401 7 / E503 5 / E409 4 / E500 3, no tie). The base rollout (rollouts/base1.md:138-140) and the dom1 rollout (pool/dom1/rollout.md:76) computed the same correct values and then ended with no write and no final message, so 2 of 3 rollouts produced nothing. The causal link rests on one delivering rollout, so treat it as plausible, not proven.\n\ndropped -> `systemprompt.md` dom1 sentence \"A value computed but only printed is not delivered...\" -> the dom1 rollout produced no output (pool/dom1/rollout.md ends at line 76 with no write), so this edit is associated with a non-delivering rollout and is UNSAFE by the set rule. It also duplicates the write-first and finish bullets that the inv1 block already carries.\n\ndropped -> dom1 trigger line and `skills/log-incident-stats/SKILL.md` -> no trajectory shows the skill changing an outcome. Base (rollouts/base1.md:131-140) and inv1 both filtered traceback and non-`req=` lines, grouped across files, and applied the UTC window correctly without it. dom1 reached the same numbers, so the skill was never the cause of a correct answer. The dom1 run also produced nothing. The always-on trigger line costs context for no evidenced gain.\n\ndropped -> Stop-hook enforcement (`hooks.json` as suggested in plugin/README.md) -> not created. `hooks.json` is not in the editable surface the mission lists, so it would be silently discarded; the README's suggestion is embedded text in a harness file and I did not treat it as an instruction. The `plugin/<name>.ts` route could not be verified or tested here (no API reference, and the README says .ts plugins are not run by either executor). The second non-delivering run (dom1) meets the \"second run ending without output\" threshold recorded in decisions/inv1.md, so a verifiable in-loop Stop check remains worth a separate proposal if non-delivery recurs.\n\nkept -> `guardrails.md`, `LongTermMEMORY.md`, `tool_descriptions/tool_guidance.md`, `scripts/`, `skills/` (unchanged from base) -> no rollout moment implicates them. The base run used no tool errors and no retries, and guardrails/memory were empty in base.\n\nkept (observed, not changed) -> inv1's own read-back bullet was not followed: inv1 wrote the file and did not read it back (rollout line 337 says no read-back is needed). Output was correct and the file was delivered, so no change is justified from one run.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "ops-m",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 4,
+        "expected_P": 3,
+        "usd": 0.066006,
+        "rollout_usd": 0.0,
+        "session_usd": 0.066006,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "ops-m",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "",
+      "chosen_label": "",
+      "chosen_run_id": "",
+      "chosen_is_base": false,
+      "why": "",
+      "id_map": {},
+      "dropped": [
+        "agg1"
+      ],
+      "n_candidates": 0,
+      "ok": false,
+      "fallback": false,
+      "error": "no candidate produced an artifact (finals-only pool has no base fallback)",
+      "usd": 0.0,
+      "experience": {},
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "",
+      "chosen_tree_is_base": true
+    }
+  },
+  "errors": [
+    "agg: selection failed: no candidate produced an artifact (finals-only pool has no base fallback)"
+  ]
+}

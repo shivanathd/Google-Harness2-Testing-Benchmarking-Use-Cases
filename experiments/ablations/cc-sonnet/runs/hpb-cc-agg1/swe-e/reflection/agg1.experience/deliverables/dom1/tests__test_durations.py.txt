@@ -1,0 +1,69 @@
+from durations import parse_duration
+
+
+def test_hours_minutes():
+    assert parse_duration("1h30m") == 5400
+
+
+def test_seconds_only():
+    assert parse_duration("45s") == 45
+
+
+def test_all_units_with_spaces():
+    assert parse_duration("2h 5m 10s") == 7510
+
+
+def test_omitted_part():
+    assert parse_duration("1h10s") == 3610
+
+
+def test_zero_values():
+    assert parse_duration("0s") == 0
+    assert parse_duration("0h0m0s") == 0
+
+
+def test_case_insensitive():
+    assert parse_duration("1H30M") == 5400
+    assert parse_duration("45S") == 45
+
+
+def test_surrounding_and_inner_whitespace_allowed():
+    assert parse_duration("  1h 30m  ") == 5400
+
+
+def test_rejects_empty_and_whitespace_only():
+    for text in ["", "   "]:
+        with pytest.raises(ValueError):
+            parse_duration(text)
+
+
+def test_rejects_bare_number():
+    with pytest.raises(ValueError):
+        parse_duration("30")
+
+
+def test_rejects_unknown_unit():
+    with pytest.raises(ValueError):
+        parse_duration("1x")
+
+
+def test_rejects_repeated_unit():
+    with pytest.raises(ValueError):
+        parse_duration("1h1h")
+
+
+def test_rejects_wrong_order():
+    with pytest.raises(ValueError):
+        parse_duration("1m1h")
+
+
+def test_rejects_signed_and_fractional_numbers():
+    for text in ["+1h", "-1h", "1.5h"]:
+        with pytest.raises(ValueError):
+            parse_duration(text)
+
+
+def test_rejects_stray_characters():
+    for text in ["1h foo", "xx1h", "1h30mxyz", "h", "1 h"]:
+        with pytest.raises(ValueError):
+            parse_duration(text)

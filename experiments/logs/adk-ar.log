@@ -1,0 +1,13 @@
+[ar adk swe] it1 score=0.20 best=0.20 kept=False
+[ar adk data] it1 score=1.00 best=1.00 kept=True
+[ar adk swe] it2 score=0.80 best=0.80 kept=True
+[ar adk ops] it1 score=0.00 best=0.33 kept=False
+[ar adk data] it2 score=1.00 best=1.00 kept=False
+[ar adk ops] it2 score=0.00 best=0.33 kept=False
+[ar adk data] it3 score=1.00 best=1.00 kept=False
+[ar adk data] it4 score=1.00 best=1.00 kept=False
+[ar adk ops] it3 score=1.00 best=1.00 kept=True
+[ar adk swe] it3 score=1.00 best=1.00 kept=True
+[ar adk ops] it4 score=0.00 best=1.00 kept=False
+[ar adk swe] it4 score=0.60 best=1.00 kept=False
+done {'data': 1.0, 'ops': 1.0, 'swe': 1.0}

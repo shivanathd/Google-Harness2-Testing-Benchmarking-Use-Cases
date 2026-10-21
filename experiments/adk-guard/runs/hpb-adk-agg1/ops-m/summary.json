@@ -1,0 +1,126 @@
+{
+  "task_id": "ops-m",
+  "domain": "ops",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-adk-agg1/ops-m/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/adk-guard/exec/hpb-adk-agg1/ops-m/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "ops-m",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.30146100000000003,
+          "cached": false,
+          "notes": "This revision fixes the two problems the validator reported. I didn't re-read the trajectories this round. I only removed instance data from the harness and re-checked the result.\n\n- **Removed the \"Workspace fact\" block** from `skills/request-failure-stats/SKILL.md`. It held this task's own results: failed=19, users=8, top_code=E401, the per-code counts, and the 06 Oct window. The skill now teaches only the method, which the agent re-derives on each run.\n- **Replaced the other instance-specific examples:**\n  - The date in the timestamp example is now the generic form `YYYY-MM-DDTHH:MM:SS+00:00`. I changed it in both `SKILL.md` and the `request_failures.py` docstring.\n  - The \"cache warm after ERROR code=E500\" example is now a generic description: an INFO line that merely mentions \"ERROR code=...\".\n- **Checked what's left.**\n  - A grep of the harness finds no error-code ids, no 2026 dates and no \"Workspace fact\" text.\n  - `request_failures.py` still byte-compiles.\n  - The skill's trigger line is still in `systemprompt.md`, and the script still ships at `skills/request-failure-stats/scripts/request_failures.py`.\n  - There are no `{{` or `{%` sequences in the always-on text.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.30564800000000003,
+          "cached": false,
+          "notes": "The previous proposal was rejected because `skills/request-failure-stats/SKILL.md` recorded this task's own results. I fixed that by editing the file in place.\n\n- **Removed the \"Workspace facts\" block.** It held this instance's cross-check values (the failed-request, user and top-code counts), its file and request counts, and its look-alike wrong answers. The skill now teaches only the method: group by `req=`, classify by the last attempt in UTC, treat the window as start-inclusive and end-exclusive, and skip continuation lines.\n- **Generalized the script invocation.** The command now takes `START_UTC END_UTC FILE [FILE ...]` with a placeholder date format. It no longer names this instance's date or log files.\n- **Added one method check to \"Before writing\".** The agent compares its answer with a naive count of every ERROR line in the window. It should be able to explain the difference: retries, recovered requests, continuation lines. This replaces the removed hard-coded look-alike value with a check the agent can re-derive.\n- **Left unchanged:** the trigger line in `systemprompt.md` and the script `skills/request-failure-stats/scripts/request_failures.py`. A grep of `SKILL.md` and the script for the removed instance-specific values (the counts, the error code, the date) found no hits. I did not re-read the script's logic or run it.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.1934863,
+          "cached": false,
+          "notes": "kept -> dom1 `skills/request-failure-stats` (SKILL.md and script) plus its trigger line in `systemprompt.md` -> The base rollout (1/1) produced no deliverable. It read truncated logs, got binary output from the `.gz` file, hit a shell quoting error, and resent the same broken awk command twice. The dom1 rollout loaded the skill, ran the script on all 3 files, and wrote `{\"failed\":19,\"users\":8,\"top_code\":\"E401\"}`. dom1's script judges the last attempt by UTC instant (and flags a disagreement with the highest `attempt=`), skips continuation lines and req-less \"cache warm after ERROR\" lines, and lists every failed request with its source file and line. I chose it over inv1's script for those checks. Both candidates gave the same answer, so no run separates them. Neither the base nor any candidate checked the answer independently, so I have not confirmed that 19/8/E401 is correct.\ndropped -> inv1 skill and script (argparse `--out`, highest-`attempt=` rule) -> inv1's rollout gave an identical 19/8/E401 answer, so it adds nothing over dom1. Having two near-duplicate skills would also be redundant.\ndropped -> inv1 `hooks.json` Stop hook and `scripts/check_output.py` -> The hook never fired in the inv1 rollout. `hooks.json` is not a listed editable component, so I expect it to be discarded or unsupported. The always-registered stop-blocking behaviour could also misfire on tasks that legitimately write nothing.\nkept -> inv1 `tool_descriptions/tool_guidance.md` (3 lines: `read_file` returns binary on `.gz`; do not resend a failed quoted shell command; truncated reads mean compute with scripts) -> Base1 showed all three failures. It read `.gz` via `read_file` and got garbage, it resent the identical broken awk command twice, and its large reads were truncated. The text is short and aimed at the exact failure that left the base with no output.\nrevised -> `systemprompt.md` -> I used dom1's narrow trigger line, which names the skill verbatim so the skill is loaded. I added inv1's one sentence about writing the deliverable as soon as the numbers are computed and not answering from partial reading. I left out inv1's \"read back after writing\". The run it came from did not read the file back, so that sentence had no observed effect.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "ops-m",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 5,
+        "expected_P": 3,
+        "usd": 0.800595,
+        "rollout_usd": 0.0,
+        "session_usd": 0.800595,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "ops-m",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-adk-agg1/ops-m/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.1496547,
+      "experience": {
+        "cue": "A recurring analysis task over messy, multi-file inputs (retries, mixed timezones, compressed rotations, look-alike lines) where an unaided run flailed with ad-hoc shell commands and wrote no deliverable.",
+        "lesson": "Add a task-class skill to the harness's skills/ directory. It should hold a method-only SKILL.md and a tested script that does the whole computation: pool across all files, decompress, convert timezones, filter out look-alike lines, and print the answer with a per-item listing for spot-checks. Add a one-line trigger in systemprompt.md that names the skill and says to compute with its script instead of counting by eye. Do not put the instance's own results, dates or file names in the skill. Judge the edit by whether the first action is a skill load followed by a single script run that writes the output file.",
+        "evidence": "The skill-plus-trigger bundle (agg1, dom1, inv1). Base1 had no skill, got binary from `.gz` via read_file, resent the same broken awk command twice, and wrote no file. All three candidates loaded the skill first, ran the script once on all 3 files, and wrote a deliverable with identical numbers. The tool_guidance and extra-prompt-sentence edits were never exercised and show no contrast. Skill and trigger were always added together.",
+        "confidence": "low. The only contrast is one base rollout against three near-identical candidate rollouts, and the three candidates agree with each other but nothing checks the answer. It supports \"a scripted skill with a trigger line turned a no-output run into a deliverable\", not that the answer is correct or that any single component is responsible.",
+        "edits": "component: skills/request-failure-stats (SKILL.md and scripts/request_failures.py) plus the trigger line in systemprompt.md\ncandidates: agg1 (the adopted bundle, shown in context/harness), dom1 (same skill with an in-script filter), inv1 (a different CLI and rule)\nchange: Added a skill and script for grouping retried requests by `req=`, judging the last attempt in UTC, treating the window as start-inclusive and end-exclusive, skipping traceback and req-less lines, and reading `.gz` files. The system prompt gained a line telling the agent to load the skill for this kind of task. The three candidates differ in detail. dom1 and agg1 use a positional `START END FILE...` CLI that judges the last attempt by UTC instant and flags a disagreement with the highest `attempt=`. inv1 uses a `logs --start --end --out` CLI, takes the highest `attempt=` as the last attempt, and writes the answer file itself.\nobserved: base1 never loaded a skill. It read `.gz` through `read_file` and got binary, hit a shell quoting error, resent the same broken awk command twice, and produced no deliverable. agg1, dom1 and inv1 all loaded the skill as their first action, ran the script once on all 3 files, and wrote `{\"failed\":19,\"users\":8,\"top_code\":\"E401\"}`. The dom1 and agg1 rollouts are identical. No run checks 19/8/E401 independently, so correctness is unverified. The skill and its trigger line were always added together, and the only baseline is one rollout.\nverdict: confounded\n\ncomponent: systemprompt.md (sentence \"Write the deliverable as soon as the computed numbers are in hand\u2026 Never answer from partial reading\")\ncandidates: agg1 and inv1 (inv1 also adds \"read the file back after writing\"); dom1 omits it\nchange: Added a rule to write the output file as soon as the numbers are computed, and not to answer from partial reading. inv1 extended it with a read-back step.\nobserved: dom1 had no such sentence and behaved the same as agg1, which did have it. The inv1 rollout did not read the file back either. The sentence was not tested against a failure path.\nverdict: no observed effect\n\ncomponent: tool_descriptions/tool_guidance.md (3 lines: `.gz` returns binary from read_file, don't resend a failed quoted command, large reads truncate)\ncandidates: agg1 (kept from inv1's edit); dom1 removes it\nchange: Added guidance aimed at the three failures seen in base1. The dom1 variant deletes these lines.\nobserved: In none of the three candidate runs did the agent call `read_file` on a `.gz` file or hit a shell error. The skill path ran straight to the script, so the guidance was never exercised. dom1 without it behaved the same as agg1 with it.\nverdict: no observed effect\n\ncomponent: hooks.json and scripts/check_output.py (Stop hook that blocks finishing when output/ is empty or has bad JSON)\ncandidates: inv1 only\nchange: Registered a stop hook that exits 2 when no usable file is under output/ or a `.json` file does not parse.\nobserved: The hook never fired in the inv1 rollout, because the file was written correctly on the first try. The decision log dropped it as an unlisted component and a possible misfire risk. Its effect is untested.\nverdict: no observed effect\n\ncomponent: skills/request-failure-stats/SKILL.md \"Before writing\" checks, including the naive ERROR-line sanity check\ncandidates: agg1 (the dom1 skill text with this check added)\nchange: Added checklist items: users \u2264 failed, code counts sum to failed, every file passed to the script, and a comparison against a naive ERROR count. The \"Workspace facts\" block holding this task's own results was removed.\nobserved: The agg1 rollout did not run the naive-count comparison. It ran the script once and wrote the file. The agg1 trajectory is identical to dom1's, which lacks the naive-count line.\nverdict: no observed effect"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/adk-guard/exec/hpb-adk-agg1/ops-m/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "fadba3dfbbb72fb0"
+    }
+  },
+  "errors": []
+}

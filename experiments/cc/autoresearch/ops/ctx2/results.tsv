@@ -1,0 +1,3 @@
+iter	score	kept	notes
+0	1.000	True	baseline
+1	1.000	False	th an inclusive start and exclusive end, using only the record's own level field, ignoring continuation lines and embedded "ERROR" or `user=` text, checking ties, and verifying the output schema. The 

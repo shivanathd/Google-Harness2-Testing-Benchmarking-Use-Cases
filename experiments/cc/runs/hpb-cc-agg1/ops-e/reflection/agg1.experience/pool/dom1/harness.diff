@@ -1,0 +1,39 @@
+--- current/skills/log-incident-stats/SKILL.md
++++ dom1/skills/log-incident-stats/SKILL.md
+@@ -0,0 +1,30 @@
++---
++name: log-incident-stats
++description: Count incidents, distinct users and top error codes from a multi-service, multi-timezone application log for a stated time window. Use before computing any log-derived error/traffic statistic.
++---
++
++# Log -> incident / traffic statistics
++
++ANALYTIC MOVE: classify each log EVENT (not each physical line), normalise its timestamp to the window's timezone, filter by window and level, then count events / distinct keys / modal value.
++
++## Event definition (check each before counting)
++- An event starts at a line beginning with a timestamp. Indented lines (tracebacks, stack frames, `RuntimeError: upstream ERROR user=... code=...`) belong to the parent event. They are not events, and their embedded user/code values are NOT the event's user/code. Attribute user and code from the header line only.
++- Level is the header's level token (the field right after the timestamp). `ERROR` appearing inside `msg=` text (e.g. `INFO ... msg=retrying after ERROR code=E500`) is not an ERROR-level event. WARN/INFO lines carrying `code=` are not errors.
++- Do not match on the substring "ERROR" over raw lines; parse the header.
++
++## Time handling
++- Every timestamp has its own UTC offset (`Z`, `+01:00`, `+05:30`, `-07:00`). Convert to UTC before comparing; never compare local wall-clock times or sort lines by file order (the file is not chronological).
++- Windows are half-open: start inclusive, end exclusive. An event exactly at the end instant is out; exactly at the start is in. Check events near both edges in several offsets (including the half-hour +05:30 zone and events whose local date differs from the UTC date).
++
++## Counting
++- "Distinct users" = set of user values over the in-window ERROR events only (not over all users in the log).
++- "Most frequent code" = mode over in-window ERROR events; print the full ranking and confirm no tie at the top. If a tie exists, say so in the reply rather than silently choosing.
++- Confirm the counts reconcile: sum of per-code counts == error count; per-service or per-user breakdown also sums to the same total.
++- Before finishing, list the in-window ERROR events (UTC time, service, user, code) and eyeball them against the raw log; report the count of unparsed header lines (should be 0 or explained).
++
++## Deliverable
++Write exactly the keys/types the task specifies (ints as JSON numbers, code as the string as it appears in the log). No extra keys.
++
++## Workspace facts (this task instance; re-verify against source/app.log)
++- Log uses ERROR/WARN/INFO; format `TS LEVEL [service] user=X code=Y msg=...`; INFO lines have no code unless "retrying after ERROR". Traceback blocks follow some ERROR headers and embed a different user/code that must be ignored.
++- Window 2026-10-03 09:00-12:00 UTC yielded 15 ERROR events / 6 users / top E500 (5 vs E403 4, E401 4) under these rules.
+--- current/systemprompt.md
++++ dom1/systemprompt.md
+@@ -1 +1,3 @@
+ You are an assistant that completes tasks inside a workspace directory. Read the task, do the work, and write the requested deliverables under output/.
++
++When analysing service/application logs into error, incident, user or traffic statistics, load the `log-incident-stats` skill.

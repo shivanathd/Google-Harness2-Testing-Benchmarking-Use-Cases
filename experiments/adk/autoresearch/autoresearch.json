@@ -1,0 +1,114 @@
+{
+  "data": {
+    "dev_task": "data-e",
+    "best_dev_score": 1.0,
+    "log": [
+      {
+        "iter": 0,
+        "score": 0.0,
+        "kept": true,
+        "notes": "baseline"
+      },
+      {
+        "iter": 1,
+        "score": 1.0,
+        "kept": true,
+        "notes": "oted CSV, never write placeholder zeros, and not repeat identical commands. The baseline looped on the same broken awk command until it hit the 40-call limit and scored 0. On the sample data the script outputs net_usd 18691.64 over 21 transactions; I haven't checked that against a reference.</notes>"
+      },
+      {
+        "iter": 2,
+        "score": 1.0,
+        "kept": false,
+        "notes": "tes. I also added a step 6 to `systemprompt.md`: reconcile every raw row, resolve any WARNING or DUP-DIFFERENT lines, and adapt a copy of the script when the task's rules differ from its defaults. The last score was already 1.0, so the aim is to keep it there on other tasks of the same kind.</notes>"
+      },
+      {
+        "iter": 3,
+        "score": 1.0,
+        "kept": false,
+        "notes": " differ from the defaults, and to check `answer.json` against the schema at the end. The script still gives the same answer on the sample data (net 18691.64, 21 transactions). The score was already 1.0, so this is a robustness change for other tasks of the same kind, and I haven't scored it.</notes>"
+      },
+      {
+        "iter": 4,
+        "score": 1.0,
+        "kept": false,
+        "notes": "- and whitespace-insensitively, so \"t11001 \" and \"T11001\" count as the same transaction. It also stops with a clear message if a currency has no FX rate, instead of crashing with a KeyError. On the sample data it still gives net 18691.64 over 21 transactions, so the score should stay at 1.0.</notes>"
+      }
+    ],
+    "final": "/Users/me/GoogleHarness2/experiments/adk/autoresearch/data/final"
+  },
+  "ops": {
+    "dev_task": "ops-e",
+    "best_dev_score": 1.0,
+    "log": [
+      {
+        "iter": 0,
+        "score": 0.3333333333333333,
+        "kept": true,
+        "notes": "baseline"
+      },
+      {
+        "iter": 1,
+        "score": 0.0,
+        "kept": false,
+        "notes": "ead of eyeballing, read the whole file, and use the script for log-window questions. The baseline agent estimated by eye and wrote 24/10/E500. On the sample log the script gives 15 errors and 6 users (top code E500), but I haven't run the agent with the new harness, so the score is untested.</notes>"
+      },
+      {
+        "iter": 2,
+        "score": 0.0,
+        "kept": false,
+        "notes": "sers and top code as JSON. The system prompt, guardrails and tool guidance now tell the agent to compute counts with this script instead of estimating from a truncated read. The baseline's by-eye estimate scored 0.333; I ran the script on the sample log but have no score for the new harness.</notes>"
+      },
+      {
+        "iter": 3,
+        "score": 1.0,
+        "kept": true,
+        "notes": "r runs wrote 24/10/E500 by eye). I rewrote the system prompt, guardrails, tool guidance and memory so the agent runs the script instead of estimating, with the exact command and a fallback. The two earlier script attempts scored 0, so I'm unsure the agent used it, and this run wasn't scored.</notes>"
+      },
+      {
+        "iter": 4,
+        "score": 0.0,
+        "kept": false,
+        "notes": "cketed level such as `[ERROR]`, and quoted or `user_id=` / `error_code=` style fields. The harness already scored 1.0, so I touched nothing else. It is meant to keep working on other logs of the same kind. I re-ran it on the sample log and it still gives 15 errors, 6 users and top code E500.</notes>"
+      }
+    ],
+    "final": "/Users/me/GoogleHarness2/experiments/adk/autoresearch/ops/final"
+  },
+  "swe": {
+    "dev_task": "swe-e",
+    "best_dev_score": 1.0,
+    "log": [
+      {
+        "iter": 0,
+        "score": 0.2,
+        "kept": true,
+        "notes": "baseline"
+      },
+      {
+        "iter": 1,
+        "score": 0.2,
+        "kept": false,
+        "notes": "make a real change, such as strict validation that raises ValueError instead of silently skipping junk. After that it runs ad-hoc checks and the existing tests, copies the file to the output path and diffs the copy. I haven't run the agent with the new files, so the score effect is untested.</notes>"
+      },
+      {
+        "iter": 2,
+        "score": 0.8,
+        "kept": true,
+        "notes": "ent; (2) actually change the code, using strict whole-input validation; (3) run throwaway checks that cover the symptom, valid formats and invalid inputs; (4) add tests; (5) re-copy the file to output/ and confirm with diff. This is untested, since I haven't run the agent with the new files.</notes>"
+      },
+      {
+        "iter": 3,
+        "score": 1.0,
+        "kept": true,
+        "notes": "its own checks. The new section says to use `re.fullmatch` or an ordered optional-group pattern that requires at least one part, to lowercase captured units, and to run a throwaway script covering valid and invalid cases before finishing. I haven't run the harness, so none of this is tested.</notes>"
+      },
+      {
+        "iter": 4,
+        "score": 0.6,
+        "kept": false,
+        "notes": "or `sys.path.insert` because that error is a path problem, not a code bug. It also says not to repeat a failed command or end on a plan. The copy to the output path and the `diff` check must actually be run before finishing. I haven't re-run the agent, so the effect on the score is untested.</notes>"
+      }
+    ],
+    "final": "/Users/me/GoogleHarness2/experiments/adk/autoresearch/swe/final"
+  },
+  "improver_usd": 0.5306
+}

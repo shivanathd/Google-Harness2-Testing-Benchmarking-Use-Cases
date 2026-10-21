@@ -1,0 +1,12 @@
+- I removed the "Workspace facts" block from `skills/fix-python-bug/SKILL.md`, as the rejection asked. It described this instance's files: `src/durations.py`, `parse_duration`, its regex bug, and the single test in `tests/test_durations.py`.
+- I changed the last checklist bullet from "raised as ValueError" to "the exception type the docstring names", so the skill no longer carries an instance-specific detail.
+- What remains is the generic practitioner checks:
+  - Turn the docstring into numbered clauses.
+  - Reproduce the failure first.
+  - Make a minimal fix.
+  - Probe each clause, including the parser edge cases.
+  - Treat existing tests as protected.
+  - Run `python3 -m pytest -q` from the workspace root.
+  - Copy the fixed source to the output path and `diff` it.
+- The trigger line in `systemprompt.md` still names `fix-python-bug`, so the skill passes the trigger-line rule.
+- I did not re-read the trajectories this round. The edit only removes the flagged content.

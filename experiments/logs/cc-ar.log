@@ -1,0 +1,13 @@
+[ar cc ops] it1 score=1.00 best=1.00 kept=False
+[ar cc data] it1 score=1.00 best=1.00 kept=False
+[ar cc swe] it1 score=1.00 best=1.00 kept=False
+[ar cc ops] it2 score=1.00 best=1.00 kept=False
+[ar cc data] it2 score=1.00 best=1.00 kept=False
+[ar cc swe] it2 score=1.00 best=1.00 kept=False
+[ar cc data] it3 score=1.00 best=1.00 kept=False
+[ar cc ops] it3 score=1.00 best=1.00 kept=False
+[ar cc data] it4 score=1.00 best=1.00 kept=False
+[ar cc swe] it3 score=1.00 best=1.00 kept=False
+[ar cc ops] it4 score=1.00 best=1.00 kept=False
+[ar cc swe] it4 score=1.00 best=1.00 kept=False
+done {'data': 1.0, 'ops': 1.0, 'swe': 1.0}

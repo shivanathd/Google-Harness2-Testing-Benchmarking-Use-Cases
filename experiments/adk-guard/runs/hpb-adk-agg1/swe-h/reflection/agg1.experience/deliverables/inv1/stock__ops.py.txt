@@ -1,0 +1,12 @@
+def add(data, sku, qty):
+    if qty <= 0:
+        raise ValueError("quantity must be positive")
+    data[sku] = data.get(sku, 0) + qty
+    return data
+
+
+def remove(data, sku, qty):
+    if qty < 0:
+        raise ValueError("quantity must not be negative")
+    data[sku] = data.get(sku, 0) - qty
+    return data

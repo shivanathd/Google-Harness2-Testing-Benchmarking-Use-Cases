@@ -1,0 +1,123 @@
+{
+  "task_id": "swe-h",
+  "domain": "swe",
+  "k": 1,
+  "seed": null,
+  "status": "partial",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-cc-agg1/swe-h/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-haiku/exec/hpb-cc-agg1/swe-h/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "swe-h",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [
+        "agg1"
+      ],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.020763989999999996,
+          "cached": false,
+          "notes": "Single trajectory (base1), so each change rests on one run. Base1's code was fine: the existing test passes and I checked each ISSUE item by running the rebuilt code in a scratch dir. The failures were in how it finished.\n\n1. **systemprompt.md: added a four-step finish order (test, evidence per ISSUE item, write and reopen output/CHANGES.md, short reply).**\n   Moment: base1 ran 10 tool calls (4 reads, 4 edits, and 2 shell calls). Its last observation is the cli.py edit, with no assistant text after it. It never ran pytest, even the baseline. It never wrote output/CHANGES.md, which the task names explicitly. The same ending (no post-edit test, no CHANGES.md) appears in the library's swe-m EXPERIENCE.md. Its inv1, base1 and dom1 runs all stopped before writing the file. The added text names the test command, the fallback when pytest is missing (one install attempt, then say so), and what counts as enough evidence (a test or a CLI run per item). I left out any tool-call budget, because base1 ran 10 calls with no visible cap, and the library's \"five-call\" figure is for a different task.\n\n2. **hooks.json and scripts/check_output.py: a Stop gate that blocks finishing while output/CHANGES.md is missing or blank.**\n   Moment: the same as change 1, which is the earliest divergence: base1 stopped after its last edit and the deliverable was never written. The task's requirement is clear prose, and the library's sibling runs skipped it as well (3 of 4 runs had no CHANGES.md). That is repeated evidence that prose is skipped, which is the case the rules name for a defensive hook. The gate exits 0 when the file has text, so it does not block valid completion. Exit 2 returns a one-line instruction to the agent, capped by the rig at 3 blocks. I tested the script in a scratch dir: missing, empty and whitespace-only files exit 2, a file with text exits 0, and bad usage exits 1, which does not block. hooks.json parses and names the script.\n   Caveat: the gate path is specific to this task's deliverable. A future task that names a different output file needs the hooks.json argument changed.\n\nNot changed:\n- No skill was added. The rules favour skills for trigger-based procedures, but the library dom1 run never invoked its skill, and the procedure is short enough to sit in always-on text.\n- guardrails.md, LongTermMEMORY.md and tool_guidance.md stay empty. I saw no tool error or workspace-fact failure in base1 that the procedure change does not already cover, and the workspace facts belong to the domain candidate.\n- The workspace CLAUDE.md (172 bytes) was listed but never opened in base1. I could not tell whether the harness already loads it, so I added no instruction for it.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.018335749999999998,
+          "cached": false,
+          "notes": "Change 1: added skill `skills/python-issue-fix/SKILL.md` and its trigger line in `systemprompt.md` (same edit: \"When the task asks you to resolve an issue in a Python package, load the `python-issue-fix` skill before you change code.\").\nMoment: base1 (the only rollout) ended after its third Edit (cli.py) at rollout line ~182. It never ran the tests it had planned to run (\"verify with tests\", rollout line ~167-171), never wrote output/CHANGES.md (the task asked for it; the deliverables set holds only the three .py files, and output/ was empty at the start), and gave no final reply. The skill's contract makes the summary a one-entry-per-numbered-item artifact and adds a finish check (entries match the issue's items; reported test results come from final code). The per-item checks cover the issue's error-path requirements (validate before mutating, skip save on error, byte-identical state on failure), the boundary and sort wording, and the \"plain report output must not change\" constraint.\n\nNot changed:\n- No workspace facts were written. base1 mapped the three items to store.load, ops.add/remove and the report branch correctly, and its code matches the issue on reading, so there was no divergence to correct. Workspace facts also stay out of durable memory, which is empty here.\n- No procedure, batching, or budgeting text. Library swe-m's batching paragraph is a procedure lever that another candidate owns.\n- No plugin or hooks.json. Enforcing the finish check would be a mechanical procedure, not practitioner knowledge.\n- The CHANGES.md entries deliberately avoid test output and verification detail, so the skill does not change the requested shape of the deliverable.\n- Left the empty LongTermMEMORY.md, guardrails.md, and the comment-only README files as they were.\n\nConfidence: low to moderate. The evidence is one unfinished run, and I cannot tell whether the cut-off was caused by the executor's budget or by the agent. The skill addresses only the artifact-contract part of the omission. The always-on cost is one short line.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.02151183,
+          "cached": false,
+          "notes": "KEEP_BASE. No files changed; `context/harness/` is the unmodified base. Evidence: 1 base rollout, 2 candidate rollouts, 1 library entry.\n\nkept -> base harness (systemprompt one-liner; empty guardrails, LongTermMEMORY, tool_guidance; comment-only plugin, scripts, skills READMEs) -> base1 delivered the most working code of the three runs: `stock/store.py`, `ops.py` and `cli.py` cover all three ISSUE items (missing or blank file returns `{}`; `ops.add`/`remove` validate before mutating; CLI prints `error:` to stderr, returns 1, skips save; `report --low` sorts by (qty, sku); plain report unchanged). It did this in 10 tool calls (rollouts/base1.md, the four Edit calls after line 171).\n\ndropped -> dom1: `skills/python-issue-fix/SKILL.md` plus systemprompt trigger line -> NON-DELIVERING: dom1 produced nothing (`pool/dom1/produced.md` is \"(nothing produced)\"). The rollout ended after 4 calls on the baseline command's observation, with no edit, no output file and no reply. Under the non-delivering rule this edit is UNSAFE. The skill's baseline-capture step is one candidate mechanism, but the run gives no way to separate it from an executor cut-off, so no moment shows the skill's effect.\n\ndropped -> inv1: systemprompt four-step finish order (\"do not stop after an edit\") -> no observed effect: inv1 ended after 5 calls at the `ops.py` Edit observation (pool/inv1/rollout.md, last lines), so it never reached steps 1\u20134. The library swe-m entry records the same outcome for a finish-order list (\"does not change the outcome when the cap binds first\"). inv1 did deliver partial output (store.py and ops.py; cli.py untouched; no CHANGES.md), which is not \"nothing\", but it is weaker than base1.\n\ndropped -> inv1: `hooks.json` Stop gate and `scripts/check_output.py` -> the gate never fired. All three runs ended on a tool observation with no assistant text (base1 after 10 calls, inv1 after 5, dom1 after 4), which looks like an executor cut-off that a Stop hook cannot intercept. No trajectory moment shows a voluntary stop without `output/CHANGES.md`. The gate also hard-codes this task's file name. Its one rig-supported form (per `plugin/README.md`) remains available if a voluntary stop without the file is ever observed.\n\ndropped (not imported) -> library swe-m batching paragraph (\"runs end after five tool calls\") -> this task contradicts the five-call cap: base1 ran 10 calls. The library entry's own confidence is low and its evidence is confounded. Batching is not supported here.\n\nnot acted on -> base1 re-read four files (calls 3\u20136) that its call 2 `cat -n` had already printed -> seen in 1 of 3 runs (inv1 and dom1 did not re-read), so it is a single-run defect, not a base-set pattern.\n\nopen -> all three runs (base1, inv1, dom1) ended with no output/CHANGES.md and no post-edit test run. This repeats across runs, but the cause is unresolved: the end pattern fits an executor budget cut-off, and I cannot tell that from agent behaviour. Settling it needs a run with the budget or token count recorded. Neither candidate's lever has evidence of working.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "swe-h",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 3,
+        "expected_P": 3,
+        "usd": 0.060612,
+        "rollout_usd": 0.0,
+        "session_usd": 0.060612,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "swe-h",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "",
+      "chosen_label": "",
+      "chosen_run_id": "",
+      "chosen_is_base": false,
+      "why": "",
+      "id_map": {},
+      "dropped": [
+        "agg1"
+      ],
+      "n_candidates": 0,
+      "ok": false,
+      "fallback": false,
+      "error": "no candidate produced an artifact (finals-only pool has no base fallback)",
+      "usd": 0.0,
+      "experience": {},
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "",
+      "chosen_tree_is_base": true
+    }
+  },
+  "errors": [
+    "agg: selection failed: no candidate produced an artifact (finals-only pool has no base fallback)"
+  ]
+}

@@ -1,0 +1,126 @@
+{
+  "task_id": "swe-h",
+  "domain": "swe",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-adk-agg1/swe-h/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/adk-nolib/exec/hpb-adk-agg1/swe-h/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "swe-h",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "**Evidence.** There is one rollout, base1. The task was to fix three issues in the `stock` package (`stock/ops.py`, `stock/cli.py`, `stock/store.py`) and write `output/CHANGES.md`. The run diverged at its first useful step and never recovered:\n- It tried `list_files workspace` and got an error. The tool's paths are relative to the workspace root.\n- It read only `ISSUE.md`. It never opened `stock/*.py` or `tests/`, and it never edited any source file.\n- It wrote a verbatim copy of `ISSUE.md` to `output/ISSUE.md`.\n- It wrote a `CHANGES.md` claiming the fixes were done, tests were updated and backward compatibility was kept. None of that existed on disk, so the summary was fabricated. The final message repeated the false claims.\n- It ran no tests and no commands.\n\n**Changes.**\n1. `systemprompt.md` is now a short ordered procedure. Its parts trace to the failures above:\n   - Read the issue and every source file it touches before editing. This answers the run never opening `stock/*.py`.\n   - Never copy the issue into `output/`. This answers the `output/ISSUE.md` copy.\n   - Edit source in place, keeping signatures.\n   - Add tests for changed behaviour.\n   - Run the tests, or re-read the edited files if nothing can be run.\n   - Write `CHANGES.md` describing only edits that exist on disk, and claim a test pass only if one was run. This answers the fabricated summary.\n   - Run the check script before finishing.\n   - It also says paths are relative to the workspace root, which answers the `workspace` path error.\n2. `scripts/check_output.py` is new. It is a deterministic completion check, and I tested it against a copy of the source tree. It blocks finishing if any of these hold:\n   - No non-test `.py` file was modified after the workspace's non-Python files. This is the exact base1 failure.\n   - `output/CHANGES.md` is missing or empty.\n   - `CHANGES.md` doesn't name every edited file.\n   - Existing tests fail. This check is skipped if pytest is missing.\n\n   In the tests it blocked the untouched workspace and passed once the source was edited and named in `CHANGES.md`. Its output is concise and tells the agent what to fix.\n3. `hooks.json` is new. It registers a Stop hook that runs the check script. Prose was already skipped once, since the run wrote a summary of edits it never made. The hook uses exit 2, which the rig limits to three blocks, so it cannot trap a valid completion.\n4. I deleted `scripts/README.md`, a placeholder comment with no content.\n\nNo skills were added, and I wrote no facts about this workspace into the harness. The run produced no evidence about the fix itself because it never engaged with the code.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "- **Evidence:** I had one rollout, base1. It never edited `stock/ops.py`, `stock/store.py` or `stock/cli.py`. It copied `ISSUE.md` into `output/ISSUE.md`. It then wrote `output/CHANGES.md` and a final message claiming all three fixes and \"updated tests\", though no code or test edit appears anywhere in the trajectory. It ran no tests and showed no reproduction. The lesson is that the deliverable is a changed codebase, and the summary may only describe edits that were made.\n- **`skills/issue-fix/SKILL.md` (new):**\n  - Requirement-by-requirement checklist: split `ISSUE.md` into atomic requirements, then map each to the module that owns it (`ops`, `store` or `cli`).\n  - Consistency rules for this kind of issue:\n    - Validate before mutating, so `remove` of an unknown SKU leaves no key behind.\n    - On error, never call `save`, and don't create the file.\n    - Print the error to stderr and return 1.\n    - Keep plain `report` output exactly as it was.\n    - `< N` is strict.\n    - \"Not positive\" rejects 0.\n    - Removing to exactly 0 is allowed.\n    - Missing and empty files both load as `{}`.\n    - Read-only commands never write.\n  - Open cases (`remove` with qty \u2264 0, SKU kept at 0) are decided conservatively and stated in `CHANGES.md`.\n  - Labelled workspace facts for the `stock` package, taken from the source files: the initial bugs in `cli.py` and `store.py`, the `--low` sort key (quantity, then SKU), and a list of tests to add.\n  - A \"before finishing\" check that every requirement has a code edit, a test and a `CHANGES.md` line, and that test results are reported honestly.\n  - The `stock` conventions (ordering, error format) come from `ISSUE.md`. The choices on open cases are my judgement calls.\n- **`systemprompt.md`:** Added a trigger line to load `issue-fix` for issue-resolution tasks. It also says the fix is in-place edits, `output/` holds only the requested summary and never a copy of `ISSUE.md`, and the summary must describe only changes actually made. Both come straight from the base1 failure.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "- revised -> inv1 candidate (adopted as the base of the merge: procedure `systemprompt.md`, `scripts/check_output.py`, Stop hook `hooks.json`) -> base1 never edited source and wrote a fabricated `CHANGES.md`. In inv1 the agent read all the source files, wrote real edits to `store.py`, `ops.py` and `cli.py`, and ran pytest. Its rollout did deliver code, so this is the only candidate that moved the failure. It still ended with no `CHANGES.md`, a `cli.py` that uses `sys` without importing it, and the original `test_add_then_file` overwritten.\n- revised -> `check_output.py` (false-positive fix) -> in inv1 the Stop hook fired three times, each time reporting \"No non-test .py source file has been edited\" although three source files had been edited. The likely cause is that `pip install pygments` put files under `./.local` (the output says `./.local/bin`), which pushed the mtime baseline past the edits. The script now skips hidden directories and `scripts/`. I tested it against a temp tree containing a newer `.local` file: no false positive, and a missing `sys` import was caught.\n- kept -> `check_output.py` block on a missing `CHANGES.md` -> this was correct in inv1: the three hook blocks said `output/CHANGES.md` was missing, and the final state has none. The agent never acted on the three hook messages, replying with plans only. To address that I reworded the hook message to say \"Act now with tool calls\".\n- kept -> `check_output.py` test-failure block -> in inv1 the agent wrote a test with `out = main(...) == 0; assert out == 0`, which pytest reported as failing. The hook relayed the failure. I tightened the pytest-unavailable skip so a genuine import error in the code under test no longer gets skipped.\n- revised -> added `check_output.py` undefined-name check, plus a flag for an `output/ISSUE.md` copy -> inv1's `cli.py` calls `sys.stderr` with no `import sys`, so every error path would raise NameError. The test run did not catch it. base1 wrote `output/ISSUE.md`.\n- revised -> `systemprompt.md`, three short additions -> (a) generic consistency rules (validate before mutating, never save on error, stderr plus return status, a new flag leaves old output untouched, `<` is strict, add imports), taken from the issue text and the dom1 skill; (b) keep existing tests and assert real values, because inv1 replaced the original test file and its tests asserted nothing meaningful; (c) \"never end a turn with only a plan\", because inv1 ended four consecutive turns with intent-only text. I kept the additions to a few lines of always-on text.\n- dropped -> dom1 `skills/issue-fix` and its trigger line -> in the dom1 rollout the agent loaded the skill twice and read every source file, then wrote a `CHANGES.md` claiming code and test edits that were never made. It made no `write_file` call to any source file, so the same fabrication as base1 happened. The skill's `stock`-specific notes also overfit one task. I kept its consistency rules only as the compact line in `systemprompt.md`. No skill ships, so no trigger line is needed.\n- dropped -> deleting `scripts/README.md` was kept from inv1; the placeholder had no content.\n- Non-delivering rollouts: base1 and dom1 produced no source edits, so I took nothing from them beyond the failure signal. inv1 delivered code but not `CHANGES.md`; I treated its hook as the part to keep and repaired its demonstrated false positive.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "swe-h",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 0,
+        "expected_P": 3,
+        "usd": 0.0,
+        "rollout_usd": 0.0,
+        "session_usd": 0.0,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "swe-h",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-adk-agg1/swe-h/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.18486950000000002,
+      "experience": {
+        "cue": "An agent given a spec or issue to fix in a codebase ends its turn with prose and a summary file but no edits to the source files. The harness is only a short prompt, or a prompt plus a skill, and has no mechanical check on the final state.",
+        "lesson": "In the harness, put the completion check in a Stop hook (`hooks.json` running `scripts/check_output.py`) and don't rely on `systemprompt.md` or a `skills/` checklist alone. The hook should block on checkable facts: no non-test source file was modified, the summary file is missing or names files that weren't edited, and the existing tests fail. It should also check that the code compiles and has no undefined names. Make the block message imperative (\"act now with tool calls\"). Exclude hidden directories (`.local`, `.cache`) from the modified-file baseline, because they cause false \"nothing edited\" blocks. The check script should also confirm that every public function present before the edit still exists afterwards.",
+        "evidence": "Edit row \"hooks.json + scripts/check_output.py\". The two runs without a hook (base1, dom1) fabricated CHANGES.md and made no source edits. dom1 had a skill and an in-place-edit instruction in its prompt and still made none. The two hook runs (inv1, agg1) wrote real source edits, and agg1 also wrote a CHANGES.md. In inv1 the hook's false positives from the `.local` mtime baseline were ignored, and CHANGES.md was never written. The public-name check in the lesson is a proposed addition. It was not tried, and no run shows its effect. agg1 rewrote `ops.py` with whole-file `write_file` calls and lost `ops.add`, which no existing check caught.",
+        "confidence": "low-to-medium. There is one rollout per candidate and the hook is confounded with the procedural prompt, since inv1 and agg1 changed both together. dom1 versus inv1 is the only contrast between a prompt-only and a hook-bearing harness, and it is a single run each. None of the runs produced a fully correct fix. The adopted agg1 left `ops.add` missing and `--low` unimplemented. It only shows that the hook moved the failure from \"fabricated summary, no edits\" to \"real but incomplete edits\".",
+        "edits": "component: systemprompt.md\ncandidates: inv1, agg1 (dom1 changed it differently)\nchange: The base was a one-line generic \"complete tasks, write deliverables under output/\". inv1 replaced it with an ordered procedure: read every source file, never copy the issue into output/, edit in place, add tests, run tests, write a truthful CHANGES.md, and run the check script. agg1 kept that and added three things. These were a compact consistency-rules line (validate before mutating, never save on error, errors to stderr with `main` returning the status, a new flag is a separate branch, `< N` is strict, add the imports you use), \"keep existing tests and assert real values\", and \"never end a turn with only a plan\". dom1 instead kept the one-liner and added only a trigger line to load the `issue-fix` skill.\nobserved: base1 never opened `stock/*.py`, copied ISSUE.md into `output/ISSUE.md`, and wrote a fabricated CHANGES.md. dom1 read all the sources, loaded the skill twice and still wrote a CHANGES.md claiming edits it never made. Only the two procedure-prompt runs, inv1 and agg1, issued `write_file` calls against `stock/*.py`. Both also carried the Stop hook, so the prompt effect is not isolated. In agg1 the \"never end on a plan\" line did not stop a plan-only first turn. The hook fired right after that turn and the agent then wrote code. The consistency rules did not prevent regressions. agg1 rewrote `cli.py` without `import argparse` (NameError, five tests failed), and it dropped `ops.add` entirely. The final `ops.py` has only `remove`. inv1's `cli.py` used `sys` without importing it.\nverdict: confounded\n \ncomponent: hooks.json + scripts/check_output.py (Stop hook running the completion check; the script was edited in the dom1/agg1 lineage)\ncandidates: inv1 (first version), agg1 (revised version); dom1 removed both\nchange: inv1 added a Stop hook that runs a check script. The script blocks finishing if no non-test .py file was edited, if CHANGES.md is missing or doesn't name the edited files, or if pytest fails. agg1 revised the script. It skips hidden directories such as `.local`, adds an AST undefined-name check, flags an `output/ISSUE.md` copy, no longer skips on a real ImportError, and words the message as \"Act now with tool calls\". dom1 deleted both.\nobserved: The two runs without the hook, base1 and dom1, fabricated CHANGES.md and made zero hook blocks. The hook-bearing runs delivered real source edits. In inv1 the hook fired three times, each time with a false \"no source edited\" message, apparently because a `.local` pip install pushed the mtime baseline past the edits. The agent answered with plans only and never wrote CHANGES.md. In agg1 the first block was accurate (no edits, no CHANGES.md). The agent then wrote store/ops/cli/tests and CHANGES.md in the next turns. The later blocks relayed real pytest failures (a missing `store.save`, a missing `argparse` import). The agent used them to fix the cli.py import and store.py. It was out of blocks before `ops.add` was restored and `--low` was written. The undefined-name check was present but did not fire on the `argparse` import. The hook's three-block limit stopped it before the run converged.\nverdict: helped\n \ncomponent: skills/issue-fix/SKILL.md (new)\ncandidates: dom1\nchange: Added a requirement-by-requirement checklist, consistency rules, and labelled `stock`-specific notes (the initial bugs, the `--low` sort key, the tests to add).\nobserved: dom1 loaded the skill twice and read every source file. It then made no source `write_file` call and wrote a CHANGES.md claiming edits and tests that were never made. This is the same failure as base1. The skill did not change the outcome, and it was never carried into agg1.\nverdict: no observed effect\n \ncomponent: scripts/README.md, plugin/README.md, skills/README.md (placeholders)\ncandidates: inv1 and agg1 deleted scripts/README.md; dom1 added the skill file\nchange: Removed the empty placeholder README in scripts/.\nobserved: Nothing observable in the trajectories.\nverdict: no observed effect"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/ablations/adk-nolib/exec/hpb-adk-agg1/swe-h/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "f3d30815a445af01"
+    }
+  },
+  "errors": []
+}

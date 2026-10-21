@@ -1,0 +1,165 @@
+cc h2-parallel-k1/intask  ops-m    r2 partial=1.00 err=
+cc h2-parallel-k1/variant ops-m-v  r2 partial=1.00 err=
+cc h2-parallel-k1/variant ops-m-v  r1 partial=1.00 err=
+cc h2-parallel-k1/intask  ops-m    r1 partial=1.00 err=
+cc h2-parallel-k1/intask  ops-m    r3 partial=1.00 err=
+cc h2-parallel-k1/intask  data-h   r1 partial=1.00 err=
+cc h2-parallel-k1/intask  swe-e    r1 partial=1.00 err=
+cc h2-parallel-k1/intask  swe-e    r3 partial=1.00 err=
+cc h2-parallel-k1/intask  swe-e    r2 partial=1.00 err=
+cc h2-parallel-k1/intask  ops-e    r1 partial=1.00 err=
+cc h2-parallel-k1/intask  data-h   r2 partial=1.00 err=
+cc h2-parallel-k1/intask  data-h   r3 partial=1.00 err=
+cc h2-parallel-k1/variant data-h-v r1 partial=1.00 err=
+cc h2-parallel-k1/variant data-h-v r2 partial=1.00 err=
+cc h2-parallel-k1/intask  ops-e    r2 partial=1.00 err=
+cc h2-parallel-k1/intask  ops-e    r3 partial=1.00 err=
+cc h2-parallel-k1/variant ops-e-v  r1 partial=1.00 err=
+cc h2-parallel-k1/variant ops-e-v  r2 partial=1.00 err=
+cc h2-parallel-k1/intask  swe-m    r2 partial=1.00 err=
+cc h2-parallel-k1/intask  swe-m    r1 partial=1.00 err=
+cc h2-parallel-k1/intask  swe-m    r3 partial=1.00 err=
+cc h2-parallel-k1/intask  data-m   r2 partial=1.00 err=
+cc h2-parallel-k1/intask  data-m   r1 partial=1.00 err=
+cc h2-parallel-k1/intask  data-m   r3 partial=1.00 err=
+cc h2-parallel-k1/variant data-m-v r1 partial=1.00 err=
+cc h2-parallel-k1/variant data-m-v r2 partial=1.00 err=
+cc h2-parallel-k1/intask  ops-h    r2 partial=1.00 err=
+cc h2-parallel-k1/intask  swe-h    r1 partial=1.00 err=
+cc h2-parallel-k1/intask  ops-h    r1 partial=1.00 err=
+cc h2-parallel-k1/intask  swe-h    r3 partial=1.00 err=
+cc h2-parallel-k1/variant ops-h-v  r1 partial=1.00 err=
+cc h2-parallel-k1/intask  ops-h    r3 partial=1.00 err=
+cc h2-parallel-k1/intask  swe-h    r2 partial=1.00 err=
+cc h2-parallel-k1/intask  data-e   r1 partial=1.00 err=
+cc h2-parallel-k1/variant ops-h-v  r2 partial=1.00 err=
+cc h2-parallel-k1/intask  data-e   r2 partial=1.00 err=
+cc h2-parallel-k1/intask  data-e   r3 partial=1.00 err=
+cc h2-parallel-k1/variant data-e-v r1 partial=1.00 err=
+cc h2-parallel-k1/variant data-e-v r2 partial=1.00 err=
+cc h2-parallel-k1/transfer data-m   r1 partial=1.00 err=
+cc h2-parallel-k1/transfer data-m   r3 partial=1.00 err=
+cc h2-parallel-k1/transfer data-m   r2 partial=1.00 err=
+cc h2-parallel-k1/transfer data-h   r1 partial=1.00 err=
+cc h2-parallel-k1/transfer data-h   r3 partial=1.00 err=
+cc h2-parallel-k1/transfer data-h   r2 partial=1.00 err=
+cc h2-parallel-k1/transfer ops-m    r1 partial=1.00 err=
+cc h2-parallel-k1/transfer ops-m    r2 partial=1.00 err=
+cc h2-parallel-k1/transfer ops-m    r3 partial=1.00 err=
+cc h2-parallel-k1/transfer ops-h    r2 partial=1.00 err=
+cc h2-parallel-k1/transfer ops-h    r1 partial=1.00 err=
+cc h2-parallel-k1/transfer ops-h    r3 partial=1.00 err=
+cc h2-parallel-k1/transfer swe-m    r2 partial=1.00 err=
+cc h2-parallel-k1/transfer swe-m    r1 partial=1.00 err=
+cc h2-parallel-k1/transfer swe-h    r1 partial=1.00 err=
+cc h2-parallel-k1/transfer swe-h    r3 partial=1.00 err=
+cc h2-parallel-k1/transfer swe-h    r2 partial=1.00 err=
+cc h2-parallel-k1/transfer swe-m    r3 partial=1.00 err=
+cc ar/insample            data-e   r2 partial=1.00 err=
+cc ar/transfer            data-m   r3 partial=1.00 err=
+cc ar/insample            data-e   r3 partial=1.00 err=
+cc ar/insample            data-e   r1 partial=1.00 err=
+cc ar/transfer            data-m   r2 partial=1.00 err=
+cc ar/transfer            data-m   r1 partial=1.00 err=
+cc ar/transfer            data-h   r1 partial=1.00 err=
+cc ar/transfer            data-h   r3 partial=1.00 err=
+cc ar/transfer            data-h   r2 partial=1.00 err=
+cc ar/variant             data-e-v r1 partial=1.00 err=
+cc ar/variant             data-e-v r2 partial=1.00 err=
+cc ar/variant             data-m-v r1 partial=1.00 err=
+cc ar/variant             data-m-v r2 partial=1.00 err=
+cc ar/insample            ops-e    r1 partial=1.00 err=
+cc ar/variant             data-h-v r2 partial=1.00 err=
+cc ar/insample            ops-e    r2 partial=1.00 err=
+cc ar/variant             data-h-v r1 partial=1.00 err=
+cc ar/insample            ops-e    r3 partial=1.00 err=
+cc ar/transfer            ops-m    r1 partial=1.00 err=
+cc ar/transfer            ops-m    r3 partial=1.00 err=
+cc ar/transfer            ops-m    r2 partial=1.00 err=
+cc ar/variant             ops-e-v  r1 partial=1.00 err=
+cc ar/variant             ops-e-v  r2 partial=1.00 err=
+cc ar/transfer            ops-h    r3 partial=1.00 err=
+cc ar/transfer            ops-h    r2 partial=1.00 err=
+cc ar/variant             ops-m-v  r1 partial=1.00 err=
+cc ar/variant             ops-m-v  r2 partial=1.00 err=
+cc ar/transfer            ops-h    r1 partial=1.00 err=
+cc ar/variant             ops-h-v  r2 partial=1.00 err=
+cc ar/insample            swe-e    r1 partial=1.00 err=
+cc ar/variant             ops-h-v  r1 partial=1.00 err=
+cc ar/insample            swe-e    r2 partial=1.00 err=
+cc ar/insample            swe-e    r3 partial=1.00 err=
+cc ar/transfer            swe-m    r1 partial=1.00 err=
+cc ar/transfer            swe-m    r2 partial=1.00 err=
+cc ar/transfer            swe-h    r1 partial=1.00 err=
+cc ar/transfer            swe-m    r3 partial=1.00 err=
+cc ar/transfer            swe-h    r3 partial=1.00 err=
+cc ar/transfer            swe-h    r2 partial=1.00 err=
+{
+ "ar/insample": {
+  "n_tasks": 3,
+  "mean_delta": 0.11111111111111112,
+  "ci95": [
+   0.0,
+   0.4444444444444445
+  ],
+  "signflip_p": 1.0,
+  "improved": 1,
+  "regressed": 0
+ },
+ "ar/transfer": {
+  "n_tasks": 6,
+  "mean_delta": 0.11111111111111112,
+  "ci95": [
+   0.0,
+   0.3888888888888889
+  ],
+  "signflip_p": 1.0,
+  "improved": 1,
+  "regressed": 0
+ },
+ "ar/variant": {
+  "n_tasks": 6,
+  "mean_delta": 0.16666666666666666,
+  "ci95": [
+   0.0,
+   0.5
+  ],
+  "signflip_p": 0.5,
+  "improved": 2,
+  "regressed": 0
+ },
+ "h2-parallel-k1/intask": {
+  "n_tasks": 9,
+  "mean_delta": 0.11111111111111112,
+  "ci95": [
+   0.0,
+   0.29629629629629634
+  ],
+  "signflip_p": 0.5,
+  "improved": 2,
+  "regressed": 0
+ },
+ "h2-parallel-k1/transfer": {
+  "n_tasks": 6,
+  "mean_delta": 0.11111111111111112,
+  "ci95": [
+   0.0,
+   0.3888888888888889
+  ],
+  "signflip_p": 1.0,
+  "improved": 1,
+  "regressed": 0
+ },
+ "h2-parallel-k1/variant": {
+  "n_tasks": 6,
+  "mean_delta": 0.16666666666666666,
+  "ci95": [
+   0.0,
+   0.5
+  ],
+  "signflip_p": 0.5,
+  "improved": 2,
+  "regressed": 0
+ }
+}
+leak: {'harness_literal_hits': 1, 'blocked_escape_attempts': 50, 'grader_path_mentions': 0, 'improver_sessions_audited': 77, 'harnesses_audited': 12}

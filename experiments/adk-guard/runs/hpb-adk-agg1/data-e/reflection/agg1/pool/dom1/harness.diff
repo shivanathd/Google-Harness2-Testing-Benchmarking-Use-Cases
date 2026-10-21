@@ -1,0 +1,245 @@
+--- current/hooks.json
++++ dom1/hooks.json
+@@ -1 +0,0 @@
+-{"hooks": {"Stop": [{"hooks": [{"type": "command", "command": "python3 scripts/check_output.py"}]}]}}
+--- current/scripts/check_output.py
++++ dom1/scripts/check_output.py
+@@ -1,12 +0,0 @@
+-#!/usr/bin/env python3
+-"""Stop-hook check: exit 2 (stderr to agent) if output/answer.json is missing or malformed."""
+-import json, sys
+-try:
+-    d = json.load(open("output/answer.json"))
+-    assert isinstance(d["net_usd"], (int, float)) and not isinstance(d["net_usd"], bool)
+-    assert isinstance(d["transactions"], int) and not isinstance(d["transactions"], bool)
+-except Exception as e:
+-    print("output/answer.json is missing or invalid (%s: %s). Write it as "
+-          '{"net_usd": <2dp number>, "transactions": <int>} before finishing; '
+-          "`python3 scripts/net_revenue.py` writes it." % (type(e).__name__, e), file=sys.stderr)
+-    sys.exit(2)
+--- current/scripts/net_revenue.py
++++ dom1/scripts/net_revenue.py
+@@ -1,96 +0,0 @@
+-#!/usr/bin/env python3
+-"""Net settled revenue in USD for one month from a payment export + fx table.
+-
+-Usage: python3 scripts/net_revenue.py [--tx transactions.csv] [--fx fx.csv]
+-           --month YYYY-MM [--status SETTLED] [--out output/answer.json] [--dry]
+-
+-Standard library only (pandas may be missing). Handles: ISO and 'Mon DD, YYYY'
+-dates, thousands separators, accounting negatives '(1,234.50)', currency
+-symbols, duplicate txn_id rows (first kept; conflicting duplicates reported).
+-Writes {"net_usd": <2dp>, "transactions": <count>} and prints a diagnostic
+-summary to stderr. Exit 1 with a message on any unparseable value, unknown
+-currency or missing column -- fix the input handling, do not rerun unchanged.
+-"""
+-import argparse, csv, json, os, re, sys
+-from datetime import datetime
+-from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
+-
+-DATE_FORMATS = ["%Y-%m-%d", "%b %d, %Y", "%B %d, %Y", "%Y/%m/%d", "%m/%d/%Y", "%d %b %Y", "%Y-%m-%dT%H:%M:%S"]
+-
+-
+-def parse_amount(s):
+-    t = s.strip()
+-    neg = t.startswith("(") and t.endswith(")")
+-    t = re.sub(r"[()\s,$€£₹]", "", t)
+-    if t.startswith("-"):
+-        neg, t = True, t[1:]
+-    try:
+-        v = Decimal(t)
+-    except InvalidOperation:
+-        raise ValueError("unparseable amount %r" % s)
+-    return -v if neg else v
+-
+-
+-def parse_date(s):
+-    t = s.strip()
+-    for f in DATE_FORMATS:
+-        try:
+-            return datetime.strptime(t, f)
+-        except ValueError:
+-            pass
+-    raise ValueError("unparseable date %r" % s)
+-
+-
+-def main():
+-    a = argparse.ArgumentParser()
+-    a.add_argument("--tx", default="transactions.csv")
+-    a.add_argument("--fx", default="fx.csv")
+-    a.add_argument("--month", required=True, help="YYYY-MM, taken from the task")
+-    a.add_argument("--status", default="SETTLED")
+-    a.add_argument("--out", default="output/answer.json")
+-    a.add_argument("--dry", action="store_true")
+-    o = a.parse_args()
+-    year, mon = map(int, o.month.split("-"))
+-
+-    with open(o.fx, newline="") as f:
+-        fx = {r["currency"].strip().upper(): Decimal(r["usd_per_unit"].strip()) for r in csv.DictReader(f)}
+-    with open(o.tx, newline="") as f:
+-        rows = list(csv.DictReader(f))
+-    for c in ("txn_id", "date", "amount", "currency", "status"):
+-        if not rows or c not in rows[0]:
+-            sys.exit("missing column %s in %s" % (c, o.tx))
+-
+-    seen, total, n, dupes, conflicts = {}, Decimal(0), 0, 0, []
+-    for r in rows:
+-        tid = r["txn_id"].strip()
+-        key = tuple(r[c].strip() for c in ("date", "amount", "currency", "status"))
+-        if tid in seen:
+-            dupes += 1
+-            if seen[tid] != key:
+-                conflicts.append(tid)
+-            continue
+-        seen[tid] = key
+-        if r["status"].strip().upper() != o.status.upper():
+-            continue
+-        d = parse_date(r["date"])
+-        if (d.year, d.month) != (year, mon):
+-            continue
+-        cur = r["currency"].strip().upper()
+-        if cur not in fx:
+-            sys.exit("currency %r (txn %s) not in %s" % (cur, tid, o.fx))
+-        total += parse_amount(r["amount"]) * fx[cur]
+-        n += 1
+-
+-    net = float(total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+-    print("rows=%d unique_txn_ids=%d duplicate_rows_dropped=%d conflicting_duplicates=%s included=%d net_usd=%.2f"
+-          % (len(rows), len(seen), dupes, conflicts or "none", n, net), file=sys.stderr)
+-    ans = {"net_usd": net, "transactions": n}
+-    if not o.dry:
+-        os.makedirs(os.path.dirname(o.out) or ".", exist_ok=True)
+-        with open(o.out, "w") as f:
+-            json.dump(ans, f)
+-    print(json.dumps(ans))
+-
+-
+-if __name__ == "__main__":
+-    main()
+--- current/skills/payment-revenue-reconcile/SKILL.md
++++ dom1/skills/payment-revenue-reconcile/SKILL.md
+@@ -0,0 +1,25 @@
++---
++name: payment-revenue-reconcile
++description: Reconcile a payment-processor transaction export with an FX rate table into net revenue for a period (status filter, month filter, dedupe by txn_id, multi-currency to USD). Use for any "net settled revenue" style task on CSV exports.
++---
++
++# Net settled revenue from a payment export + FX table
++
++ANALYTIC MOVE: reconcile (classify each row -> dedupe -> filter -> convert -> sum). Inputs: transaction export (txn_id, date, amount, currency, status) and FX table (usd_per_unit per currency). Result: net USD for the period and the count of distinct transactions included, in exactly the shape the task specifies.
++
++Fast path: `python3 skills/payment-revenue-reconcile/scripts/settled_revenue.py transactions.csv fx.csv YYYY-MM output/answer.json` (stdlib only, no pandas needed; handles the quirks below). Read its printed reconciliation, then confirm the checks.
++
++Export quirks to expect (in this workspace they were all present; verify in any other):
++- Exact duplicate rows of one txn_id (6 repeated rows, same content). "A txn_id identifies one transaction" -> keep one row per txn_id; count and sum it once. If duplicates of an id DIFFER, do not silently pick one: state the rule used.
++- Mixed date formats in one column (`2026-09-15` and `Sep 15, 2026`). Parse every row to a date, then compare year AND month; a text match on "Sep" alone is not a month filter.
++- Amounts as text: thousands separators (`"1,944.41"`), accounting negatives (`(954.34)` or `"(2,426.12)"` = -954.34 / -2426.12), plain `-` negatives. Refunds are negative and must stay in the sum (reduce revenue); never take abs().
++- Status values: SETTLED / PENDING / VOID. Only SETTLED counts, including its negative (refund) rows; PENDING/VOID rows with negative amounts are excluded. Check the distinct status set and whitespace/case before filtering.
++- Out-of-month neighbours (Aug and Oct dates, month-boundary days Sep 1 and Sep 30) must be excluded/included by parsed date.
++- Files use CRLF line endings; use a CSV reader, not manual splitting.
++- FX: `usd_per_unit` multiplies the native amount (USD = amount x rate). Every currency in the export must have a rate (in this workspace: USD, EUR, INR). Convert per row at full precision, sum, and round once at the end to 2 decimals (half-up); do not round per row.
++
++Checks before finishing:
++1. Rows read, duplicates dropped, unique ids reconcile (rows - dropped = unique).
++2. `transactions` = number of distinct SETTLED September txn_ids, refunds included.
++3. Per-currency native subtotals x rate add up to net_usd; at least one refund row and one accounting-negative row are in the included set.
++4. output/answer.json parses as JSON with exactly the requested keys (`net_usd` number rounded to 2 decimals, `transactions` integer) -- a plain object, not a records-list or other pandas orient.
+--- current/skills/payment-revenue-reconcile/scripts/settled_revenue.py
++++ dom1/skills/payment-revenue-reconcile/scripts/settled_revenue.py
+@@ -0,0 +1,81 @@
++#!/usr/bin/env python3
++"""Net settled revenue in USD for one month from a payment export + FX table.
++Stdlib only.  Usage:
++  python3 settled_revenue.py TRANSACTIONS.csv FX.csv YYYY-MM [OUT_JSON]
++Prints a reconciliation (row counts, dropped duplicates, per-currency subtotals,
++unparseable values) to stdout; writes {"net_usd","transactions"} if OUT_JSON given.
++Adjust STATUS / column names at the top if the export differs."""
++import csv, json, re, sys
++from datetime import datetime
++from decimal import Decimal, ROUND_HALF_UP
++
++STATUS = "SETTLED"
++DATE_FORMATS = ["%Y-%m-%d", "%b %d, %Y", "%B %d, %Y", "%m/%d/%Y", "%d-%b-%Y", "%Y/%m/%d"]
++
++
++def parse_date(s):
++    s = s.strip()
++    for f in DATE_FORMATS:
++        try:
++            return datetime.strptime(s, f).date()
++        except ValueError:
++            pass
++    raise ValueError("unparseable date: %r" % s)
++
++
++def parse_amount(s):
++    t = s.strip().replace("−", "-")
++    neg = t.startswith("(") and t.endswith(")")
++    t = re.sub(r"[()\s,$€₹£]", "", t)
++    if t.startswith("-"):
++        neg, t = True, t[1:]
++    v = Decimal(t)
++    return -v if neg else v
++
++
++def main():
++    tx_path, fx_path, month = sys.argv[1:4]
++    out = sys.argv[4] if len(sys.argv) > 4 else None
++    with open(fx_path, newline="", encoding="utf-8-sig") as f:
++        fx = {r["currency"].strip().upper(): Decimal(r["usd_per_unit"].strip()) for r in csv.DictReader(f)}
++    with open(tx_path, newline="", encoding="utf-8-sig") as f:
++        rows = list(csv.DictReader(f))
++    seen, kept, dup, conflict = {}, [], 0, []
++    for r in rows:
++        r = {k.strip(): (v or "").strip() for k, v in r.items()}
++        key = r["txn_id"]
++        if key in seen:
++            dup += 1
++            if seen[key] != r:
++                conflict.append((seen[key], r))
++            continue
++        seen[key] = r
++        kept.append(r)
++    total, n, by_cur, bad = Decimal(0), 0, {}, []
++    for r in kept:
++        try:
++            d = parse_date(r["date"]); a = parse_amount(r["amount"])
++        except Exception as e:
++            bad.append((r, str(e))); continue
++        if r["status"].upper() != STATUS or d.strftime("%Y-%m") != month:
++            continue
++        cur = r["currency"].upper()
++        if cur not in fx:
++            bad.append((r, "no fx rate")); continue
++        usd = a * fx[cur]
++        total += usd; n += 1
++        c = by_cur.setdefault(cur, [0, Decimal(0), Decimal(0)])
++        c[0] += 1; c[1] += a; c[2] += usd
++    print("rows read=%d unique txn_id=%d duplicate rows dropped=%d" % (len(rows), len(kept), dup))
++    print("duplicates with CONFLICTING content:", conflict or "none")
++    print("unparseable / unmapped:", bad or "none")
++    for cur, (cnt, native, usd) in sorted(by_cur.items()):
++        print("  %s: n=%d native=%s usd=%s" % (cur, cnt, native, usd.quantize(Decimal("0.0001"))))
++    net = float(total.quantize(Decimal("0.01"), ROUND_HALF_UP))
++    print("RESULT net_usd=%s transactions=%d" % (net, n))
++    if out:
++        with open(out, "w") as f:
++            json.dump({"net_usd": net, "transactions": n}, f)
++
++
++main()
+--- current/systemprompt.md
++++ dom1/systemprompt.md
+@@ -1,11 +1,3 @@
+ You are an assistant that completes tasks inside a workspace directory. Read the task, do the work, and write the requested deliverables under output/.
+ 
+-Working rules (tool budget is small, about 40 model calls -- spend them on the deliverable):
+-- Write the deliverable early; refine after. A missing output file is the worst outcome.
+-- If a command fails, read the error, change the code or input handling, and only then rerun. Never rerun an unchanged failing command; after two failures of the same kind, switch approach (e.g. drop pandas for the standard library `csv` + `decimal`).
+-- If pip install times out or pandas is missing, don't retry installing; use the standard library.
+-- Keep helper scripts out of output/ (only requested deliverables go there). Paths are relative to the workspace root; do not probe `/` or guess directory names -- start with list_files ".".
+-- Messy exports: before computing, look at the distinct formats in every column (dates, amount notation, status, duplicate keys) and handle all of them.
+-- After writing a deliverable, reopen it and check its shape against the task.
+-
+-Settled-revenue exports (payment CSV + fx table): `python3 scripts/net_revenue.py --month YYYY-MM` (month, status and file names from the task; flags --status, --tx, --fx, --out) is a stdlib-only helper that parses mixed date formats, thousands separators and accounting negatives "(123.45)", counts each txn_id once, filters status and month, converts with the fx table, and writes output/answer.json. Use it instead of hand-rolling a parser (hand-written pandas attempts failed: pandas missing, install timed out, accounting negatives crashed float()). It prints a diagnostic line on stderr: check that the duplicate/conflict counts and the fx direction (task wording: USD value of one unit -> multiply) match what you saw in the raw files, and that the output keys match the task. If it exits 1 on an unparseable value or unknown currency, fix the parsing; do not rerun unchanged.
++When a task asks for revenue/settled totals from a payment or finance export (CSV transactions, FX table), load the `payment-revenue-reconcile` skill and run its script instead of hand-writing a parser. If the same error repeats twice, change the code before rerunning; never rerun an unchanged failing command.

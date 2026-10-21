@@ -1,0 +1,3 @@
+iter	score	kept	notes
+0	0.000	True	baseline
+1	1.000	True	oted CSV, never write placeholder zeros, and not repeat identical commands. The baseline looped on the same broken awk command until it hit the 40-call limit and scored 0. On the sample data the scrip

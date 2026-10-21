@@ -1,0 +1,126 @@
+{
+  "task_id": "data-m",
+  "domain": "data",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-adk-agg1/data-m/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/adk-guard/exec/hpb-adk-agg1/data-m/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "data-m",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.2728401,
+          "cached": false,
+          "notes": "- **Change:** I rewrote only the \"In this workspace (verified)\" paragraph of `systemprompt.md`. The previous attempt was rejected because it recorded this instance's data: the row and unique-id counts, the duplicated transaction ids, the computed result and its counts, the specific month, and an example amount.\n- **What replaced it:** workspace facts stated structurally, with no values.\n  - Duplicate txn_ids appear as identical rows and should be counted once.\n  - Amounts can carry thousands commas.\n  - Currencies are USD, EUR and INR, with usd_per_unit rates that are multiplied.\n  - A zero fx rate on a date outside the requested month does not matter unless a settlement or refund falls on that date.\n- **New instruction:** I added a line telling the agent to sanity-check the helper's counts against a quick independent filter of the raw files before finishing. I wrote this from the existing procedure; I did not re-trace a trajectory moment for it.\n- **Unchanged:** the procedure paragraph, `scripts/net_revenue.py`, `scripts/check_output.py` and `hooks.json`. I grepped the harness for the flagged values and the only match left is the `--month 2026-09` usage example in the `scripts/net_revenue.py` docstring.\n- **Checks:** I found no template braces in the `.md` files. There are no skills, so no trigger line is needed. I did not re-read `context/rollouts/` or `context/deliverables/` in this pass. The edit is limited to removing the flagged data.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.25413129999999995,
+          "cached": false,
+          "notes": "This attempt only fixes the rejection. I did not re-read the trajectories or deliverables.\n\n- **Change:** I replaced the \"In this workspace (verified)\" paragraph in `systemprompt.md`. It had listed this task's own transaction and refund ids, its fx date and currency, and its month window. The new paragraph describes what these exports typically contain: duplicate rows, comma-quoted amounts, one fx row per date per currency, and a possible zero or blank rate on some day.\n- **Method rules kept:** A zero or missing rate on a day you need must be raised, not applied. A bad rate on a day outside the target month is irrelevant. Refunds dated outside the target month are listed and excluded by their own date, not by their transaction's settlement month.\n- **No other changes:** `guardrails.md`, `LongTermMEMORY.md` and the tool guidance are empty or unchanged. A grep of the harness for ids, dates and month names finds no other instance data.\n- **Not verified:** I did not check that the reworded paragraph is consistent with `scripts/net_revenue.py` or `scripts/check_output.py`.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.1669999,
+          "cached": false,
+          "notes": "kept -> dom1 `scripts/net_revenue.py` and the `systemprompt.md` pointer to it -> The base rollout read all three CSVs, wrote a plan, and ended with no `output/answer.json`. It never ran any computation. Both candidates ran the helper script and wrote 24317.47 / 16 / 5. I checked this by hand: 16 unique settled September transactions and 5 September refunds. I chose dom1's version of the script because it reports orphan refunds and refunds on non-SETTLED transactions instead of aborting the run. I did not run it on the task data myself.\nkept -> dom1 domain rules in `systemprompt.md` (settled_on and refunded_on month logic, the refund's own currency and day rate, dedupe by txn_id, a zero fx rate flagged only if needed) -> The data has duplicate rows (3 dropped), quoted comma amounts, a zero INR rate on 2026-10-31, and refund R03 dated that day. dom1's rules cover all of these. Both candidates got the right answer, so the rules were not tested against any failure.\nkept -> `hooks.json` and `scripts/check_output.py` (a Stop hook that rejects a missing or malformed answer.json) -> The base run produced nothing, which is the costliest failure. The hook costs no always-on text. It never fired in either candidate rollout, so there is no evidence for or against it. The two candidates' copies are identical.\nrevised -> added one line to `systemprompt.md`: list and read the inputs first, never rerun an unchanged failing command, and pass a value after every flag -> In inv1, `--out` was run without a value and argparse failed (exit=2). The agent fixed it on the next call. It is a short generic line borrowed from inv1, and it is the only change beyond dom1's prompt.\ndropped -> inv1's long \"Working rules\" block (about 40-call budget, pandas fallback, and similar) -> Neither candidate rollout exercised these rules. inv1's one call-budget slip was the `--out` error above, which the single added line covers. The script's own checks were the same in both candidates, so the extra prose adds no measurable benefit.\ndropped -> inv1's `net_revenue.py` variant (exits on an unknown refund txn_id) -> It gave the same result as dom1's script on this data, and aborting is the riskier behavior.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "data-m",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 5,
+        "expected_P": 3,
+        "usd": 0.693971,
+        "rollout_usd": 0.0,
+        "session_usd": 0.693971,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "data-m",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-adk-agg1/data-m/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.149393,
+      "experience": {
+        "cue": "A task asks for a deterministic number or structured file computed from messy tabular exports (duplicate rows, formatted amounts, date-windowed joins, a bad-value trap on a boundary date), and the base harness gives only generic \"do the work and write output/\" text.",
+        "lesson": "Put the computation in the harness as an executable, stdlib-only helper under `scripts/`, with defaults for its input paths and a one-line invocation in `systemprompt.md`. Have it write the deliverable itself and print per-currency and per-count diagnostics. Do not rely on prose rules alone. Do not also expect an extra \"never rerun a failing command / pass a value after every flag\" sentence in `systemprompt.md` to prevent argument errors, because this record shows no effect from it. Keep the call short enough that the agent has no reason to invent flags, for example by stating the exact working command with no optional flags listed.",
+        "evidence": "Rows 1 and 2 (systemprompt.md pointer and scripts/net_revenue.py), both confounded because they were added together. base1 had no script and ended on a plan with no answer.json. dom1, inv1 and agg1 each ran the helper and wrote the same figures (24317.47 / 16 / 5). Row 3 shows the generic flag-value line did nothing: agg1 had it and failed three times on bare flags, while dom1, without it, ran cleanly.",
+        "confidence": "low-to-medium. The contrast is one base rollout against three candidates that all carried the same package, so the script and the prompt pointer cannot be separated. The base failure (stopping on a plan) may also be sampling variance. The rules for dedupe, boundary dates and zero rates were never put under test, since every candidate took the same correct path.",
+        "edits": "component: systemprompt.md (revenue-reconciliation paragraph that points to `scripts/net_revenue.py` and states the domain rules)\ncandidates: dom1, inv1, agg1\nchange: The base prompt was one sentence (\"complete the task, write under output/\"). Every candidate added a paragraph that tells the agent to run `python3 scripts/net_revenue.py --month YYYY-MM`. dom1 and agg1 also spelled out the rules: settled_on/refunded_on month logic, the refund's own currency and day rate, dedupe by txn_id, a zero fx rate raised only if needed, and a boundary-row check. inv1 used a longer \"Working rules\" block (about a 40-call budget, a pandas fallback) plus a short description of the helper and the data.\nobserved: base1 read all three CSVs, ended on a plan in prose, and wrote no `output/answer.json`. Its last fx rows showed INR 0 on 2026-10-31, and refund R03 is dated that day. All three candidates ran the helper and wrote `{\"net_usd\": 24317.47, \"transactions\": 16, \"refunds\": 5}`. Their diagnostics were identical: 3 duplicate rows dropped, 16 recognised transactions, 5 refunds applied. The prompt text and the script arrived together in every candidate, so no run separates them. The extra rules were never tested, because all three runs hit the same correct path. The base-versus-candidate contrast is one rollout each.\nverdict: confounded\n\ncomponent: scripts/net_revenue.py\ncandidates: dom1 (also in agg1, byte-identical), inv1 (variant)\nchange: This is a new stdlib helper that dedupes by txn_id, parses comma amounts, applies the settled_on and refunded_on month rules with that day's rate, and writes the three-key JSON. The dom1/agg1 version reports orphan refunds and refunds on non-SETTLED transactions in its diagnostics. The inv1 version exits 1 on an unknown refund txn_id and on a missing or zero rate, and has fuller input validation.\nobserved: Both variants gave the same figures on this data, and the zero-rate INR day (2026-10-31) fell outside the target month in both. The decision notes mention the difference between abort and report, but no run exercised it. In agg1 the script ran only after three argparse failures, so it was not at fault. The script is the likeliest reason the three candidates produced a file and base1 did not, but base1 differs in the prompt as well.\nverdict: confounded\n\ncomponent: systemprompt.md (generic line \"never rerun an unchanged failing command, pass a value after every flag, e.g. --out output/answer.json\")\ncandidates: agg1 (adopted); the closely related \"Working rules\" block in inv1\nchange: Added a sentence to the opening paragraph telling the agent to change something after a failure and to give a value to every flag. dom1 did not have this sentence.\nobserved: In the agg1 run, the agent still sent bare flags. `--tx --refunds --fx --status --out` failed with exit 2. It then supplied values one flag at a time and failed on `--status` and then `--out`, which is three failures before the fourth call succeeded. In inv1, which had the longer working-rules block and no explicit flag line, the agent ran a bare `--out` once (exit 2) and fixed it next call. In dom1, with neither line, the agent ran `--month 2026-09` once and finished cleanly. agg1 also did not start by listing the workspace, although the line says to. The line did not prevent the failure it was added for, and the run with it was the least efficient. This is single-rollout evidence, and the flag-error behaviour looks like sampling noise.\nverdict: no observed effect\n\ncomponent: hooks.json and scripts/check_output.py (Stop hook that rejects a missing or malformed answer.json)\ncandidates: dom1, inv1, agg1 (identical in all three)\nchange: New Stop hook. It runs `check_output.py`, which exits 2 with a message if `output/answer.json` is missing, has the wrong types, or is not rounded to 2 decimals.\nobserved: All three candidates had written a valid file before stopping, so the hook never fired. Nothing shows whether it would have rescued a base1-style run that stopped on a plan.\nverdict: no observed effect\n\ncomponent: plugin/README.md, scripts/README.md, skills/README.md, tool_descriptions/tool_guidance.md\ncandidates: agg1 (and the other candidates, unchanged or placeholder)\nchange: The README files are placeholder stubs, and `tool_guidance.md` is identical to the base.\nobserved: Nothing in any rollout references them.\nverdict: no observed effect"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/adk-guard/exec/hpb-adk-agg1/data-m/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "908ab7abb994950c"
+    }
+  },
+  "errors": []
+}

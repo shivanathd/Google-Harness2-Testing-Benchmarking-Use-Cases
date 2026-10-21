@@ -1,0 +1,33 @@
+---
+name: service-log-incident-stats
+description: Turn rotated service logs (plain + gzip, mixed UTC offsets, retried requests) into failed-request, distinct-user and top-error-code statistics for a UTC window.
+---
+
+# Service logs -> incident / traffic statistics
+
+ANALYTIC MOVE: classify each request by its LAST attempt, then count within a UTC window.
+Inputs: every rotated file (app.log, app.log.N, *.gz -- read gz via a decompressed copy outside the input dir). Result: the exact fields the task names, nothing extra in the artifact.
+
+## Definitions to apply (state the one you used if the task text is ambiguous)
+- Unit of count = a request (`req=` id), not a log line. Group all attempts of a req across ALL files; rotation means one request's attempts can sit in different files, and file order / line order is NOT chronological.
+- Last attempt = latest timestamp after converting to UTC (offsets differ line to line, e.g. +02:00, -04:00, +00:00). Cross-check against the highest `attempt=` number; if they disagree for any req, list those reqs and decide explicitly.
+- FAILED = last attempt is an ERROR line. A request whose earlier attempts errored but whose last attempt is INFO/status=200 is a success.
+- Window filter applies to the LAST attempt's UTC time (start inclusive, end exclusive) -- not to the first attempt, not to local time.
+- Users = distinct `user=` on the failed requests' last-attempt lines. Top code = mode of `code=` on those same last-attempt lines (not on earlier attempts, which may carry a different code than the last one).
+
+## Noise that is NOT a request attempt
+- Lines with no `req=` (e.g. `INFO user=.. msg=cache warm after ERROR code=E500`) contain the words ERROR/code= but are not attempts.
+- Indented traceback lines (`Traceback ...`, `UpstreamError: ERROR code=.. user=..`) have no timestamp; they are continuation lines, not attempts. They are decoys for a naive `grep ERROR | grep code=`.
+- Anchor the parse on the timestamp + `req=` + `attempt=` pattern; report counts of lines skipped by reason and of any unparsed line.
+
+## Checks before writing
+1. Total parsed attempt lines + skipped lines = total lines in all files (gz included).
+2. Check for exact-duplicate lines across rotated files (overlap) and say whether any were found.
+3. Failed count == sum of per-code counts; users <= failed.
+4. Top code: print the full code tally; if tied, report the tie in your reply and apply any tie rule the task gives (none in the task => say so).
+5. Re-run the count with window edges +/- shifted (e.g. reqs whose last attempt is within a minute of 08:00 or 12:00 UTC) and confirm inclusive/exclusive handling.
+6. Output JSON types exactly as asked (ints as ints, code as string).
+
+## Workspace facts (this task instance; verify, they may differ next time)
+- 3 files: app.log, app.log.1, app.log.2.gz; 110 distinct reqs; format `<ISO ts with offset> <LEVEL> req=rNNNNNN user=<id> attempt=<n> [status=200|code=Exxx] msg=ok|failed`. Codes seen: E401, E409, E500, E503. No duplicate lines, no attempt-number/timestamp conflicts, no req with multiple users.
+- Prior result for the 2026-10-06 08:00-12:00 UTC window: failed 19, users 8, top code E401 (7; E503 5, E409 4, E500 3) -- independently recomputed; use only as a cross-check, never as the answer for a different window or log set.

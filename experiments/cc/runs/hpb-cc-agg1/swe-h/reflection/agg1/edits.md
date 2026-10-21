@@ -1,0 +1,10 @@
+component: skills/issue-fix-checklist/SKILL.md (new skill), plus a one-line trigger in systemprompt.md
+candidates: dom1
+change: Added a 9-step checklist for resolving ISSUE.md items. The steps cover a clause table, validate-before-mutate, boundary tests, a byte-for-byte comparison for "must not change" output, exception reach, judgement calls and regression tests. Step 7 says to "choose the narrowest reading" of anything the issue leaves open. The systemprompt line tells the agent to load the skill before editing.
+observed: dom1 loaded the skill (`[ACTION] Skill issue-fix-checklist`, line 30). It wrote 18 regression tests in a new `tests/test_issue_fixes.py`, and its CHANGES.md has a "Judgement calls" section. It left `ops.remove` accepting qty<=0, so a negative remove adds stock. Its CHANGES.md calls this "a possible gap" because the issue only specifies the below-zero case. base1, inv1 and agg1 had no skill and all rejected qty<=0 in `remove`. inv1 reasoned "a negative remove would just be an add". The skill's narrowest-reading rule and the missing guard are consistent with each other, but there is only one dom1 run and no run without step 7, so the cause is not isolated. The test-writing and judgement-call reporting appear in dom1 and also in inv1 and agg1 without any harness change, so those behaviors are not attributable to the skill.
+verdict: confounded
+component: whole harness (no edits)
+candidates: agg1 (adopted), inv1
+change: The harness is byte-identical to base. Both `harness.diff` files are empty. The only differences from base are empty `scripts/` and `skills/` README placeholders.
+observed: The runs still differed. inv1 and agg1 added tests to `tests/test_cli.py` (5 and 7 tests). base1 added none. All three rejected qty<=0 in `remove`. Their message wording and `report` code structure differ. The differences come from rollout variance, not from an edit. agg1's adoption is a trivial single-final pick and says nothing about any edit.
+verdict: no observed effect

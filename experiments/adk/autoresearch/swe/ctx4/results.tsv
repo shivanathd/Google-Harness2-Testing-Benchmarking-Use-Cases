@@ -1,0 +1,5 @@
+iter	score	kept	notes
+0	0.200	True	baseline
+1	0.200	False	make a real change, such as strict validation that raises ValueError instead of silently skipping junk. After that it runs ad-hoc checks and the existing tests, copies the file to the output path and 
+2	0.800	True	ent; (2) actually change the code, using strict whole-input validation; (3) run throwaway checks that cover the symptom, valid formats and invalid inputs; (4) add tests; (5) re-copy the file to output
+3	1.000	True	its own checks. The new section says to use `re.fullmatch` or an ordered optional-group pattern that requires at least one part, to lowercase captured units, and to run a throwaway script covering val

@@ -1,0 +1,21 @@
+{
+ "cond": "ar/transfer",
+ "task": "data-m",
+ "rep": 2,
+ "partial": 0.0,
+ "all_pass": false,
+ "checks": {
+  "net_usd": false,
+  "transactions": false,
+  "refunds": false
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/adk/autoresearch/data/final",
+ "cost_usd": null,
+ "tokens_in": 112096,
+ "tokens_out": 659,
+ "wall_s": 197.7,
+ "error": "",
+ "infra_error": false,
+ "turns": null,
+ "tool_calls": 14
+}

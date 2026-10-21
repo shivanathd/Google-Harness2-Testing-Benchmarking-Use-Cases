@@ -1,0 +1,16 @@
+# third-party clone (its own git history), environments, model weights, local tool state
+repo/
+.venv/
+adk-venv/
+tools/
+.remember/
+__pycache__/
+*.pyc
+.DS_Store
+
+# regenerable bulk: rollout workspaces, generated task sources, improver evidence copies, raw streams
+experiments/**/exec/
+experiments/**/sources/
+experiments/**/audit/
+experiments/**/runs/**/context/
+experiments/**/runs/**/selection/

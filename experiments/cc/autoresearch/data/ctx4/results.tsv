@@ -1,0 +1,8 @@
+iter	score	kept	notes
+0	1.000	True	baseline
+1	1.000	False	sy dates, amounts, duplicates and currencies, using a script with Decimal and a single final rounding, printing row counts after each filter, and verifying the output schema. The baseline already scor
+2	1.000	False	icating by the stated ID, filtering exactly, using Decimal with a single final rounding, printing row counts after each filter, and re-reading the output file to check its schema. The baseline already
+3	1.000	False	e stated ID.
+- Compute in a script with Decimal and round once at the end.
+- Print row counts after each filter and fail loudly on values that won't parse.
+- Re-read the output file to check its schem

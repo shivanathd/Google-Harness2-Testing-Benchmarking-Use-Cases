@@ -1,0 +1,1 @@
+{"executor": "adk", "root": "../experiments/ablations/adk-noprobe", "no_probe": true, "no_library": false, "tiers": ["easy", "medium", "hard"], "domains": ["data", "ops", "swe"], "share_base": "../experiments/adk-guard", "improver_sessions": 6, "improver": "claude-sonnet-5-5"}

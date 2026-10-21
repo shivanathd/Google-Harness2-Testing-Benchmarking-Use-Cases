@@ -1,0 +1,7 @@
+KEEP_BASE. I changed no files.
+
+dropped -> dom1 `skills/revenue-reconciliation` skill plus its trigger line in `systemprompt.md` -> The base rollout already reached 5072.12 / 9 / 3 with no errors or detours. It converted to UTC, excluded test customers from chargebacks as well as charges, and counted charged-back charges. dom1's rollout reached the identical answer, so its skill added no measurable gain. Its "Workspace facts" section hard-codes this dataset's IDs and result (C09/C10, ch_028, cb_5, "net 5072.12"). That is an answer leak that would mislead on other months or exports, and it costs an always-on trigger line.
+
+dropped -> inv1 (KEEP_BASE candidate, no files changed) -> Its rollout was also 5072.12 / 9 / 3 with the same method. It identified no failure to fix, and I agree. Both candidate rollouts delivered a valid `answer.json`, so none of them was a non-delivering rollout.
+
+dropped -> generic checklist in dom1 (filter order, boundary rows checked in UTC, every chargeback row accounted for) -> Base1 did all of this unprompted (one Decimal script, `answer.json` re-parsed afterwards). The base set is 1/1 clean, so there is no repeated failure to aim an edit at, and any prose would only spend context.

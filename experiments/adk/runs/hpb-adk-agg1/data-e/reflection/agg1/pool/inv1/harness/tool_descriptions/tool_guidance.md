@@ -1,0 +1,3 @@
+- Paths are relative to the workspace root; "workspace" and "/" are rejected. Start with list_files ".".
+- run_command: check `exit=`. exit=timeout means the command hung (e.g. pip install with no network): do not retry it. Tracebacks name the failing value; fix that cause before re-running.
+- Scripts in scripts/ run from the workspace root: `python3 scripts/<name>.py`.

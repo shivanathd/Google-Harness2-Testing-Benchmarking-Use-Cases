@@ -1,0 +1,440 @@
+<title>Harness² on the Bench</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+/* Layout: a single 46rem reading column with full-bleed figure rows; bench-notebook feel, cool paper, ink, instrument labels. */
+:root {
+  --paper: #f4f6f7;
+  --paper-2: #e9edef;
+  --ink: #152027;
+  --ink-2: #44525b;
+  --ink-3: #6b7a83;
+  --rule: #cdd5da;
+  --accent: #4a3aa7;
+  --s-base: #2a78d6;
+  --s-h2: #eb6834;
+  --s-ar: #1baf7a;
+  --good: #1e7f4f;
+  --warn: #9a6200;
+  --bad: #b3261e;
+  --code-bg: #e6ebee;
+  --display: "IBM Plex Sans Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --body: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #12181c; --paper-2: #1a2227; --ink: #e6ecef; --ink-2: #b4c0c6; --ink-3: #8796a0;
+    --rule: #2c373e; --accent: #a99cf2; --s-base: #3987e5; --s-h2: #d95926; --s-ar: #199e70;
+    --good: #5cc48d; --warn: #e0a640; --bad: #f08a80; --code-bg: #1d272d;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #12181c; --paper-2: #1a2227; --ink: #e6ecef; --ink-2: #b4c0c6; --ink-3: #8796a0;
+  --rule: #2c373e; --accent: #a99cf2; --s-base: #3987e5; --s-h2: #d95926; --s-ar: #199e70;
+  --good: #5cc48d; --warn: #e0a640; --bad: #f08a80; --code-bg: #1d272d;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font: 17px/1.62 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+main { max-width: 46rem; margin: 0 auto; padding-block: 3rem 5rem; display: grid; gap: 2.6rem; }
+.wide { width: min(64rem, calc(100vw - 32px)); justify-self: center; }
+h1, h2, h3, .label, th, .chip, nav a, figcaption, .kicker { font-family: var(--display); }
+h1 { font-size: clamp(2.3rem, 6vw, 3.4rem); line-height: 1.02; margin: 0; font-weight: 700; letter-spacing: -0.01em; text-wrap: balance; }
+h2 { font-size: 1.55rem; line-height: 1.15; margin: 0 0 .6rem; font-weight: 600; text-wrap: balance; }
+h3 { font-size: 1.12rem; margin: 0 0 .35rem; font-weight: 600; }
+p { margin: 0; max-width: 65ch; }
+section { display: grid; gap: .95rem; }
+.kicker { text-transform: uppercase; letter-spacing: .12em; font-size: .78rem; color: var(--accent); font-weight: 600; }
+.lede { font-size: 1.2rem; color: var(--ink-2); }
+.meta { font-family: var(--mono); font-size: .78rem; color: var(--ink-3); display: flex; flex-wrap: wrap; gap: .3rem 1.2rem; }
+a { color: var(--accent); text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+code, .mono { font-family: var(--mono); font-size: .84em; }
+code { background: var(--code-bg); padding: .08em .32em; border-radius: 3px; }
+hr { border: 0; border-top: 1px solid var(--rule); margin: 0; }
+nav { display: flex; flex-wrap: wrap; gap: .4rem 1.1rem; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding-block: .6rem; }
+nav a { font-size: .9rem; text-decoration: none; color: var(--ink-2); font-weight: 500; }
+nav a:hover { color: var(--accent); }
+
+/* verdict list */
+.verdict { display: grid; gap: .1rem; border-left: 3px solid var(--accent); padding-left: 1.1rem; }
+.verdict li { margin: .35rem 0; }
+.verdict ul { margin: 0; padding-left: 1.1rem; }
+.num { font-family: var(--display); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* tables */
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; font-variant-numeric: tabular-nums; }
+th { text-align: left; font-weight: 600; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); border-bottom: 1px solid var(--rule); padding: .45rem .6rem .45rem 0; vertical-align: bottom; }
+td { border-bottom: 1px solid var(--rule); padding: .45rem .6rem .45rem 0; vertical-align: top; }
+td.r, th.r { text-align: right; }
+tr.group td { font-family: var(--display); font-weight: 600; color: var(--ink-2); padding-top: .9rem; border-bottom: 0; }
+.pos { color: var(--good); } .neg { color: var(--bad); } .zero { color: var(--ink-3); }
+
+/* harness tree + code */
+.twocol { display: grid; grid-template-columns: minmax(0, 15rem) minmax(0, 1fr); gap: 1.4rem; align-items: start; }
+@media (max-width: 720px) { .twocol { grid-template-columns: 1fr; } }
+.tree { font-family: var(--mono); font-size: .8rem; line-height: 1.7; color: var(--ink-2); margin: 0; white-space: pre; overflow-x: auto; }
+.tree b { color: var(--ink); font-weight: 500; }
+pre.code { margin: 0; background: var(--code-bg); border-radius: 4px; padding: .9rem 1rem; font: .78rem/1.55 var(--mono); overflow-x: auto; max-height: 26rem; white-space: pre-wrap; }
+
+/* chips */
+.chip { display: inline-block; font-size: .72rem; font-weight: 600; letter-spacing: .04em; padding: .08rem .45rem; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+.chip.keep { color: var(--ink-3); } .chip.edit { color: var(--accent); } .chip.ok { color: var(--good); } .chip.warn { color: var(--warn); }
+
+/* figures */
+figure { margin: 0; display: grid; gap: .6rem; }
+figcaption { font-size: .85rem; color: var(--ink-3); }
+.legend { display: flex; flex-wrap: wrap; gap: .3rem 1.2rem; font-family: var(--display); font-size: .85rem; color: var(--ink-2); }
+.legend span.hollow::before { background: transparent; border: 2px solid var(--s-h2); width: .55rem; height: .55rem; }
+.legend span::before { content: ""; display: inline-block; width: .7rem; height: .7rem; border-radius: 50%; margin-right: .4rem; vertical-align: -1px; background: var(--c); }
+.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr)); gap: 1.6rem; }
+.chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+.chart text { fill: var(--ink-2); font-family: var(--display); font-size: 12px; }
+.chart .axis line, .chart .grid line { stroke: var(--rule); }
+.chart .tick text { fill: var(--ink-3); font-size: 11px; }
+.chart .hit { fill: transparent; cursor: default; }
+.chart .hit:hover { fill: color-mix(in srgb, var(--accent) 8%, transparent); }
+.pending { border: 1px dashed var(--rule); border-radius: 4px; padding: 1rem; color: var(--ink-3); font-family: var(--display); }
+#tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--paper); font: 12px/1.45 var(--display); padding: .45rem .6rem; border-radius: 4px; max-width: 18rem; z-index: 5; }
+.callout { background: var(--paper-2); border-radius: 4px; padding: 1rem 1.15rem; display: grid; gap: .5rem; }
+.grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13.5rem), 1fr)); gap: 1rem 1.4rem; }
+.grid3 > div { display: grid; gap: .3rem; align-content: start; }
+ol.steps { margin: 0; padding-left: 1.3rem; display: grid; gap: .55rem; }
+ol.steps li::marker { font-family: var(--display); font-weight: 600; color: var(--accent); }
+details summary { cursor: pointer; font-family: var(--display); font-weight: 600; color: var(--ink-2); }
+@media (prefers-reduced-motion: no-preference) { .chart circle.m { transition: r .15s; } }
+</style>
+
+<main>
+  <header style="display:grid;gap:1rem">
+    <div class="kicker">Field test · google-research/harness2 @ 1cfe254</div>
+    <h1>Harness² on the Bench</h1>
+    <p class="lede" id="lede">We ran Google's self-improving agent harness on a benchmark we built, with two executors and a Karpathy-style baseline, and audited every step for leaks.</p>
+    <div class="meta"><span>19 Oct 2026</span><span>executors: Claude Code + Haiku 5.5 · Google ADK + qwen3:8b</span><span>improver: Claude Sonnet 5.5</span></div>
+    <nav aria-label="Sections"><a href="#verdict">Verdict</a><a href="#what">What it is</a><a href="#how">How we tested</a><a href="#results">Results</a><a href="#wrote">What it wrote</a><a href="#vs">vs autoresearch</a><a href="#lessons">Method lessons</a><a href="#apply">Using it with Claude Code</a><a href="#repro">Reproduce</a></nav>
+  </header>
+
+  <section id="verdict">
+    <div class="kicker">Verdict</div>
+    <div class="verdict" id="verdict-body"><!--VERDICT--></div>
+  </section>
+
+  <section id="what">
+    <div class="kicker">What Harness² is</div>
+    <h2>It edits the agent's surroundings, never the model</h2>
+    <p>A harness is everything around a model that makes it an agent. Harness² treats that harness as the thing to optimise, using two loops.</p>
+    <div class="grid3">
+      <div><h3>Task-level recursion</h3><p>For the task in front of it, an improver model <em>proposes</em> harness edits, <em>probes</em> them by running the agent on the same task, and <em>composes</em> a refined harness from how the runs behaved differently. It never sees a grader, rubric or answer.</p></div>
+      <div><h3>Harnessing-level recursion</h3><p>After each task, a reflector writes the adopted harness and one evidence-backed lesson into a per-domain library. Later tasks in that domain read the library before proposing.</p></div>
+      <div><h3>Parallel or sequential</h3><p>Parallel explores <span class="mono">k</span> general and <span class="mono">k</span> domain edits, then composes <span class="mono">k</span> finals. Sequential refines through <span class="mono">k</span> rounds. Either way a task costs <span class="num">4k</span> agent rollouts and <span class="num">3k</span> improver sessions.</p></div>
+    </div>
+    <div class="twocol">
+      <pre class="tree" aria-label="Harness tree"><b>harness/</b>
+├─ systemprompt.md        c1
+├─ guardrails.md          c2
+├─ LongTermMEMORY.md      c3
+├─ tool_descriptions/
+│  └─ tool_guidance.md    c4
+├─ sub_agents/&lt;n&gt;/AGENT.md c5
+├─ skills/&lt;n&gt;/SKILL.md    c6
+├─ scripts/&lt;n&gt;.py         c7
+└─ plugin/&lt;n&gt;.ts          c8</pre>
+      <div style="display:grid;gap:.7rem">
+        <p>The eight editable components map almost one-to-one onto a Claude Code project: c1 to c4 become <code>CLAUDE.md</code>, c5 becomes <code>.claude/agents/</code>, c6 becomes <code>.claude/skills/</code>, c7 stays <code>scripts/</code>, and c8 is the hook layer. That mapping is why the method transfers to Claude Code at all.</p>
+        <p>Google's release drives OpenCode or Codex on Vertex Gemini against JobBench, LAB and WorkBuddy-Bench, and reports gains of up to 11.5 points from a single step. Interactive diagram: <a href="../docs/diagrams/harness2-loop.svg">the per-task loop, with source links</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="kicker">How we tested</div>
+    <h2>A benchmark with hidden graders, two agents, one sandbox</h2>
+    <p>The official benchmarks need Vertex Gemini models. The only Google Cloud project on this machine is a production one, so we left it alone and built a benchmark that runs on what was already here. Harness²'s core code ran unmodified; we wrote the adapter it asks for. Interactive diagram: <a href="../docs/diagrams/test-rig.svg">the test rig</a>.</p>
+    <div class="tbl wide">
+      <table>
+        <thead><tr><th>Domain</th><th>Easy</th><th>Medium</th><th>Hard</th></tr></thead>
+        <tbody>
+          <tr><td><b>data</b><br><span class="mono">answer.json</span></td><td>Net settled revenue from one CSV. Traps: double-imported rows, <span class="mono">(1,234.50)</span> negatives, mixed date formats, VOID/PENDING, FX.</td><td>Adds daily FX, recognition by settlement date, partial refunds booked in the month they were issued.</td><td>Rules exist only in <span class="mono">POLICY.md</span>: UTC month boundary, minor units (JPY has none), test customers, chargeback plus $15 fee.</td></tr>
+          <tr><td><b>ops</b><br><span class="mono">answer.json</span></td><td>Count ERROR events, users and top code in a UTC window across timezone offsets. Traps: traceback lines and INFO lines that say "ERROR".</td><td>Rotated and gzipped logs; retries; a request failed only if its last attempt failed.</td><td>Per-service requests, error rate and nearest-rank p95 from JSONL; truncated lines, <span class="mono">/healthz</span> excluded, a mid-window switch from ms to seconds.</td></tr>
+          <tr><td><b>swe</b><br><span class="mono">hidden tests</span></td><td>Fix <span class="mono">parse_duration</span> to its docstring; 10 hidden edge cases.</td><td>A three-module invoicing package and an issue: Decimal, half-up rounding, tax after discount, region codes; 10 hidden tests.</td><td>Inventory CLI: two bugs and a new <span class="mono">report --low</span> flag, with hidden regression tests on the output format other tools parse; 14 tests.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid3">
+      <div><h3>Executors</h3><p><b>Claude Code</b> (<code>claude -p</code>, Haiku 5.5), with the harness written as <code>CLAUDE.md</code>, project skills and scripts. A <b>Google ADK</b> agent on local qwen3:8b through Ollama, with four workspace tools and a <code>load_skill</code> tool.</p></div>
+      <div><h3>Conditions</h3><p>Base harness (one sentence). Harness² parallel <span class="mono">k=1</span> over all nine tasks, in order easy to hard within each domain. Sequential <span class="mono">k=2</span> on the data domain (Claude Code only; dropped for ADK to save local GPU time). Karpathy-style autoresearch: four keep-if-better edits on the easy task, scored by the real grader, then frozen.</p></div>
+      <div><h3>Measurement</h3><p>Fresh re-rolls of every adopted or frozen harness, compared with base re-rolls. Transfer from the easy task to medium and hard. Fresh-seed variants to catch memorisation. Hierarchical bootstrap and an exact sign-flip test. Written down before the first treatment run.</p></div>
+    </div>
+    <div class="callout">
+      <h3>Isolation and review before any treatment run</h3>
+      <p>Every model-driven process ran under a macOS <code>sandbox-exec</code> profile with an allow-listed environment. Reads of the grader code, other runs' outputs and credential folders were denied, writes outside the workspace were denied, and web tools were off. Three adversarial reviewers (critical, supportive, neutral) and a security review ran first. Together they caught one silent blocker and seven grader or spec bugs. The full list is in <a href="#lessons">Method lessons</a>.</p>
+    </div>
+  </section>
+
+  <section id="results" class="wide" style="gap:1.2rem">
+    <div class="kicker">Results</div>
+    <h2>Mean score per task: base vs Harness² vs autoresearch</h2>
+    <div class="legend"><span style="--c:var(--s-base)">Base harness</span><span style="--c:var(--s-h2)">Harness² adopted (in-task)</span><span style="--c:var(--s-ar)">Autoresearch frozen (easy: tuned task; medium/hard: transfer)</span><span class="hollow">Hollow: void under the leak rule</span></div>
+    <div class="charts">
+      <figure class="chart" id="chart-cc"></figure>
+      <figure class="chart" id="chart-adk"></figure>
+    </div>
+    <div id="results-text" style="display:grid;gap:.9rem;max-width:46rem"><!--RESULTS--></div>
+    <div class="tbl" id="cmp-table"></div>
+    <details><summary>Per-rollout table</summary><div class="tbl" id="raw-table" style="margin-top:.6rem"></div></details>
+  </section>
+
+  <section id="wrote">
+    <div class="kicker">What it wrote</div>
+    <h2>Mostly process, and sometimes the answers</h2>
+    <div id="wrote-body" style="display:grid;gap:.9rem"></div>
+  </section>
+
+  <section id="vs">
+    <div class="kicker">Compared with Karpathy's autoresearch</div>
+    <h2>Same idea, opposite source of truth</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th></th><th>Harness²</th><th>autoresearch</th></tr></thead>
+        <tbody>
+          <tr><td>What changes</td><td>The agent's harness: prompts, guardrails, memory, skills, scripts, subagents, plugins</td><td>One file (<code>train.py</code>); the human writes <code>program.md</code></td></tr>
+          <tr><td>Who decides "better"</td><td>The improver, by contrasting executions. No ground truth.</td><td>A fixed scalar (<code>val_bpb</code>) under a fixed 5-minute budget</td></tr>
+          <tr><td>Keep or revert</td><td>Compose from evidence; KEEP_BASE is an allowed outcome</td><td>Git: keep if the score strictly improves, else reset</td></tr>
+          <tr><td>Memory across runs</td><td>Per-domain library of adopted harnesses and lessons</td><td>The git history and a results log</td></tr>
+          <tr><td>Works without a grader</td><td>Yes. That is the point.</td><td>No. The metric is the loop.</td></tr>
+          <tr><td>Main risk</td><td>Self-judgement can reward persuasive but wrong edits</td><td>Overfitting the metric; noisy single runs pick winners</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="vs-body" style="display:grid;gap:.9rem"></div>
+  </section>
+
+  <section id="lessons">
+    <div class="kicker">Method lessons</div>
+    <h2>Nine things that would have produced a wrong answer</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Found by</th><th>Problem</th><th>What it would have done</th></tr></thead>
+        <tbody id="lessons-body">
+          <tr><td class="mono" style="white-space:nowrap">Calibration pilot</td><td>Claude Code + Haiku 5.5 passed 27 of 27 runs on the first, easy-only task set.</td><td>Any harness method would have shown zero gain for lack of headroom. We added medium and hard tiers and a weaker executor.</td></tr>
+          <tr><td class="mono" style="white-space:nowrap">Supportive reviewer</td><td>Our surface was named <code>hpb</code>; harness2's prompt builder only knows <code>opencode</code> and <code>codex</code>.</td><td>Every propose and compose call would raise, every task would fall back to base, and the report would read "Harness² = base".</td></tr>
+          <tr><td class="mono" style="white-space:nowrap">Our leak audit</td><td>Under concurrent start, the Claude CLI sometimes replied <code>Not logged in · Please run /login</code> with status <code>success</code>. It hit 11 of 237 executor runs and 4 improver sessions.</td><td>Base runs looked worse than they were, which produced a fake +0.11 gain for Harness². The first improver also saw an empty trajectory. Fixed, and the whole CC arm re-run.</td></tr>
+          <tr><td class="mono" style="white-space:nowrap">Critical reviewer</td><td>Agents and the improver could read the grader code, reference solutions and earlier runs' answers. Absolute paths in trajectories told them where to look.</td><td>Answer leakage. Fixed with a sandbox-exec profile that denies those reads, plus path scrubbing in evidence.</td></tr>
+          <tr><td class="mono" style="white-space:nowrap">Security review</td><td><code>GITHUB_TOKEN</code> and three API keys were in the environment passed to agents running with all permissions.</td><td>Credential exposure to a model-driven shell. Fixed with an environment allow-list.</td></tr>
+          <tr><td class="mono" style="white-space:nowrap">Neutral + critical</td><td>Six refunds were dated before their transaction settled, and two chargebacks before capture.</td><td>A careful agent that drops impossible records would score 0.5. Generators fixed and every task re-verified.</td></tr>
+          <tr><td class="mono" style="white-space:nowrap">Critical reviewer</td><td>The ADK <code>list_files</code> tool returned <code>(empty)</code> for a path that does not exist, and ADK aborted the run on any tool exception.</td><td>qwen3 concluded the workspace was empty and stopped. Any harness edit saying "use '.'" would look like a large gain that was really an adapter bug.</td></tr>
+          <tr><td class="mono" style="white-space:nowrap">Neutral reviewer</td><td>The SWE grader trusted the last stdout line, which agent code could forge with <code>atexit</code>. <code>valid_json</code> counted as credit. One hidden test checked behaviour the issue never asked for.</td><td>Forgeable or inflated scores. Fixed with a nonce-tagged result line and a gate in place of a credited check; the out-of-scope test was dropped.</td></tr>
+          <tr><td class="mono" style="white-space:nowrap">Measurement</td><td>qwen3's <code>/no_think</code> tag is ignored through LiteLLM; only <code>think=False</code> works. The host's security agent and Spotlight held load average near 200.</td><td>Rollouts slowed from minutes to half an hour, so step limits and timeouts would have scored as agent failures.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="apply">
+    <div class="kicker">Using it with Claude Code</div>
+    <h2>Where a harness optimiser earns its cost</h2>
+    <div id="apply-body" style="display:grid;gap:1rem">
+      <p>Harness² is a search over the files Claude Code already reads. Point it at work your team repeats, and it proposes a <code>CLAUDE.md</code>, skills and scripts, and keeps what changes behaviour. Our whole adapter, covering both executors, sandboxing and auth handling, is about 400 lines, and any agent that reads instructions from files can be plugged in the same way.</p>
+      <div class="tbl"><table><thead><tr><th>Harness² component</th><th>Claude Code file</th><th>What a good edit looks like</th></tr></thead><tbody>
+        <tr><td>system prompt, guardrails, memory, tool guidance</td><td><code>CLAUDE.md</code></td><td>"Write a script for any count over a file; never eyeball it"</td></tr>
+        <tr><td>skills</td><td><code>.claude/skills/&lt;n&gt;/SKILL.md</code></td><td>A domain procedure with its own helper script, loaded on demand</td></tr>
+        <tr><td>scripts</td><td><code>scripts/*.py</code></td><td>A deterministic checker the agent must run before finishing</td></tr>
+        <tr><td>subagents</td><td><code>.claude/agents/*.md</code></td><td>A reader for large inputs that returns a small table</td></tr>
+        <tr><td>plugins</td><td>hooks in <code>.claude/settings.json</code></td><td>Block "done" until <code>output/</code> exists; the one rule the model cannot skip</td></tr>
+      </tbody></table></div>
+      <div class="grid3">
+        <div><h3>Team conventions without a test oracle</h3><p>Finance close, incident write-ups, migration runbooks: work where "correct" lives in a policy document, not in a test. The verifier-free loop is the only option there, and the data-hard task is that shape.</p></div>
+        <div><h3>Skills from real sessions</h3><p>Feed recent session transcripts in as rollouts. The reflector's lesson format (cue, lesson, evidence, confidence) is a ready review template for a skills pull request.</p></div>
+        <div><h3>Cheaper or local models</h3><p>The headroom is with weaker executors. Haiku inside Claude Code was already at ceiling, while qwen3:8b in a plain ADK agent went from mostly failing to three out of three on six of eight tasks. A custom ADK or Agent SDK agent on a small model is where harness edits pay for themselves.</p></div>
+        <div><h3>A regression gate for CLAUDE.md</h3><p>Before merging a prompt or skill change, re-roll it against base at least three times, report pass^k, and run an A/A check. We found a fake +0.11 gain that way.</p></div>
+        <div><h3>Per-repo libraries</h3><p>Harness²'s domain library maps to one library per repository or service. Lessons learned on easy tickets are read first on hard ones.</p></div>
+        <div><h3>When not to bother</h3><p>Already at ceiling (measure first). One-off tasks with no repeating shape. Expecting one harness to cover a whole area: ours did not carry from easy tasks to harder ones. Budgets where four rollouts plus three Sonnet sessions per task (about $0.31 per task in our Claude Code arm) are too much.</p></div>
+      </div>
+      <h3>A recipe</h3>
+      <ol class="steps">
+        <li>Collect 10 to 30 representative tasks, with a cheap check for each so <em>you</em> can evaluate. Harness² itself never sees the check.</li>
+        <li>Re-roll the current setup three or more times per task. Drop tasks that are always perfect or always zero.</li>
+        <li>Run Harness² <span class="mono">k=1</span> in task order within each area, sandboxed, with no secrets in the agent's environment.</li>
+        <li>Re-roll each adopted harness three or more times, compare with base outside noise, and re-test on fresh instances to rule out memorisation.</li>
+        <li>Read the diffs, and grep them for numbers and ids from the task inputs. In our runs the improver wrote computed answers into three of eight skills. Keep the edits that are process (scripts, checks, procedures) and delete every "workspace fact".</li>
+        <li>Commit to <code>CLAUDE.md</code> and <code>.claude/skills/</code>, and keep the re-roll suite as a regression gate.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="repro">
+    <div class="kicker">Reproduce</div>
+    <h2>Commands</h2>
+    <pre class="code">cd GoogleHarness2/repo &amp;&amp; uv venv --python 3.12 .venv &amp;&amp; uv pip install -e '.[render]'
+harness2-demo --output runs/demo --k 2          # credential-free self-check
+cd ../hpb
+../repo/.venv/bin/python bench.py               # grader self-test: 15 tasks
+../repo/.venv/bin/python eval.py cc base --reps 3
+../repo/.venv/bin/python run.py cc --mode parallel --k 1
+../repo/.venv/bin/python run.py cc --mode sequential --k 2 --domains data
+../repo/.venv/bin/python autoresearch.py cc
+../repo/.venv/bin/python eval.py cc h2 --run parallel-k1 --reps 3
+../repo/.venv/bin/python eval.py cc ar --reps 3 &amp;&amp; ../repo/.venv/bin/python eval.py cc report
+# same with "adk" after: ollama serve, ollama pull qwen3:8b
+# official benchmarks (needs a Vertex project): harness2-setup lab &amp;&amp; harness2 --bench lab --k 1 --mode parallel</pre>
+    <details><summary>Pre-registration and amendments</summary><pre class="code" id="prereg" style="margin-top:.6rem"></pre></details>
+  </section>
+</main>
+<div id="tip" hidden></div>
+
+<script>
+const DATA = /*__DATA__*/{};
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const MAIN = ["data-e", "data-m", "data-h", "ops-e", "ops-m", "ops-h", "swe-e", "swe-m", "swe-h"];
+const TIER = { e: "easy", m: "medium", h: "hard" };
+const fmt = (x, d = 2) => (x == null ? "–" : Number(x).toFixed(d));
+const sgn = (x) => (x > 0.0005 ? "pos" : x < -0.0005 ? "neg" : "zero");
+const tip = $("#tip");
+function showTip(e, html) { tip.innerHTML = html; tip.hidden = false; const r = tip.getBoundingClientRect(); let x = e.clientX + 14, y = e.clientY + 14; if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 14; if (y + r.height > innerHeight - 8) y = e.clientY - r.height - 14; tip.style.left = x + "px"; tip.style.top = y + "px"; }
+function hideTip() { tip.hidden = true; }
+
+function cellsFor(ex) {
+  const c = (DATA[ex] && DATA[ex].cells) || {};
+  const h2 = c["h2-parallel-k1/intask"] || {};
+  const ar = Object.assign({}, c["ar/insample"] || {}, c["ar/transfer"] || {});
+  return { base: c.base || {}, h2, ar };
+}
+
+function drawChart(el, ex, title, status) {
+  const { base, h2, ar } = cellsFor(ex);
+  if (!Object.keys(base).length) { el.innerHTML = `<h3>${esc(title)}</h3><div class="pending">${esc(status || "Still running.")}</div>`; return; }
+  const W = 520, rowH = 34, top = 34, left = 92, right = 18, H = top + MAIN.length * rowH + 30 + 2 * 14;
+  const x = (v) => left + v * (W - left - right);
+  let y = top, s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(title)}: mean partial score per task">`;
+  for (const v of [0, 0.25, 0.5, 0.75, 1]) s += `<g class="grid"><line x1="${x(v)}" x2="${x(v)}" y1="${top - 10}" y2="${H - 22}"/></g><g class="tick"><text x="${x(v)}" y="${top - 16}" text-anchor="middle">${v}</text></g>`;
+  let prev = null;
+  MAIN.forEach((t) => {
+    const d = t.split("-")[0];
+    if (d !== prev) { if (prev) y += 14; s += `<text x="0" y="${y + 4}" style="font-weight:600;fill:var(--ink)">${d}</text>`; prev = d; }
+    const yy = y + rowH / 2;
+    s += `<text x="40" y="${yy + 4}">${TIER[t.split("-")[1]]}</text><line x1="${x(0)}" x2="${x(1)}" y1="${yy}" y2="${yy}" stroke="var(--rule)" stroke-dasharray="2 3"/>`;
+    const series = [["Base", base[t], "--s-base", -8], ["Harness²", h2[t], "--s-h2", 0], ["Autoresearch", ar[t], "--s-ar", 8]];
+    const means = series.filter((q) => q[1]).map((q) => q[1].mean);
+    if (means.length > 1) s += `<line x1="${x(Math.min(...means))}" x2="${x(Math.max(...means))}" y1="${yy}" y2="${yy}" stroke="var(--ink-3)" stroke-width="2"/>`;
+    for (const [name, c, col, dy] of series) {
+      if (!c) continue;
+      c.scores.forEach((v) => (s += `<circle cx="${x(v)}" cy="${yy + dy}" r="2.6" fill="var(${col})" opacity=".45"/>`));
+      const vd = name === "Harness²" && ((DATA[ex].report || {}).voided_cells || {})[`h2-parallel-k1/intask|${t}`];
+      s += vd ? `<circle class="m" cx="${x(c.mean)}" cy="${yy + dy}" r="5" fill="var(--paper)" stroke="var(${col})" stroke-width="2.2"/>`
+              : `<circle class="m" cx="${x(c.mean)}" cy="${yy + dy}" r="5.5" fill="var(${col})" stroke="var(--paper)" stroke-width="2"/>`;
+    }
+    const vdHits = ((DATA[ex].report || {}).voided_cells || {})[`h2-parallel-k1/intask|${t}`];
+    const tipHtml = `<b>${t}</b><br>` + series.filter((q) => q[1]).map((q) => `${q[0]}: ${fmt(q[1].mean)} · all-pass ${q[1].allpass}/${q[1].n} · runs ${q[1].scores.join(", ")}`).join("<br>") + (vdHits ? `<br><i>Harness² cell void: its harness contains this task's ${esc(vdHits.slice(0, 3).join(", "))}</i>` : "");
+    s += `<rect class="hit" x="0" y="${y}" width="${W}" height="${rowH}" data-tip="${esc(tipHtml)}"/>`;
+    y += rowH;
+  });
+  s += `<text x="${x(0.5)}" y="${H - 4}" text-anchor="middle" class="tick" style="fill:var(--ink-3)">mean fraction of checks passed (dots: individual runs)</text></svg>`;
+  el.innerHTML = `<h3>${esc(title)}</h3>${s}<figcaption>${esc(status || "")}</figcaption>`;
+  el.querySelectorAll(".hit").forEach((r) => { r.addEventListener("mousemove", (e) => showTip(e, r.dataset.tip)); r.addEventListener("mouseleave", hideTip); });
+}
+
+function cmpTable() {
+  const names = { "h2-parallel-k1/intask": "Harness² parallel k=1 · in-task", "h2-parallel-k1/transfer": "Harness² · easy-task harness on medium/hard", "h2-parallel-k1/variant": "Harness² · fresh-seed variants", "h2-sequential-k2/intask": "Harness² sequential k=2 · in-task (data)", "h2-sequential-k2/transfer": "Harness² seq k=2 · transfer (data)", "h2-sequential-k2/variant": "Harness² seq k=2 · variants (data)", "ar/insample": "Autoresearch · tuned task", "ar/transfer": "Autoresearch · medium/hard", "ar/variant": "Autoresearch · fresh-seed variants" };
+  for (const k of Object.keys(names)) names[k + " (strict)"] = names[k] + " · leak-void cells removed";
+  let h = `<table><thead><tr><th>Comparison vs base</th><th class="r">Tasks</th><th class="r">Mean Δ</th><th class="r">95% CI</th><th class="r">Sign-flip p</th><th class="r">Up / down</th></tr></thead><tbody>`;
+  for (const ex of ["cc", "adk"]) {
+    const comps = (DATA[ex] && DATA[ex].report && DATA[ex].report.comparisons) || {};
+    h += `<tr class="group"><td colspan="6">${ex === "cc" ? "Claude Code + Haiku 5.5" : "ADK + qwen3:8b"}</td></tr>`;
+    const order = ["h2-parallel-k1/intask", "h2-parallel-k1/intask (strict)", "h2-parallel-k1/variant", "h2-parallel-k1/variant (strict)", "h2-parallel-k1/transfer", "h2-parallel-k1/transfer (strict)", "h2-sequential-k2/intask", "h2-sequential-k2/transfer", "h2-sequential-k2/variant", "ar/insample", "ar/transfer", "ar/variant"];
+    const keys = order.filter((k) => comps[k]);
+    if (!keys.length) h += `<tr><td colspan="6" class="zero">Not finished yet.</td></tr>`;
+    for (const k of keys) { const v = comps[k]; h += `<tr><td>${names[k]}</td><td class="r">${v.n_tasks}</td><td class="r ${sgn(v.mean_delta)}">${v.mean_delta >= 0 ? "+" : ""}${fmt(v.mean_delta)}</td><td class="r">[${fmt(v.ci95[0])}, ${fmt(v.ci95[1])}]</td><td class="r">${fmt(v.signflip_p, 3)}</td><td class="r">${v.improved} / ${v.regressed}</td></tr>`; }
+  }
+  $("#cmp-table").innerHTML = h + "</tbody></table>";
+}
+
+function rawTable() {
+  let h = `<table><thead><tr><th>Executor</th><th>Condition</th><th>Task</th><th class="r">Runs</th><th class="r">Mean</th><th class="r">All-pass</th></tr></thead><tbody>`;
+  for (const ex of ["cc", "adk"]) for (const [cond, cells] of Object.entries((DATA[ex] && DATA[ex].cells) || {})) for (const [t, c] of Object.entries(cells)) h += `<tr><td>${ex}</td><td class="mono">${esc(cond)}</td><td class="mono">${t}</td><td class="r">${c.scores.join(" · ")}</td><td class="r">${fmt(c.mean)}</td><td class="r">${c.allpass}/${c.n}</td></tr>`;
+  $("#raw-table").innerHTML = h + "</tbody></table>";
+}
+
+function prereg() { $("#prereg").textContent = DATA.prereg || ""; }
+
+const comp = (ex, k) => (DATA[ex] && DATA[ex].report && DATA[ex].report.comparisons && DATA[ex].report.comparisons[k]) || null;
+const usd = (x) => "$" + Number(x || 0).toFixed(2);
+function baseStats(ex) {
+  const b = ((DATA[ex] || {}).cells || {}).base || {};
+  const main = MAIN.filter((t) => b[t]);
+  let n = 0, ap = 0, sum = 0;
+  main.forEach((t) => { n += b[t].n; ap += b[t].allpass; sum += b[t].mean; });
+  return { tasks: main.length, runs: n, allpass: ap, mean: main.length ? sum / main.length : null };
+}
+function sels(ex, run) { return Object.entries(((DATA[ex] || {}).selections || {})[run] || {}); }
+function deltaLine(v) { return v ? `${v.mean_delta >= 0 ? "+" : ""}${fmt(v.mean_delta)} (95% CI ${fmt(v.ci95[0])} to ${fmt(v.ci95[1])}; ${v.improved} up, ${v.regressed} down of ${v.n_tasks}; sign-flip p=${fmt(v.signflip_p, 3)})` : null; }
+
+function narrative() {
+  const cb = baseStats("cc"), ab = baseStats("adk");
+  const ccSel = sels("cc", "parallel-k1"), ccSeq = sels("cc", "sequential-k2"), adSel = sels("adk", "parallel-k1");
+  const ccKeep = ccSel.filter(([, v]) => v.is_base).length, ccSeqKeep = ccSeq.filter(([, v]) => v.is_base).length;
+  const ccImp = (DATA.cc.improver_usd || {})["parallel-k1"], adImp = (DATA.adk.improver_usd || {})["parallel-k1"];
+  const adIn = comp("adk", "h2-parallel-k1/intask"), adInS = comp("adk", "h2-parallel-k1/intask (strict)");
+  const adTr = comp("adk", "h2-parallel-k1/transfer"), adVar = comp("adk", "h2-parallel-k1/variant");
+  const arIn = comp("adk", "ar/insample"), arTr = comp("adk", "ar/transfer"), arVar = comp("adk", "ar/variant");
+  const perfect = adIn ? adIn.per_task.filter((p) => p.treat_allpass.startsWith("3/")).length : 0;
+  const nVoid = Object.keys((DATA.adk.report || {}).voided_cells || {}).filter((k) => k.startsWith("h2-parallel-k1/intask|")).length;
+
+  $("#lede").innerHTML = `On a small local model, Harness² turned failing runs into correct ones and the gains held on fresh data. It also wrote the answers into the harness whenever it could, and none of its harnesses transferred to harder tasks. On Claude Code it found nothing to fix, and correctly changed nothing.`;
+
+  const items = [
+    `<b>Weak model, big gain.</b> With ADK + qwen3:8b, the base harness averaged <span class="num">${fmt(ab.mean)}</span> and got ${ab.allpass} of ${ab.runs} runs fully right. Harness²'s adopted harnesses moved every adoptable task up: ${deltaLine(adIn)}. ${perfect} of ${adIn.n_tasks} tasks went to three out of three fully correct.`,
+    `<b>The gains are reusable, not memorised.</b> The same harnesses on fresh-seed instances of each task, data the improver never saw: ${deltaLine(adVar)}. The skills it wrote are general procedures with stdlib scripts.`,
+    `<b>But it writes answers into the harness when it can.</b> On all three ops tasks the improver ran its own script on the task files and saved the results in the skill as a "workspace fact", e.g. <code>errors=15, users=6, top_code=E500</code>. The data harnesses carry instance ids. Under our pre-registered rule that voids ${nVoid} of ${adIn.n_tasks} in-task cells. On the two clean tasks the gain is ${deltaLine(adInS)}. harness2's own guard looks for grader verdicts, not answers the improver computes itself.`,
+    `<b>No transfer up a tier.</b> The harness adopted on each easy task, frozen and run on that domain's medium and hard tasks: ${deltaLine(adTr)}. Autoresearch's frozen harness did no better: ${deltaLine(arTr)}. Both methods adapt to a task family, not to a domain.`,
+    `<b>Strong executor, no change, correctly.</b> Claude Code + Haiku 5.5 passed ${cb.allpass} of ${cb.runs} base runs across every tier. Harness² proposed edits, then kept the base harness on ${ccKeep} of ${ccSel.length} tasks (and ${ccSeqKeep} of ${ccSeq.length} in sequential k=2). Score change 0.00, no regressions, ${usd(ccImp)} of improver time.`,
+    `<b>Our own measurement nearly lied.</b> A burst of Claude CLI starts returned "Not logged in" marked as success. Scored as agent failures, they made Harness² look +0.11 better on Claude Code. The A/A rows exposed it; the clean re-run shows no gain.`,
+  ];
+  $("#verdict-body").innerHTML = `<ul>${items.map((i) => `<li>${i}</li>`).join("")}</ul>`;
+
+  const rt = [];
+  rt.push(`<p><b>ADK + qwen3:8b.</b> Base runs fail in a consistent way. The 8B model reads the files, writes long shell pipelines that break, and runs out of its 40 model calls before writing <code>output/</code>. Every adopted harness attacks that directly: a domain skill with a tested stdlib script, a trigger line in the system prompt, and rules like "write the deliverable early" and "never re-run a command that just failed". With them, the same model needs two to five tool calls. swe-m produced no adoptable harness: its only composed candidate failed to deliver, so harness2 recorded the task as partial.</p>`);
+  rt.push(`<p>Three numbers describe the in-task effect. As run: ${deltaLine(adIn)}. Pre-registered strict, leak-void cells removed: ${deltaLine(adInS)}. Fresh-seed variants, leak-free by construction: ${deltaLine(adVar)}. The strict rule also flags some variant cells, through id-scheme collisions (<code>R00</code>, <code>ch_000</code> and <code>cb_2</code> exist in every generated instance) and coincidences (ops-m has <code>failed=19</code> in both instances). Those are listed in the per-rollout table, not hidden.</p>`);
+  rt.push(`<p>One fresh-seed failure is instructive. On data-e-v the agent loaded the skill, ran its script, got the exact correct answer, and then printed it instead of writing <code>output/answer.json</code>. A prompt rule cannot force that step. Harness²'s plugin component, a hook that runs inside the tool loop, can. We left plugins off the surface so both executors had the same six components.</p>`);
+  rt.push(`<p><b>Claude Code + Haiku 5.5.</b> Every condition scores 1.0 on every task once the login artifact is removed: base, Harness² in-task, transfer, variants, sequential k=2, and autoresearch. It is a negative control, and Harness² passed it.</p>`);
+  rt.push(`<p>Nine tasks with three to four runs each supports descriptive claims. A sign-flip test over n paired tasks reaches p&lt;0.05 only when nearly all move the same way, which the ADK in-task result does (8 of 8, p=${fmt((adIn || {}).signflip_p, 3)}).</p>`);
+  $("#results-text").innerHTML = rt.join("");
+
+  const sk = DATA.skill;
+  let w = `<p>On Claude Code the improver proposed edits for every task, then composed back to the base harness. Its notes say the base trajectories already handled the traps, so nothing argued for a change. On ADK it changed the harness every time it could. Here is the harness it adopted for <span class="mono">${esc(sk ? sk.task : "")}</span>.</p>`;
+  if (sk) {
+    const text = esc(sk.text).replace(/(Workspace facts[\s\S]*)$/m, '<mark style="background:color-mix(in srgb, var(--warn) 22%, transparent);color:inherit">$1</mark>');
+    w += `<div class="twocol"><pre class="tree">${sk.tree.map((f) => esc(f)).join("\n")}</pre><pre class="code">${text}</pre></div>`;
+    w += `<p>Most of it is the procedure you would want from a careful analyst: dedupe before filtering, read <code>(x)</code> as negative, parse both date formats, multiply by the FX rate. The highlighted tail is the problem. It names this instance's duplicate ids and counts. On ops tasks the same habit wrote the answers themselves, with the note "treat as a check if the same files recur".</p>`;
+  }
+  const lessons = [...adSel].filter(([, v]) => v.lesson);
+  if (lessons.length) w += `<h3>Lessons the reflector wrote to the ADK library</h3><ul>${lessons.map(([t, v]) => `<li><span class="mono">${t}</span>: ${esc(v.lesson.slice(0, 300))}${v.lesson.length > 300 ? "…" : ""}</li>`).join("")}</ul>`;
+  $("#wrote-body").innerHTML = w;
+
+  const ar = DATA.adk.autoresearch;
+  let v = `<p>On the weak model, both methods found large gains on the easy tasks. Autoresearch, with the real grader in its loop: ${deltaLine(arIn)}. Harness², with no grader, on the same three easy tasks: ${["data-e", "ops-e", "swe-e"].map((t) => { const c = ((DATA.adk.cells || {})["h2-parallel-k1/intask"] || {})[t]; return c ? `${t} ${fmt(c.mean)}` : null; }).filter(Boolean).join(", ")}. Neither transferred to medium or hard tasks. On fresh-seed variants of the easy tasks the autoresearch harness held (${deltaLine(arVar)}).</p>`;
+  if (ar) v += `<p>Autoresearch's keep-if-better log per domain (iteration:score, ✓ kept): ${["data", "ops", "swe"].filter((d) => ar[d]).map((d) => `<b>${d}</b> ${ar[d].log.map((r) => `${r.iter}:${fmt(r.score)}${r.kept ? "✓" : ""}`).join(" ")}`).join("; ")}. Each keep decision rests on one rollout, which is why its frozen harness was re-rolled before comparing.</p>`;
+  v += `<p>The practical split: if you have a trustworthy check, autoresearch's loop is simpler, cheaper and cannot be fooled by its own story. If you do not, Harness² still makes progress, and its evidence-reading behaviour is what kept it from touching a working Claude Code harness. Neither one removes the need to audit what gets written into the harness.</p>`;
+  v += `<p class="meta">Improver spend: Harness² ${usd(adImp)} for 9 ADK tasks and ${usd(ccImp)} for 9 CC tasks; autoresearch ${usd(((DATA.adk.autoresearch || {}).improver_usd))} ADK and ${usd(((DATA.cc.autoresearch || {}).improver_usd))} CC for 3 domains × 4 iterations.</p>`;
+  $("#vs-body").innerHTML = v;
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  narrative();
+  const ccDone = DATA.cc && DATA.cc.report && DATA.cc.report.comparisons;
+  drawChart($("#chart-cc"), "cc", "Claude Code + Haiku 5.5", ccDone ? "Every condition reaches 1.0; Harness² kept the base harness on every task." : "Running.");
+  const adSel = sels("adk", "parallel-k1");
+  drawChart($("#chart-adk"), "adk", "ADK agent + qwen3:8b", "Harness² dots: re-rolls of each task's adopted harness (swe-m had none). Hover a row for runs.");
+  cmpTable(); rawTable(); prereg();
+});
+</script>

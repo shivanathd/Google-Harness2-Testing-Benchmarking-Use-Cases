@@ -1,0 +1,35 @@
+import pytest
+
+from invoicing.models import LineItem
+from invoicing.totals import compute_totals
+
+
+def test_simple_us():
+    assert compute_totals([LineItem("a", 2, "10.00")], "US")["total"] == "20.00"
+
+
+def test_region_is_case_insensitive():
+    assert compute_totals([LineItem("a", 2, "10.00")], "eu")["total"] == "24.00"
+
+
+def test_unknown_region_raises_value_error():
+    with pytest.raises(ValueError):
+        compute_totals([LineItem("a", 2, "10.00")], "XX")
+
+
+def test_tax_is_charged_on_discounted_amount():
+    totals = compute_totals([LineItem("a", 1, "100.00", 50)], "EU")
+    assert totals == {"subtotal": "100.00", "discount": "50.00", "tax": "10.00", "total": "60.00"}
+
+
+def test_discounted_eu_invoice_from_issue():
+    # 3 x 19.99 = 59.97; 10% discount = 5.997 -> 6.00; tax on 53.97 at 20% = 10.794 -> 10.79
+    totals = compute_totals([LineItem("widget", 3, "19.99", 10)], "eu")
+    assert totals == {"subtotal": "59.97", "discount": "6.00", "tax": "10.79", "total": "64.76"}
+
+
+def test_half_cent_rounds_half_up():
+    # 0.125 rounds to 0.13 (float round() would give 0.12)
+    totals = compute_totals([LineItem("a", 1, "0.125")], "US")
+    assert totals["subtotal"] == "0.13"
+    assert totals["total"] == "0.13"

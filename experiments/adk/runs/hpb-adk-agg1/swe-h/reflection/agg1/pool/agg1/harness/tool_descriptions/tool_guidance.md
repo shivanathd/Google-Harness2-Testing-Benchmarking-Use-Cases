@@ -1,0 +1,3 @@
+- list_files / read_file / write_file take paths relative to the workspace root ("." is the root; "workspace" is not a directory). read_file takes start_line and max_lines; small files fit in one call.
+- write_file overwrites the entire file: use it for full intended content of a source file you have read, for new files, and for output/ deliverables. Never on existing tests.
+- If a command tool is available, run from the workspace root: `python3 scripts/run_tests.py`, `python3 -c ...` snippets, `diff`. Read the full error before reacting; do not repeat an identical failing command.

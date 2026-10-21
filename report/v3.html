@@ -1,0 +1,506 @@
+<title>Harness² on the Bench</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+/* Layout: a single 46rem reading column with full-bleed figure rows; bench-notebook feel, cool paper, ink, instrument labels. */
+:root {
+  --paper: #f4f6f7;
+  --paper-2: #e9edef;
+  --ink: #152027;
+  --ink-2: #44525b;
+  --ink-3: #6b7a83;
+  --rule: #cdd5da;
+  --accent: #4a3aa7;
+  --s-base: #2a78d6;
+  --s-h2: #eb6834;
+  --s-ar: #1baf7a;
+  --good: #1e7f4f;
+  --warn: #9a6200;
+  --bad: #b3261e;
+  --code-bg: #e6ebee;
+  --display: "IBM Plex Sans Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --body: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #12181c; --paper-2: #1a2227; --ink: #e6ecef; --ink-2: #b4c0c6; --ink-3: #8796a0;
+    --rule: #2c373e; --accent: #a99cf2; --s-base: #3987e5; --s-h2: #d95926; --s-ar: #199e70;
+    --good: #5cc48d; --warn: #e0a640; --bad: #f08a80; --code-bg: #1d272d;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #12181c; --paper-2: #1a2227; --ink: #e6ecef; --ink-2: #b4c0c6; --ink-3: #8796a0;
+  --rule: #2c373e; --accent: #a99cf2; --s-base: #3987e5; --s-h2: #d95926; --s-ar: #199e70;
+  --good: #5cc48d; --warn: #e0a640; --bad: #f08a80; --code-bg: #1d272d;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font: 17px/1.62 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+main { padding-block: 3rem 5rem; display: grid; gap: 2.6rem; grid-template-columns: minmax(0, 1fr) minmax(0, 46rem) minmax(0, 1fr); }
+main > * { grid-column: 2; min-width: 0; }
+.wide { width: min(64rem, calc(100vw - 32px)); justify-self: center; }
+h1, h2, h3, .label, th, .chip, nav a, figcaption, .kicker { font-family: var(--display); }
+h1 { font-size: clamp(2.3rem, 6vw, 3.4rem); line-height: 1.02; margin: 0; font-weight: 700; letter-spacing: -0.01em; text-wrap: balance; }
+h2 { font-size: 1.55rem; line-height: 1.15; margin: 0 0 .6rem; font-weight: 600; text-wrap: balance; }
+h3 { font-size: 1.12rem; margin: 0 0 .35rem; font-weight: 600; }
+p { margin: 0; max-width: 65ch; }
+section { display: grid; gap: .95rem; }
+.kicker { text-transform: uppercase; letter-spacing: .12em; font-size: .78rem; color: var(--accent); font-weight: 600; }
+.lede { font-size: 1.2rem; color: var(--ink-2); }
+.meta { font-family: var(--mono); font-size: .78rem; color: var(--ink-3); display: flex; flex-wrap: wrap; gap: .3rem 1.2rem; }
+a { color: var(--accent); text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+code, .mono { font-family: var(--mono); font-size: .84em; }
+code { background: var(--code-bg); padding: .08em .32em; border-radius: 3px; }
+hr { border: 0; border-top: 1px solid var(--rule); margin: 0; }
+nav { display: flex; flex-wrap: wrap; gap: .4rem 1.1rem; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding-block: .6rem; }
+nav a { font-size: .9rem; text-decoration: none; color: var(--ink-2); font-weight: 500; }
+nav a:hover { color: var(--accent); }
+
+/* verdict list */
+.verdict { display: grid; gap: .1rem; border-left: 3px solid var(--accent); padding-left: 1.1rem; }
+.verdict li { margin: .35rem 0; }
+.verdict ul { margin: 0; padding-left: 1.1rem; }
+.num { font-family: var(--display); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* tables */
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; font-variant-numeric: tabular-nums; }
+th { text-align: left; font-weight: 600; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); border-bottom: 1px solid var(--rule); padding: .45rem .6rem .45rem 0; vertical-align: bottom; }
+td { border-bottom: 1px solid var(--rule); padding: .45rem .6rem .45rem 0; vertical-align: top; }
+td.r, th.r { text-align: right; }
+tr.group td { font-family: var(--display); font-weight: 600; color: var(--ink-2); padding-top: .9rem; border-bottom: 0; }
+.pos { color: var(--good); } .neg { color: var(--bad); } .zero { color: var(--ink-3); }
+
+/* harness tree + code */
+.twocol { display: grid; grid-template-columns: minmax(0, 15rem) minmax(0, 1fr); gap: 1.4rem; align-items: start; }
+@media (max-width: 720px) { .twocol { grid-template-columns: 1fr; } }
+.tree { font-family: var(--mono); font-size: .8rem; line-height: 1.7; color: var(--ink-2); margin: 0; white-space: pre; overflow-x: auto; }
+.tree b { color: var(--ink); font-weight: 500; }
+pre.code { margin: 0; background: var(--code-bg); border-radius: 4px; padding: .9rem 1rem; font: .78rem/1.55 var(--mono); overflow-x: auto; max-height: 26rem; white-space: pre-wrap; }
+
+/* chips */
+.chip { display: inline-block; font-size: .72rem; font-weight: 600; letter-spacing: .04em; padding: .08rem .45rem; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+.chip.keep { color: var(--ink-3); } .chip.edit { color: var(--accent); } .chip.ok { color: var(--good); } .chip.warn { color: var(--warn); }
+
+/* figures */
+figure { margin: 0; display: grid; gap: .6rem; }
+figcaption { font-size: .85rem; color: var(--ink-3); }
+.legend { display: flex; flex-wrap: wrap; gap: .3rem 1.2rem; font-family: var(--display); font-size: .85rem; color: var(--ink-2); }
+.legend span.hollow::before { background: transparent; border: 2px solid var(--s-h2); width: .55rem; height: .55rem; }
+.legend span::before { content: ""; display: inline-block; width: .7rem; height: .7rem; border-radius: 50%; margin-right: .4rem; vertical-align: -1px; background: var(--c); }
+.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr)); gap: 1.6rem; }
+.chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+.chart text { fill: var(--ink-2); font-family: var(--display); font-size: 12px; }
+.chart .axis line, .chart .grid line { stroke: var(--rule); }
+.chart .tick text { fill: var(--ink-3); font-size: 11px; }
+.chart .hit { fill: transparent; cursor: default; }
+.chart .hit:hover { fill: color-mix(in srgb, var(--accent) 8%, transparent); }
+.pending { border: 1px dashed var(--rule); border-radius: 4px; padding: 1rem; color: var(--ink-3); font-family: var(--display); }
+#tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--paper); font: 12px/1.45 var(--display); padding: .45rem .6rem; border-radius: 4px; max-width: 18rem; z-index: 5; }
+.callout { background: var(--paper-2); border-radius: 4px; padding: 1rem 1.15rem; display: grid; gap: .5rem; }
+.grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13.5rem), 1fr)); gap: 1rem 1.4rem; }
+.grid3 > div { display: grid; gap: .3rem; align-content: start; }
+ol.steps { margin: 0; padding-left: 1.3rem; display: grid; gap: .55rem; }
+ol.steps li::marker { font-family: var(--display); font-weight: 600; color: var(--accent); }
+details summary { cursor: pointer; font-family: var(--display); font-weight: 600; color: var(--ink-2); }
+@media (prefers-reduced-motion: no-preference) { .chart circle.m { transition: r .15s; } }
+
+/* v3 additions */
+main > .wide { grid-column: 1 / -1; width: 100%; max-width: 70rem; justify-self: center; }
+.charts.three { grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); }
+.chart svg .tk { fill: var(--ink-3); font-size: 11px; font-family: var(--display); }
+.chart svg .lbl { fill: var(--ink-2); font-size: 12px; font-family: var(--display); }
+.caption { font-size: .9rem; color: var(--ink-2); }
+.forest { display: grid; gap: 2px; font-family: var(--display); }
+.f-axis, .f-row { display: grid; grid-template-columns: minmax(12rem, 26rem) 1fr; gap: .8rem; align-items: center; }
+.f-scale { position: relative; height: 1.2rem; }
+.f-scale i { position: absolute; transform: translateX(-50%); font-style: normal; font-size: .75rem; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.f-group { font-weight: 600; color: var(--ink); margin-top: .7rem; padding-top: .45rem; border-top: 1px solid var(--rule); font-size: .9rem; }
+.f-row { padding: .2rem 0; border-radius: 3px; outline-offset: 1px; }
+.f-row:hover, .f-row:focus-visible { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+.f-label { font-size: .86rem; color: var(--ink-2); }
+.f-strip { position: relative; height: 1.5rem; overflow: hidden; }
+.f-strip b, .f-strip em { position: absolute; top: 50%; }
+.f-zero { width: 1px; height: 1.5rem; top: 0 !important; background: var(--ink-3); }
+.f-ci { height: 3px; margin-top: -1.5px; border-radius: 2px; opacity: .55; }
+.f-pt { width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 2px var(--paper); }
+.f-pt.hollow { background: var(--paper); border: 2px solid var(--c); width: 10px; height: 10px; margin: -5px 0 0 -5px; }
+.f-val { font-style: normal; font-size: .75rem; color: var(--ink-2); margin: -.55rem 0 0 .5rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (max-width: 640px) { .f-axis, .f-row { grid-template-columns: 1fr; gap: .15rem; } .f-axis > span { display: none; } }
+.legend span.hollow::before { background: transparent; border: 2px solid var(--c); width: .55rem; height: .55rem; }
+.flipfig { gap: .35rem; }
+.fl-head, .fl-row { display: grid; grid-template-columns: minmax(7rem, 11rem) 1fr 1fr; gap: .5rem; align-items: center; font-family: var(--display); font-size: .82rem; }
+.fl-head span { color: var(--ink-3); font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; }
+.fl-head span:nth-child(2) { text-align: right; }
+.fl-task { color: var(--ink-2); overflow-wrap: anywhere; }
+.fl-lost, .fl-gain { position: relative; height: 1rem; display: flex; align-items: center; gap: .3rem; }
+.fl-lost { flex-direction: row-reverse; }
+.fl-lost b, .fl-gain b { display: block; height: .7rem; border-radius: 2px; min-width: 0; }
+.fl-lost b { background: var(--bad); } .fl-gain b { background: var(--good); }
+.fl-lost em, .fl-gain em { font-style: normal; font-size: .75rem; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.fl-row { border-radius: 3px; } .fl-row:hover, .fl-row:focus-visible { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+.filters { display: flex; flex-wrap: wrap; gap: .4rem; }
+.filters button { font: 500 .85rem var(--display); color: var(--ink-2); background: transparent; border: 1px solid var(--rule); border-radius: 999px; padding: .2rem .7rem; cursor: pointer; }
+.filters button.on { color: var(--paper); background: var(--ink); border-color: var(--ink); }
+.filters small { color: inherit; opacity: .7; }
+ol.timeline { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; max-width: 52rem; }
+ol.timeline li { display: grid; grid-template-columns: 3.4rem 8.6rem 1fr; gap: .8rem; padding: .7rem 0; border-top: 1px solid var(--rule); align-items: start; }
+ol.timeline time { font: 500 .85rem var(--mono); color: var(--ink-3); padding-top: .15rem; }
+ol.timeline h3 { margin: 0 0 .2rem; font-size: 1rem; }
+ol.timeline p { font-size: .92rem; color: var(--ink-2); }
+ol.timeline .meta2 { font-size: .8rem; color: var(--ink-3); margin-top: .25rem; }
+@media (max-width: 640px) { ol.timeline li { grid-template-columns: 3.2rem 1fr; } ol.timeline li > div { grid-column: 1 / -1; } }
+ul.tight { margin: 0; padding-left: 1.1rem; display: grid; gap: .45rem; font-size: .95rem; }
+.twocol.even { grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); }
+mark { background: color-mix(in srgb, var(--warn) 24%, transparent); color: inherit; }
+</style>
+<main>
+  <header style="display:grid;gap:1rem">
+    <div class="kicker">Field test · google-research/harness2 @ 1cfe254 · four studies · 19 Oct 2026</div>
+    <h1>Harness² on the Bench</h1>
+    <p class="lede">Google's Harness² rewrites an agent's prompts, skills and scripts while the model stays fixed. We ran it on our own benchmark and on Google's own legal tasks, with a weak local model and with Claude Code. We also ran the ablations the paper's claims rest on, and we audited every harness it wrote for leaked answers.</p>
+    <div class="meta"><span>executors: Claude Code + Haiku 5.5 · Google ADK + qwen3:8b</span><span>improvers: Claude Sonnet 5.5 · Haiku 5.5</span><span id="lab-status"></span></div>
+    <nav aria-label="Sections"><a href="#verdict">Verdict</a><a href="#board">Scoreboard</a><a href="#jobs">Job after job</a><a href="#flips">Check flips</a><a href="#cost">Cost</a><a href="#lineage">Decision lineage</a><a href="#learnings">Learnings</a><a href="#wrote">What it wrote</a><a href="#method">Method</a><a href="#vs">vs autoresearch</a><a href="#apply">Claude Code</a><a href="#repro">Reproduce</a></nav>
+  </header>
+
+  <section id="verdict">
+    <div class="kicker">Verdict</div>
+    <div class="verdict" id="verdict-body"></div>
+  </section>
+
+  <section id="board" class="wide" style="gap:1rem">
+    <div class="kicker">Scoreboard</div>
+    <h2>Every comparison, one scale</h2>
+    <p>Each row is the mean change in the fraction of grader checks passed, against that study's base harness, with a 95% hierarchical-bootstrap interval. Rows below zero mean the treatment did worse. "Minus" rows compare two variants of Harness² directly.</p>
+    <div class="legend" id="board-legend"></div>
+    <figure class="chart" id="board-chart"></figure>
+    <details><summary>Scoreboard as a table</summary><div class="tbl" id="board-table" style="margin-top:.6rem"></div></details>
+  </section>
+
+  <section id="jobs" class="wide" style="gap:1rem">
+    <div class="kicker">Job after job</div>
+    <h2>A jump on every job, not a staircase</h2>
+    <p style="max-width:46rem">The video's slide shows the model flat and the agent climbing job after job. In the code, every task starts again from the original harness, and only the improver's lesson library carries forward. Here is what the weak model did, task by task, in each domain's order (study 2, leak guard on).</p>
+    <div class="legend"><span style="--c:var(--s-base)">Base harness</span><span style="--c:var(--s-h2)">Harness² adapted on this job</span><span style="--c:var(--ink-3)">Easy-job harness carried forward</span><span style="--c:var(--s-ar)">Adapted with the lesson library off</span></div>
+    <div class="charts three" id="jobs-charts"></div>
+    <p class="caption" id="jobs-caption" style="max-width:46rem"></p>
+  </section>
+
+  <section id="flips" class="wide" style="gap:1rem">
+    <div class="kicker">Check flips</div>
+    <h2>Which grader checks moved</h2>
+    <p style="max-width:46rem">A check counts as gained when its pass rate across re-rolls rose by at least half from base to treatment, and as lost when it fell by as much. Losses are where a harness edit broke something the agent used to get right.</p>
+    <div class="charts" id="flip-charts"></div>
+  </section>
+
+  <section id="cost" class="wide" style="gap:1rem">
+    <div class="kicker">Cost against gain</div>
+    <h2>What a point of improvement costs</h2>
+    <p style="max-width:46rem">Improver spend per task (proposals, compositions, selection and reflection; executor and judge costs excluded) against the change it bought, using each arm's cleanest metric.</p>
+    <figure class="chart" id="cost-chart"></figure>
+  </section>
+
+  <section id="lineage" class="wide" style="gap:1rem">
+    <div class="kicker">Decision lineage</div>
+    <h2>How we got here, and what each finding changed</h2>
+    <div class="filters" id="lineage-filters" role="group" aria-label="Filter events by type"></div>
+    <figure class="chart" id="lineage-strip"></figure>
+    <ol class="timeline" id="lineage-list"></ol>
+  </section>
+
+  <section id="learnings">
+    <div class="kicker">Learnings</div>
+    <h2>What we would tell the next team</h2>
+    <div class="grid3" id="learnings-body"></div>
+  </section>
+
+  <section id="wrote">
+    <div class="kicker">What it wrote</div>
+    <h2>The same skill, before and after the leak guard</h2>
+    <p>Both harnesses were adopted for the ops-easy log task. Without the guard, the improver ran its own script on the task files and recorded the answers. With the guard, the proposal was rejected, retried, and came back as method only.</p>
+    <div class="twocol even" id="exhibit"></div>
+  </section>
+
+  <section id="method">
+    <div class="kicker">Method</div>
+    <h2>How we tested</h2>
+    <div class="grid3">
+      <div><h3>Benchmarks</h3><p><b>HPB</b>: our own 9 tasks (data, ops, SWE-style repos × easy, medium, hard) with hidden programmatic graders and fresh-seed copies. <b>LAB</b>: four of Google's own arbitration tasks from harvey-labs (37–59 rubric checks each), scored by a Claude rubric judge that mirrors LAB's scorer.</p></div>
+      <div><h3>Agents and improvers</h3><p>Claude Code (<code>claude -p</code>, Haiku 5.5) and a Google ADK agent on local qwen3:8b. Improvers: Sonnet 5.5, or Haiku 5.5 improving itself. Harness² core ran unmodified behind our adapter. Production cloud projects were never used.</p></div>
+      <div><h3>Measurement</h3><p>Pre-registered endpoints with seven dated amendments. Fresh re-rolls of every adopted harness (R=3–4). Hierarchical bootstrap with exact sign-flip tests. Fresh-seed and held-out tasks as the leak-free headline, with in-task results labelled as test-time adaptation.</p></div>
+    </div>
+    <div class="callout">
+      <h3>Leak and isolation defences, in layers</h3>
+      <ol class="steps">
+        <li>Every model process runs in a macOS <code>sandbox-exec</code> profile with an environment allow-list. Reads of graders, other runs, credentials and <code>.git</code> are denied, writes are allowed only in the workspace, and web tools are off.</li>
+        <li>Guard v1 at adoption rejects the task's own answers, its ids, and "workspace fact" blocks. Harness² retries the proposal once, then falls back.</li>
+        <li>Guard v2 (<code>hpb/leakguard.py</code>) also rejects distinctive numbers and ids from the data, case-specific names, and 8-word passages copied from the sources.</li>
+        <li>A read-only audit of every adopted harness in every arm, plus a scan of every agent and improver log for grader paths.</li>
+        <li>The headline metric is data the improver never saw.</li>
+      </ol>
+    </div>
+    <p>Diagrams: <a href="../docs/diagrams/harness2-loop.svg">the Harness² task loop</a>, <a href="../docs/diagrams/test-rig.svg">the test rig</a> and <a href="../docs/diagrams/method.svg">our method</a>.</p>
+  </section>
+
+  <section id="vs">
+    <div class="kicker">Compared with Karpathy's autoresearch</div>
+    <h2>Same idea, opposite source of truth</h2>
+    <div class="tbl"><table>
+      <thead><tr><th></th><th>Harness²</th><th>autoresearch</th></tr></thead>
+      <tbody>
+        <tr><td>Who decides "better"</td><td>The improver, by contrasting executions; no ground truth</td><td>A fixed scalar from the real grader</td></tr>
+        <tr><td>Keep or revert</td><td>Compose from evidence; keeping the base harness is allowed</td><td>Keep only if the score strictly improves</td></tr>
+        <tr><td>Our weak-model result</td><td id="vs-h2"></td><td id="vs-ar"></td></tr>
+        <tr><td>Transfer to harder tasks</td><td id="vs-h2t"></td><td id="vs-art"></td></tr>
+        <tr><td>Main risk we saw</td><td>Writes answers into skills unless guarded</td><td>One noisy rollout decides each keep</td></tr>
+      </tbody>
+    </table></div>
+    <p>With a trustworthy check, autoresearch's loop is simpler and cheaper. Without one, Harness² still makes progress, and its evidence-reading kept it from touching a Claude Code harness that already worked.</p>
+  </section>
+
+  <section id="apply">
+    <div class="kicker">Using it with Claude Code</div>
+    <h2>Where it earns its cost</h2>
+    <div class="tbl"><table><thead><tr><th>Harness² component</th><th>Claude Code file</th><th>Good edit, from our runs</th></tr></thead><tbody>
+      <tr><td>system prompt, guardrails, memory, tool guidance</td><td><code>CLAUDE.md</code></td><td>"Write the deliverable early; never re-run a command that just failed"</td></tr>
+      <tr><td>skills</td><td><code>.claude/skills/&lt;n&gt;/SKILL.md</code></td><td>A domain procedure with its own tested stdlib script</td></tr>
+      <tr><td>scripts</td><td><code>scripts/*.py</code></td><td>A checker that writes <code>output/</code> itself</td></tr>
+      <tr><td>subagents</td><td><code>.claude/agents/*.md</code></td><td>A reader for large inputs that returns a small table</td></tr>
+      <tr><td>plugins (c8)</td><td>hooks in <code>.claude/settings.json</code></td><td>A Stop hook that blocks "done" until <code>output/</code> exists</td></tr>
+    </tbody></table></div>
+    <div class="grid3">
+      <div><h3>Use it when</h3><p>A cheaper or local model does repeated work and fails for process reasons: running out of steps, skipping a check, forgetting to write the file. That is where we saw the gains (+0.42 on Claude Code capped at four turns, +0.97 on a local 8B model).</p></div>
+      <div><h3>Pair it with</h3><p>A stronger improver than the agent (self-improvement gave half the gain and caused a regression), the leak guard, and a held-out re-roll before you commit any <code>CLAUDE.md</code> or skill change.</p></div>
+      <div><h3>Skip it when</h3><p>The agent is already at ceiling (full-strength Claude Code: no change), or you expect one harness to cover a whole area: harnesses tuned on easy tasks did not transfer to harder ones.</p></div>
+    </div>
+    <h3>A recipe</h3>
+    <ol class="steps">
+      <li>Collect 10 to 30 representative tasks, each with a cheap check so <em>you</em> can evaluate. Harness² never sees the check.</li>
+      <li>Re-roll the current setup three or more times per task. Drop tasks that are always perfect or always zero.</li>
+      <li>Run Harness² <span class="mono">k=1</span>, sandboxed, with no secrets in the agent's environment and the leak guard on.</li>
+      <li>Re-roll each adopted harness on fresh instances of the same task, and compare with base outside the noise.</li>
+      <li>Grep the diff for numbers, ids and names from the task inputs. Keep process; delete facts.</li>
+      <li>Commit to <code>CLAUDE.md</code> and <code>.claude/skills/</code>, and keep the re-roll suite as a regression gate.</li>
+    </ol>
+  </section>
+
+  <section id="repro">
+    <div class="kicker">Reproduce</div>
+    <h2>Commands</h2>
+    <pre class="code">cd GoogleHarness2 &amp;&amp; git log --oneline        # every arm is committed
+cd repo &amp;&amp; uv venv --python 3.12 .venv &amp;&amp; uv pip install -e '.[render]' &amp;&amp; harness2-demo --output runs/demo --k 2
+cd ../hpb
+../repo/.venv/bin/python bench.py               # grader self-test, 15 tasks
+../repo/.venv/bin/python leakguard.py           # leak detector self-check
+../repo/.venv/bin/python run.py adk --mode parallel --k 1      # Harness² (needs: ollama serve, qwen3:8b)
+../repo/.venv/bin/python eval.py adk h2 --run parallel-k1 --reps 3 &amp;&amp; ../repo/.venv/bin/python eval.py adk report
+../repo/.venv/bin/python ablate.py adk --no-probe ...          # ablations, see experiments/ablations/RESULTS.md
+../repo/.venv/bin/python lab.py base|h2|adopted|transfer        # LAB legal tasks, see experiments/lab/RESULTS.md
+HPB_LEAKGUARD=2 ...                             # second leak-guard layer for new runs
+../repo/.venv/bin/python build_v3.py            # rebuild this page from the arms' outputs</pre>
+    <details><summary>Pre-registration and amendments</summary><pre class="code" id="prereg" style="margin-top:.6rem"></pre></details>
+  </section>
+</main>
+<div id="tip" hidden></div>
+
+<script>
+const DATA = {"voids": {"study1": {"void": 6, "of": 8}, "study2": {"void": 0, "of": 9}}, "board": [{"study": "Study 1 \u00b7 HPB", "label": "Claude Code + Haiku, Harness\u00b2 in-task", "delta": 0.0, "lo": 0.0, "hi": 0.0, "n": 9, "up": 0, "down": 0, "p": 1.0, "kind": "null", "note": "At ceiling: every condition scores 1.0"}, {"study": "Study 1 \u00b7 HPB", "label": "ADK + qwen3:8b, in-task (as run)", "delta": 0.7392857142857143, "lo": 0.5291666666666667, "hi": 0.9270833333333334, "n": 8, "up": 8, "down": 0, "p": 0.0078125, "kind": "leaky", "note": "6 of 8 cells contained the task's own answers or ids"}, {"study": "Study 1 \u00b7 HPB", "label": "ADK, in-task, leak-void cells removed", "delta": 0.33214285714285713, "lo": 0.2, "hi": 0.5357142857142858, "n": 2, "up": 2, "down": 0, "p": 0.5, "kind": "primary", "note": ""}, {"study": "Study 1 \u00b7 HPB", "label": "ADK, fresh-seed variants", "delta": 0.8055555555555556, "lo": 0.47222222222222227, "hi": 1.0, "n": 6, "up": 5, "down": 0, "p": 0.0625, "kind": "primary", "note": ""}, {"study": "Study 1 \u00b7 HPB", "label": "ADK, easy harness on medium/hard", "delta": 0.014550264550264556, "lo": -0.07473544973544972, "hi": 0.11441798941798942, "n": 6, "up": 1, "down": 2, "p": 1.0, "kind": "primary", "note": ""}, {"study": "Study 1 \u00b7 HPB", "label": "Autoresearch (grader in loop), tuned task", "delta": 0.6555555555555556, "lo": 0.15555555555555559, "hi": 1.0, "n": 3, "up": 3, "down": 0, "p": 0.25, "kind": "baseline", "note": ""}, {"study": "Study 1 \u00b7 HPB", "label": "Autoresearch, medium/hard", "delta": 0.054232804232804244, "lo": -0.07407407407407407, "hi": 0.23677248677248683, "n": 6, "up": 1, "down": 2, "p": 1.0, "kind": "baseline", "note": ""}, {"study": "Study 2 \u00b7 leak guard", "label": "ADK, in-task (0 leak-void cells)", "delta": 0.647089947089947, "lo": 0.3907407407407407, "hi": 0.8776455026455027, "n": 9, "up": 8, "down": 0, "p": 0.0078125, "kind": "primary", "note": ""}, {"study": "Study 2 \u00b7 leak guard", "label": "ADK, fresh-seed variants", "delta": 0.9722222222222222, "lo": 0.888888888888889, "hi": 1.0, "n": 6, "up": 6, "down": 0, "p": 0.03125, "kind": "primary", "note": ""}, {"study": "Study 2 \u00b7 leak guard", "label": "ADK, easy harness on medium/hard", "delta": -0.02777777777777778, "lo": -0.1111111111111111, "hi": 0.038690476190476185, "n": 6, "up": 1, "down": 2, "p": 0.75, "kind": "primary", "note": ""}, {"study": "Ablations", "label": "Claude Code (4-turn cap), Sonnet improver", "delta": 0.4226190476190476, "lo": 0.17261904761904762, "hi": 0.6944444444444444, "n": 9, "up": 8, "down": 0, "p": 0.0078125, "kind": "primary", "note": ""}, {"study": "Ablations", "label": "Claude Code (4-turn cap), Haiku improves itself (ITT)", "delta": 0.17261904761904762, "lo": -0.07738095238095238, "hi": 0.4166666666666667, "n": 9, "up": 6, "down": 1, "p": 0.171875, "kind": "primary", "note": ""}, {"study": "Ablations", "label": "Haiku minus Sonnet as improver (ITT)", "delta": -0.25, "lo": -0.5277777777777778, "hi": 0.0, "n": 9, "up": 0, "down": 3, "p": 0.25, "kind": "diff", "note": ""}, {"study": "Ablations", "label": "ADK, no probe minus probe (ITT)", "delta": -0.003703703703703703, "lo": -0.1111111111111111, "hi": 0.09735449735449736, "n": 9, "up": 1, "down": 1, "p": 1.0, "kind": "diff", "note": ""}, {"study": "Ablations", "label": "ADK, library off minus on (ITT)", "delta": -0.13333333333333336, "lo": -0.3888888888888889, "hi": 0.011904761904761918, "n": 6, "up": 0, "down": 2, "p": 0.5, "kind": "diff", "note": ""}, {"study": "LAB legal tasks", "label": "Sonnet improver, in-task", "delta": 0.09642606782437294, "lo": -0.0075918079096045366, "hi": 0.2164209664209665, "n": 4, "up": 3, "down": 1, "p": 0.25, "kind": "leaky", "note": "Includes one task whose harness carried that matter's facts (+0.27)"}, {"study": "LAB legal tasks", "label": "Sonnet improver, in-task, leaky task removed", "delta": 0.038478000342407115, "lo": -0.025894538606403044, "hi": 0.13329909262112652, "n": 3, "up": 2, "down": 1, "p": 0.5, "kind": "primary", "note": ""}, {"study": "LAB legal tasks", "label": "Haiku improves itself, in-task", "delta": -0.0413537285359319, "lo": -0.14696969696969697, "hi": 0.03095892502672168, "n": 4, "up": 1, "down": 3, "p": 0.625, "kind": "primary", "note": "Layer-2 guard rejected an answer key live during this arm"}, {"study": "LAB legal tasks", "label": "Sonnet harnesses on unseen matters (held-out)", "delta": 0.06903722867705922, "lo": -0.010663841807909608, "hi": 0.16004641004641007, "n": 4, "up": 3, "down": 1, "p": 0.25, "kind": "leaky", "note": "4 adopted harnesses x 3 unseen matters (R=3), one unit per target matter"}, {"study": "LAB legal tasks", "label": "Held-out, leaky harness removed", "delta": 0.04471883285442613, "lo": -0.04075500770416028, "hi": 0.1412302132641116, "n": 4, "up": 2, "down": 1, "p": 0.5, "kind": "primary", "note": "Gain concentrated in redline-to-redline transfer"}], "jobs": [{"task": "data-e", "domain": "data", "tier": "easy", "base": 0.0, "adapted": 1.0, "carried": null, "nolib": null}, {"task": "data-m", "domain": "data", "tier": "medium", "base": 0.0, "adapted": 1.0, "carried": 0.0, "nolib": 1.0}, {"task": "data-h", "domain": "data", "tier": "hard", "base": 0.08333333333333333, "adapted": 1.0, "carried": 0.0, "nolib": 0.3333333333333333}, {"task": "ops-e", "domain": "ops", "tier": "easy", "base": 0.5, "adapted": 1.0, "carried": null, "nolib": null}, {"task": "ops-m", "domain": "ops", "tier": "medium", "base": 0.16666666666666666, "adapted": 1.0, "carried": 0.0, "nolib": 1.0}, {"task": "ops-h", "domain": "ops", "tier": "hard", "base": 0.0, "adapted": 1.0, "carried": 0.0, "nolib": 1.0}, {"task": "swe-e", "domain": "swe", "tier": "easy", "base": 0.2, "adapted": 0.2, "carried": null, "nolib": null}, {"task": "swe-m", "domain": "swe", "tier": "medium", "base": 0.0, "adapted": 0.13333333333333333, "carried": 0.0, "nolib": null}, {"task": "swe-h", "domain": "swe", "tier": "hard", "base": 0.17857142857142855, "adapted": 0.6190476190476191, "carried": 0.26190476190476186, "nolib": 0.6190476190476191}], "flips": [{"comparison": "Sonnet improver vs base", "per_task": [{"task": "data-e", "gained": 0, "lost": 0, "base": 0.75, "treat": 1.0}, {"task": "data-m", "gained": 0, "lost": 0, "base": 0.75, "treat": 1.0}, {"task": "data-h", "gained": 3, "lost": 0, "base": 0.5, "treat": 1.0}, {"task": "ops-e", "gained": 0, "lost": 0, "base": 0.75, "treat": 1.0}, {"task": "ops-m", "gained": 3, "lost": 0, "base": 0.0, "treat": 1.0}, {"task": "ops-h", "gained": 9, "lost": 0, "base": 0.0, "treat": 1.0}, {"task": "swe-e", "gained": 0, "lost": 0, "base": 1.0, "treat": 1.0}, {"task": "swe-m", "gained": 10, "lost": 0, "base": 0.5, "treat": 1.0}, {"task": "swe-h", "gained": 0, "lost": 0, "base": 0.9464285714285714, "treat": 1.0}]}, {"comparison": "Haiku improver vs base, ITT", "per_task": [{"task": "data-e", "gained": 0, "lost": 0, "base": 0.75, "treat": 1.0}, {"task": "data-m", "gained": 0, "lost": 0, "base": 0.75, "treat": 1.0}, {"task": "data-h", "gained": 3, "lost": 0, "base": 0.5, "treat": 1.0}, {"task": "ops-e", "gained": 0, "lost": 3, "base": 0.75, "treat": 0.25}, {"task": "ops-m", "gained": 3, "lost": 0, "base": 0.0, "treat": 0.5}, {"task": "ops-h", "gained": 0, "lost": 0, "base": 0.0, "treat": 0.0}, {"task": "swe-e", "gained": 0, "lost": 0, "base": 1.0, "treat": 1.0}, {"task": "swe-m", "gained": 10, "lost": 0, "base": 0.5, "treat": 1.0}, {"task": "swe-h", "gained": 0, "lost": 0, "base": 0.9464285714285714, "treat": 1.0}]}, {"comparison": "probe (parallel k=1) vs base", "per_task": [{"task": "data-e", "gained": 2, "lost": 0, "base": 0.0, "treat": 1.0}, {"task": "data-m", "gained": 3, "lost": 0, "base": 0.0, "treat": 1.0}, {"task": "data-h", "gained": 3, "lost": 0, "base": 0.08333333333333333, "treat": 1.0}, {"task": "ops-e", "gained": 2, "lost": 0, "base": 0.5, "treat": 1.0}, {"task": "ops-m", "gained": 3, "lost": 0, "base": 0.16666666666666666, "treat": 1.0}, {"task": "ops-h", "gained": 9, "lost": 0, "base": 0.0, "treat": 1.0}, {"task": "swe-e", "gained": 0, "lost": 0, "base": 0.2, "treat": 0.2}, {"task": "swe-m", "gained": 0, "lost": 0, "base": 0.0, "treat": 0.13333333333333333}, {"task": "swe-h", "gained": 7, "lost": 0, "base": 0.17857142857142855, "treat": 0.6190476190476191}]}, {"comparison": "LAB held-out: adopted harness on unseen matters", "per_task": [{"task": "arbitration-agreement \u2192 procedural-order", "gained": 16, "lost": 0, "base": 0.6060606060606061, "treat": 0.8242424242424242}, {"task": "arbitration-agreement \u2192 proposed-interim-order", "gained": 10, "lost": 0, "base": 0.7117117117117117, "treat": 0.972972972972973}, {"task": "arbitration-agreement \u2192 identify-arbitration-a", "gained": 1, "lost": 3, "base": 0.7333333333333333, "treat": 0.7166666666666667}, {"task": "procedural-order \u2192 arbitration-agreement", "gained": 0, "lost": 2, "base": 0.9717514124293786, "treat": 0.9548022598870056}, {"task": "procedural-order \u2192 proposed-interim-order", "gained": 10, "lost": 0, "base": 0.7117117117117117, "treat": 0.954954954954955}, {"task": "procedural-order \u2192 identify-arbitration-a", "gained": 1, "lost": 0, "base": 0.7333333333333333, "treat": 0.75}, {"task": "proposed-interim-order \u2192 arbitration-agreement", "gained": 0, "lost": 0, "base": 0.9717514124293786, "treat": 0.9887005649717514}, {"task": "proposed-interim-order \u2192 procedural-order", "gained": 16, "lost": 0, "base": 0.6060606060606061, "treat": 0.8303030303030303}, {"task": "proposed-interim-order \u2192 identify-arbitration-a", "gained": 3, "lost": 0, "base": 0.7333333333333333, "treat": 0.7916666666666666}, {"task": "identify-arbitration-a \u2192 arbitration-agreement", "gained": 0, "lost": 4, "base": 0.9717514124293786, "treat": 0.943502824858757}, {"task": "identify-arbitration-a \u2192 procedural-order", "gained": 1, "lost": 5, "base": 0.6060606060606061, "treat": 0.4484848484848485}, {"task": "identify-arbitration-a \u2192 proposed-interim-order", "gained": 0, "lost": 0, "base": 0.7117117117117117, "treat": 0.7207207207207207}]}, {"comparison": "LAB legal, Sonnet improver vs base", "per_task": [{"task": "draft-markup-of-arbitration-agreement", "gained": 0, "lost": 0, "base": 0.9717514124293786, "treat": 0.9887005649717514, "n_checks": 59}, {"task": "draft-markup-of-procedural-order", "gained": 12, "lost": 1, "base": 0.6060606060606061, "treat": 0.7212121212121212, "n_checks": 55}, {"task": "draft-markup-of-proposed-interim-order", "gained": 10, "lost": 0, "base": 0.7117117117117117, "treat": 0.981981981981982, "n_checks": 37}, {"task": "identify-arbitration-agreement-issues", "gained": 1, "lost": 2, "base": 0.7333333333333333, "treat": 0.7166666666666667, "n_checks": 40}]}], "cost": [{"arm": "ADK, Harness\u00b2 (study 1)", "usd": 3.9259, "tasks": 9, "delta": 0.8055555555555556, "metric": "fresh-seed", "per_task": 0.436}, {"arm": "ADK, Harness\u00b2 + leak guard", "usd": 5.7426, "tasks": 9, "delta": 0.9722222222222222, "metric": "fresh-seed", "per_task": 0.638}, {"arm": "ADK, no probe", "usd": 1.8177, "tasks": 9, "delta": 0.6433862433862434, "metric": "in-task ITT", "per_task": 0.202}, {"arm": "ADK, autoresearch", "usd": 0.5306, "tasks": 3, "delta": 0.6555555555555556, "metric": "tuned task", "per_task": 0.177}, {"arm": "CC (4-turn cap), Sonnet improver", "usd": 1.9673, "tasks": 9, "delta": 0.4226190476190476, "metric": "in-task", "per_task": 0.219}, {"arm": "CC (4-turn cap), Haiku self-improver", "usd": 0.5339, "tasks": 9, "delta": 0.17261904761904762, "metric": "in-task ITT", "per_task": 0.059}, {"arm": "CC full, Sonnet improver", "usd": 2.8092, "tasks": 9, "delta": 0.0, "metric": "in-task", "per_task": 0.312}, {"arm": "LAB legal, Sonnet improver", "usd": 6.045, "tasks": 4, "delta": 0.04471883285442613, "metric": "held-out, clean", "per_task": 1.511}, {"arm": "LAB legal, Haiku self-improver", "usd": 1.3943, "tasks": 4, "delta": -0.0413537285359319, "metric": "in-task", "per_task": 0.349}], "lab": {"full": {"mean_delta": 0.09642606782437294, "ci95": [-0.0075918079096045366, 0.2164209664209665], "n_tasks": 4, "per_task": [{"task": "draft-markup-of-arbitration-agreement", "treat": 0.9887005649717514, "base": 0.9717514124293786, "delta": 0.016949152542372836, "n_checks": 59, "gained": 0, "lost": 0}, {"task": "draft-markup-of-procedural-order", "treat": 0.7212121212121212, "base": 0.6060606060606061, "delta": 0.11515151515151512, "n_checks": 55, "gained": 12, "lost": 1}, {"task": "draft-markup-of-proposed-interim-order", "treat": 0.981981981981982, "base": 0.7117117117117117, "delta": 0.2702702702702704, "n_checks": 37, "gained": 10, "lost": 0}, {"task": "identify-arbitration-agreement-issues", "treat": 0.7166666666666667, "base": 0.7333333333333333, "delta": -0.016666666666666607, "n_checks": 40, "gained": 1, "lost": 2}], "improved": 3, "regressed": 1, "signflip_p": 0.25}, "clean": {"mean_delta": 0.038478000342407115, "ci95": [-0.025894538606403044, 0.13329909262112652], "n_tasks": 3, "per_task": [{"task": "draft-markup-of-arbitration-agreement", "treat": 0.9887005649717514, "base": 0.9717514124293786, "delta": 0.016949152542372836, "n_checks": 59, "gained": 0, "lost": 0}, {"task": "draft-markup-of-procedural-order", "treat": 0.7212121212121212, "base": 0.6060606060606061, "delta": 0.11515151515151512, "n_checks": 55, "gained": 12, "lost": 1}, {"task": "identify-arbitration-agreement-issues", "treat": 0.7166666666666667, "base": 0.7333333333333333, "delta": -0.016666666666666607, "n_checks": 40, "gained": 1, "lost": 2}], "improved": 2, "regressed": 1, "signflip_p": 0.5}, "arm_a": {"mean_delta": -0.0413537285359319, "ci95": [-0.14696969696969697, 0.03095892502672168], "n_tasks": 4, "per_task": [{"task": "draft-markup-of-arbitration-agreement", "treat": 0.96045197740113, "base": 0.9717514124293786, "delta": -0.011299435028248594, "n_checks": 59, "gained": 0, "lost": 0}, {"task": "draft-markup-of-procedural-order", "treat": 0.42424242424242425, "base": 0.6060606060606061, "delta": -0.18181818181818182, "n_checks": 55, "gained": 1, "lost": 5}, {"task": "draft-markup-of-proposed-interim-order", "treat": 0.7477477477477478, "base": 0.7117117117117117, "delta": 0.03603603603603611, "n_checks": 37, "gained": 1, "lost": 0}, {"task": "identify-arbitration-agreement-issues", "treat": 0.725, "base": 0.7333333333333333, "delta": -0.008333333333333304, "n_checks": 40, "gained": 1, "lost": 2}], "improved": 1, "regressed": 3, "signflip_p": 0.625}, "heldout": {"mean_delta": 0.06903722867705922, "ci95": [-0.010663841807909608, 0.16004641004641007], "n_tasks": 4, "per_task": [{"task": "draft-markup-of-arbitration-agreement", "treat": 0.9623352165725048, "base": 0.9717514124293786, "delta": -0.00941619585687381, "n_checks": 59, "gained": 0, "lost": 0}, {"task": "draft-markup-of-procedural-order", "treat": 0.701010101010101, "base": 0.6060606060606061, "delta": 0.0949494949494949, "n_checks": 55, "gained": 3, "lost": 0}, {"task": "draft-markup-of-proposed-interim-order", "treat": 0.882882882882883, "base": 0.7117117117117117, "delta": 0.1711711711711713, "n_checks": 37, "gained": 7, "lost": 0}, {"task": "identify-arbitration-agreement-issues", "treat": 0.7527777777777778, "base": 0.7333333333333333, "delta": 0.019444444444444486, "n_checks": 40, "gained": 1, "lost": 0}], "improved": 3, "regressed": 1, "signflip_p": 0.25, "cells": [{"src": "draft-markup-of-arbitration-agreement", "task": "draft-markup-of-procedural-order", "treat": 0.8242424242424242, "base": 0.6060606060606061, "delta": 0.21818181818181814, "n_checks": 55, "gained": 16, "lost": 0}, {"src": "draft-markup-of-arbitration-agreement", "task": "draft-markup-of-proposed-interim-order", "treat": 0.972972972972973, "base": 0.7117117117117117, "delta": 0.26126126126126137, "n_checks": 37, "gained": 10, "lost": 0}, {"src": "draft-markup-of-arbitration-agreement", "task": "identify-arbitration-agreement-issues", "treat": 0.7166666666666667, "base": 0.7333333333333333, "delta": -0.016666666666666607, "n_checks": 40, "gained": 1, "lost": 3}, {"src": "draft-markup-of-procedural-order", "task": "draft-markup-of-arbitration-agreement", "treat": 0.9548022598870056, "base": 0.9717514124293786, "delta": -0.016949152542372947, "n_checks": 59, "gained": 0, "lost": 2}, {"src": "draft-markup-of-procedural-order", "task": "draft-markup-of-proposed-interim-order", "treat": 0.954954954954955, "base": 0.7117117117117117, "delta": 0.2432432432432433, "n_checks": 37, "gained": 10, "lost": 0}, {"src": "draft-markup-of-procedural-order", "task": "identify-arbitration-agreement-issues", "treat": 0.75, "base": 0.7333333333333333, "delta": 0.01666666666666672, "n_checks": 40, "gained": 1, "lost": 0}, {"src": "draft-markup-of-proposed-interim-order", "task": "draft-markup-of-arbitration-agreement", "treat": 0.9887005649717514, "base": 0.9717514124293786, "delta": 0.016949152542372836, "n_checks": 59, "gained": 0, "lost": 0}, {"src": "draft-markup-of-proposed-interim-order", "task": "draft-markup-of-procedural-order", "treat": 0.8303030303030303, "base": 0.6060606060606061, "delta": 0.22424242424242424, "n_checks": 55, "gained": 16, "lost": 0}, {"src": "draft-markup-of-proposed-interim-order", "task": "identify-arbitration-agreement-issues", "treat": 0.7916666666666666, "base": 0.7333333333333333, "delta": 0.05833333333333335, "n_checks": 40, "gained": 3, "lost": 0}, {"src": "identify-arbitration-agreement-issues", "task": "draft-markup-of-arbitration-agreement", "treat": 0.943502824858757, "base": 0.9717514124293786, "delta": -0.02824858757062154, "n_checks": 59, "gained": 0, "lost": 4}, {"src": "identify-arbitration-agreement-issues", "task": "draft-markup-of-procedural-order", "treat": 0.4484848484848485, "base": 0.6060606060606061, "delta": -0.1575757575757576, "n_checks": 55, "gained": 1, "lost": 5}, {"src": "identify-arbitration-agreement-issues", "task": "draft-markup-of-proposed-interim-order", "treat": 0.7207207207207207, "base": 0.7117117117117117, "delta": 0.009009009009009028, "n_checks": 37, "gained": 0, "lost": 0}]}, "heldout_clean": {"mean_delta": 0.04471883285442613, "ci95": [-0.04075500770416028, 0.1412302132641116], "n_tasks": 4, "per_task": [{"task": "draft-markup-of-arbitration-agreement", "treat": 0.9491525423728814, "base": 0.9717514124293786, "delta": -0.02259887005649719, "n_checks": 59, "gained": 0, "lost": 5}, {"task": "draft-markup-of-procedural-order", "treat": 0.6363636363636364, "base": 0.6060606060606061, "delta": 0.030303030303030276, "n_checks": 55, "gained": 1, "lost": 1}, {"task": "draft-markup-of-proposed-interim-order", "treat": 0.882882882882883, "base": 0.7117117117117117, "delta": 0.1711711711711713, "n_checks": 37, "gained": 7, "lost": 0}, {"task": "identify-arbitration-agreement-issues", "treat": 0.7333333333333334, "base": 0.7333333333333333, "delta": 1.1102230246251565e-16, "n_checks": 40, "gained": 1, "lost": 3}], "improved": 2, "regressed": 1, "signflip_p": 0.5, "cells": [{"src": "draft-markup-of-arbitration-agreement", "task": "draft-markup-of-procedural-order", "treat": 0.8242424242424242, "base": 0.6060606060606061, "delta": 0.21818181818181814, "n_checks": 55, "gained": 16, "lost": 0}, {"src": "draft-markup-of-arbitration-agreement", "task": "draft-markup-of-proposed-interim-order", "treat": 0.972972972972973, "base": 0.7117117117117117, "delta": 0.26126126126126137, "n_checks": 37, "gained": 10, "lost": 0}, {"src": "draft-markup-of-arbitration-agreement", "task": "identify-arbitration-agreement-issues", "treat": 0.7166666666666667, "base": 0.7333333333333333, "delta": -0.016666666666666607, "n_checks": 40, "gained": 1, "lost": 3}, {"src": "draft-markup-of-procedural-order", "task": "draft-markup-of-arbitration-agreement", "treat": 0.9548022598870056, "base": 0.9717514124293786, "delta": -0.016949152542372947, "n_checks": 59, "gained": 0, "lost": 2}, {"src": "draft-markup-of-procedural-order", "task": "draft-markup-of-proposed-interim-order", "treat": 0.954954954954955, "base": 0.7117117117117117, "delta": 0.2432432432432433, "n_checks": 37, "gained": 10, "lost": 0}, {"src": "draft-markup-of-procedural-order", "task": "identify-arbitration-agreement-issues", "treat": 0.75, "base": 0.7333333333333333, "delta": 0.01666666666666672, "n_checks": 40, "gained": 1, "lost": 0}, {"src": "identify-arbitration-agreement-issues", "task": "draft-markup-of-arbitration-agreement", "treat": 0.943502824858757, "base": 0.9717514124293786, "delta": -0.02824858757062154, "n_checks": 59, "gained": 0, "lost": 4}, {"src": "identify-arbitration-agreement-issues", "task": "draft-markup-of-procedural-order", "treat": 0.4484848484848485, "base": 0.6060606060606061, "delta": -0.1575757575757576, "n_checks": 55, "gained": 1, "lost": 5}, {"src": "identify-arbitration-agreement-issues", "task": "draft-markup-of-proposed-interim-order", "treat": 0.7207207207207207, "base": 0.7117117117117117, "delta": 0.009009009009009028, "n_checks": 37, "gained": 0, "lost": 0}]}}, "exhibit": {"before": {"path": "skills/log-window-stats/SKILL.md", "text": "---\nname: log-window-stats\ndescription: Count ERROR events, distinct users and top error code from a multi-timezone service log for a UTC time window. Use for any incident/traffic statistics task over raw log files.\n---\n\n# Log window statistics (errors / distinct users / top code)\n\nANALYTIC MOVE: classify each log line as event vs. non-event, convert event time to UTC, filter to the window, then count. Eyeballing a 100+ line log gives wrong numbers (a prior run counted by eye and answered errors=21 where the correct count was 15) \u2014 compute, don't estimate. If a shell is available, run `python3 skills/log-window-stats/scripts/log_window_stats.py app.log 2026-10-03T09:00:00Z 2026-10-03T12:00:00Z --level ERROR --out output/answer.json` (start inclusive, end exclusive; adjust log path, window and level to the task). It prints each matched event and the tallies on stderr, writes the three-key JSON, and refuses (exit 3) on a tied top code or empty match and (exit 2) on unparseable header lines: inspect, don't retry blindly. If there is no shell, apply the rules below line by line and list every counted event (UTC time, user, code) before totalling.\n\n## What counts as an event\n1. An EVENT is a line that STARTS with an ISO timestamp followed by LEVEL, `[service]`, `user=`. Lines indented under it (Traceback, `File ...`, `RuntimeError: upstream ERROR user=X code=Y`) are continuation text of the previous event: NEVER count them, and never take the user/code from them \u2014 the event's own `user=`/`code=` fields are the truth (the traceback often names a different user and code).\n2. Level is the token right after the timestamp. Only `ERROR` counts. `INFO ... msg=retrying after ERROR code=...` is INFO; `WARN ... slow response` is WARN, even though both carry a `code=`. A substring match on \"ERROR\" overcounts.\n3. Every timestamp has its own offset (`Z`, `+01:00`, `+05:30`, `-07:00` seen in this workspace). Convert to UTC (subtract the offset) BEFORE filtering; the file is not in time order, and the date part of the local stamp can differ from the UTC date (e.g. `2026-10-02T23:31-07:00` is 2026-10-03 06:31Z). Do not filter on the local clock text.\n4. Window is start-inclusive, end-exclusive: 12:00:00Z is out, 09:00:00Z is in. Check events near the edges explicitly (e.g. +05:30 stamps around 14:30\u201317:30 local, +01:00 around 10:00\u201313:00 local, -07:00 around 02:00\u201305:00 local).\n\n## Answer fields\n- errors = number of qualifying events (not distinct).\n- users = distinct `user=` values of those same events.\n- top_code = most frequent `code=` among those same events; check for a tie and report the tie in your reply if one exists (don't silently pick).\nWrite exactly the requested JSON keys/types (ints, string code) \u2014 no extra keys.\n\n## Cross-check before writing\n- errors equals the sum of per-code counts; users <= errors.\n- Recount boundary events and one event per offset by hand.\n- Workspace fact (this app.log, 163 lines, 4 offsets): script gives errors=15, users=6, top_code=E500 (E500 x5, E403 x4, E401 x4) for the 09:00\u201312:00Z 2026-10-03 window. Treat as a check if the same file/window recurs; recompute for any other input.\n- After writing, reopen output/answer.json"}, "after": {"path": "skills/log-window-stats/SKILL.md", "text": "---\nname: log-window-stats\ndescription: Count events, distinct users and top error code for a level inside a UTC time window from a multi-timezone service log (incident / traffic statistics).\n---\n\n# Log window statistics (practitioner rules)\n\nDeliverable: the exact JSON shape the task names, values as plain numbers/strings computed by you (never estimated from reading the log by eye).\n\n## Define the event first\n- An EVENT is a record whose line starts at column 0 with a timestamp, then a level token (ERROR/WARN/INFO), then `[service]`. Level is the token right after the timestamp, nothing else.\n- Not events, even though they contain the text \"ERROR\": indented traceback continuation lines (they may mention a different user or code than the parent event), and lower-level lines that merely quote an error (e.g. an INFO line saying it is retrying after an error). WARN lines may also carry `code=`; they are not ERROR.\n- Attribute user and code from the event's own header line only, never from its continuation lines.\n\n## Window\n- Convert every timestamp to UTC using its own offset before comparing (`Z` and numeric offsets, including non-whole-hour ones, may be mixed; lines need not be in chronological order). Start inclusive, end exclusive: an event exactly at the window end is out, exactly at the start is in.\n- Do not filter on the local clock digits or on the date prefix; an event with a local date before the window date can fall inside the UTC window, and vice versa.\n\n## Calculations\n- errors = number of qualifying events (not users, not lines).\n- users = distinct `user=` values among those same events.\n- top_code = most frequent `code=` among those same events; if the script warns of a tie, re-check the event filter; if the tie is real, pick by the task's stated rule, else say so in the final reply (the file still holds one code).\n\n## Check before writing\n- Run `python3 -I skills/log-window-stats/scripts/log_window_stats.py app.log START_UTC END_UTC ERROR` (START/END as ISO with offset, e.g. YYYY-MM-DDTHH:MM:00+00:00). It prints counts plus every qualifying event line number; spot-check 2-3 boundary-near events by hand-converting their offset.\n- Confirm users <= errors, the code counts sum to errors, and the JSON keys are exactly those requested.\n"}}, "lineage": {"note": "Decision lineage for the Harness\u00b2 field test, 19 Oct 2026 (IST). Types: ask = user request, decision, finding, bug, amendment (to PREREG.md).", "events": [{"t": "00:15", "type": "ask", "title": "Test Harness\u00b2 hands-on", "what": "Understand google-research/harness2, take cues from a demo video, research with Perplexity and Context7, preflight, design and run benchmarks, explain it with archify and an HTML report, with Claude Code use cases.", "led_to": ["research", "preflight"]}, {"t": "00:16", "type": "ask", "id": "autoresearch", "title": "Compare with Karpathy's autoresearch", "what": "Added a grader-in-the-loop keep-if-better baseline on the same harness surface.", "led_to": ["ar-baseline"]}, {"t": "00:17", "type": "finding", "id": "research", "title": "Context7 has no harness2 docs", "what": "Context7 indexes unrelated 'harness' libraries only, so the cloned repo became the primary reference. Context7 was used later for Google ADK (it surfaced the ollama_chat gotcha).", "evidence": "resolve-library-id results"}, {"t": "00:19", "type": "finding", "title": "Cost model: 4k rollouts + 3k improver stages per task", "what": "Read from recursion.py. The improver already supports a claude_cli channel, which made a Claude-driven test possible.", "evidence": "repo/harness2/core/recursion.py docstring; proposer.py"}, {"t": "00:20", "type": "decision", "id": "preflight", "title": "No official benchmarks: the only GCP project is production", "what": "LAB, JobBench and WorkBuddy need Vertex Gemini. The only gcloud project is a production project, so it stayed untouched. We built our own benchmark instead.", "why": "Never bill or touch a production project for experiments.", "evidence": "gcloud config get project"}, {"t": "00:20", "type": "ask", "title": "Use a custom agent, no secret accounts", "what": "Build an ADK-based agent if Claude Code can't be used; find any way to test.", "led_to": ["adk"]}, {"t": "00:22", "type": "decision", "id": "adk", "title": "Second executor: Google ADK on local qwen3:8b", "what": "Ollama from the official GitHub release, no account. ADK via LiteLLM with the ollama_chat provider (from Context7). This mirrors the video's 'mid-tier model plus a better harness' claim.", "why": "No API keys or extra accounts; a weak model gives headroom."}, {"t": "00:24", "type": "finding", "title": "Nested Claude runs loaded the user's 60+ MCP servers and hooks", "what": "Isolated with --setting-sources project plus an empty strict MCP config: 31k-token context, about 3 s startup, no user hooks.", "evidence": "canary test PELICAN-42"}, {"t": "00:25", "type": "ask", "title": "Adversarial review and security review before the benchmark", "led_to": ["reviews"]}, {"t": "00:31", "type": "finding", "id": "ceiling", "title": "Claude Code + Haiku 5.5 at ceiling (18/18)", "what": "The first easy-only benchmark leaves no headroom, and the ADK runs crashed on a missing mcp module.", "evidence": "experiments/cc/pilot.json"}, {"t": "00:41", "type": "ask", "title": "Add difficulty tiers, SWE-style tasks", "led_to": ["tiers"]}, {"t": "00:45", "type": "decision", "id": "tiers", "title": "Rebuild as 3 domains x 3 tiers", "what": "data, ops and swe at easy, medium and hard. Hard tiers hide rules in POLICY.md or RUNBOOK.md; SWE tiers are multi-file repos with hidden regression tests.", "evidence": "hpb/bench.py, hpb/tiers.py"}, {"t": "00:43", "type": "finding", "title": "qwen3 at 18 tok/s with thinking on", "what": "Flash attention gave 27 tok/s. Later we found the /no_think tag is ignored via LiteLLM; only think=False works.", "evidence": "serve.log timings"}, {"t": "00:50", "type": "finding", "title": "Still at ceiling with tiers: CC 27/27", "what": "Leak audit clean (no grader reads). CC becomes the negative control; ADK carries the headroom question.", "evidence": "pilot streams"}, {"t": "00:53", "type": "decision", "id": "reviews", "title": "zen has no model keys: run the three review stances as Claude subagents", "what": "Critical, supportive and neutral reviewers read the code directly.", "why": "Keep the skill's method when its tool is unavailable."}, {"t": "00:58", "type": "bug", "title": "Surface name 'hpb' disables every Harness\u00b2 edit", "what": "harness2's prompt builder only knows opencode and codex. Every proposal would raise and fall back to base, so the result would silently read 'Harness\u00b2 = base'.", "found_by": "supportive reviewer"}, {"t": "01:00", "type": "bug", "title": "Agents could read graders and answers on disk", "what": "Workspaces sat next to hpb/ and to earlier pilot answers; trajectories leaked absolute paths.", "found_by": "critical reviewer", "led_to": ["sandbox"]}, {"t": "00:55", "type": "bug", "title": "Secrets in agent environment", "what": "GITHUB_TOKEN and three API keys were passed to claude --dangerously-skip-permissions.", "found_by": "security review", "led_to": ["sandbox"]}, {"t": "01:02", "type": "bug", "title": "Impossible data and grader flaws", "what": "Refunds dated before settlement, chargebacks before capture, a test-customer rule that never fired, a forgeable stdout grader, valid_json counted as credit, an out-of-scope hidden test.", "found_by": "neutral and critical reviewers"}, {"t": "01:10", "type": "decision", "id": "sandbox", "title": "macOS sandbox-exec plus env allow-list for every model process", "what": "Deny reads of graders, experiments and credential dirs; deny writes outside the workspace; no web tools; no session persistence.", "evidence": "hpb/adapters.py sandboxed()"}, {"t": "01:20", "type": "decision", "title": "Pre-register endpoints and the leak rule", "what": "Primary endpoint per executor, bootstrap + sign-flip, failure handling, and 'any instance literal in a harness voids the cell'.", "evidence": "experiments/PREREG.md"}, {"t": "01:27", "type": "amendment", "title": "A1: ADK aborted runs on tool exceptions", "what": "Tools now return ERROR text as an observation; ADK arm discarded and relaunched.", "evidence": "PREREG.md amendment 1"}, {"t": "01:33", "type": "amendment", "title": "A2: host load ~200, fewer ADK re-rolls", "what": "EDR, syspolicyd and Spotlight saturated the CPU. ADK re-rolls cut to R=3/R=2; base kept at R=4.", "evidence": "PREREG.md amendment 2"}, {"t": "02:00", "type": "amendment", "title": "A3: drop ADK sequential k=2", "what": "Freed local GPU time for the primary comparison.", "evidence": "PREREG.md amendment 3"}, {"t": "02:15", "type": "bug", "id": "auth", "title": "Login failures counted as agent failures", "what": "Concurrent CLI starts returned 'Not logged in' with subtype=success (11 of 237 rollouts, 4 improver sessions), producing a fake +0.11 Harness\u00b2 gain on Claude Code. Exposed by an A/A check: autoresearch's frozen harness equalled base yet scored higher.", "found_by": "our leak audit"}, {"t": "02:25", "type": "amendment", "title": "A4: classify auth failures as infra, re-run the CC arm", "what": "Whole CC arm re-run from clean derived state; the improver retries auth with backoff.", "evidence": "PREREG.md amendment 4"}, {"t": "02:45", "type": "finding", "title": "Clean CC result: Harness\u00b2 keeps base on 9/9", "what": "Every condition scores 1.0. Harness\u00b2 proposes edits, then composes back to the base harness. Negative control passed.", "evidence": "experiments/cc/eval/report.json"}, {"t": "03:48", "type": "finding", "id": "adk-result", "title": "ADK: +0.74 in-task, +0.81 on fresh data, +0.02 transfer", "what": "Weak model goes from mostly failing to 3/3 on 6 of 8 tasks; gains hold on unseen instances; no carry-over to harder tiers.", "evidence": "experiments/adk/eval/report.json"}, {"t": "03:55", "type": "finding", "id": "leak", "title": "The improver wrote answers into the harness", "what": "Ops skills recorded the exact expected values as 'workspace facts'; data skills carried instance ids. 6 of 8 in-task cells void under the pre-registered rule; on the 2 clean tasks the gain is +0.33. harness2's guard checks grader verdicts, not computed answers.", "led_to": ["leakguard"]}, {"t": "04:05", "type": "decision", "title": "Report all three numbers, not the flattering one", "what": "As-run, strict (voided cells removed), and fresh-seed variants. Variants cannot leak by construction."}, {"t": "10:20", "type": "decision", "id": "leakguard", "title": "Follow-up: leak guard plus hook component, ADK rerun", "what": "validate_tree rejects harnesses with the task's answers or ids; a hook forces output/ before finishing (the data-e-v failure printed the right answer instead of writing it)."}, {"t": "10:28", "type": "ask", "title": "Compare with a second video run", "what": "A Gemini 3.5 Flash run on a LAB legal task went from 20/55 to 22/55, with one model doing job, fix and grade.", "led_to": ["gaps"]}, {"t": "10:29", "type": "finding", "id": "gaps", "title": "Four gaps: self-improvement, no-probe ablation, library on/off, official tasks", "what": "Our improver was stronger than the agents; we never tested the paper's 'probe before adopting' claim, never isolated the library, and never ran Google's own tasks. Two follow-up sessions opened."}, {"t": "11:43", "type": "finding", "id": "guard-result", "title": "Leak guard works: voided in-task cells 6/8 \u2192 0/9", "what": "With guard v1 plus the c8 Stop hook, ADK in-task +0.65 (8 up, 0 down) and fresh-seed variants +0.97 (6/6 up). The one remaining flag was a policy constant ($15.00) colliding with a count.", "evidence": "experiments/leak-guard-results.md"}, {"t": "12:00", "type": "bug", "title": "Docker Desktop woken by a status check; load average 409", "what": "A `docker ps` run to answer 'are you using Docker?' started Docker Desktop's VM (224% CPU). Together with about 16 parallel Haiku rollouts, user hooks timed out. Quit Docker; asked both sessions to cap concurrency at 4.", "found_by": "hook timeouts"}, {"t": "12:15", "type": "decision", "title": "Leak prevention in depth (guard v2 + audit + held-out headline)", "what": "hpb/leakguard.py adds data, entity and verbatim checks; a read-only audit covers every arm; the LAB session was asked to wire it in, since its guard only blocked fact phrasing; fresh/held-out results become the headline.", "evidence": "PREREG.md amendment 6"}, {"t": "13:20", "type": "bug", "title": "git init opened a new leak path: .git readable from the sandbox", "what": "Committing the project put the graders (hpb/bench.py) and results into .git, which the sandbox did not deny. Agents do run `git log` in their workspaces. Exposure window 12:28\u201313:20. No exec stream shows git show, cat-file or a grep of graders. LAB rubric text was never committed (eval rows hold criterion ids and pass/fail only). Fix: deny ROOT/.git in sandboxed().", "found_by": "ablation session audit"}, {"t": "15:00", "type": "bug", "title": "Claude CLI OAuth expired machine-wide; a second classifier gap", "what": "Every claude -p call returned 'Failed to authenticate: OAuth session expired'. That string was not in the infra list, so rollouts would have scored as agent failures. Added to AUTH_FAIL; no recorded result was affected. LAB paused.", "evidence": "commit b99175f"}, {"t": "18:23", "type": "ask", "title": "Approve the full held-out LAB matrix at R=3 (~$144)", "what": "After a re-login. The first status check still read loggedIn false from this app's environment; a second check confirmed true, and an isolated nested run returned PONG before anything was spent."}, {"t": "20:50", "type": "finding", "id": "lab-final", "title": "LAB final: held-out +6.9 pts, Haiku self-improver \u22124.1", "what": "Adopted Sonnet harnesses on matters their improver never saw: +0.069 over 12 cells (+0.059 without the leaky one). Concentrated in redline-to-redline transfer and partly format alignment with the judge's reader. Haiku improving itself lost ground (demo task 33.3 \u2192 23.3 of 55). Both improvers wrote answer keys without seeing the rubric. Spend since approval about $126.", "evidence": "experiments/lab/RESULTS.md (f983b68)"}], "learnings": {"harness2": ["It helps where there is headroom and does nothing where there is none, and it knows the difference: it kept the base harness on all 9 Claude Code tasks.", "Its edits are process: a domain skill with a tested script, a trigger line, and rules like 'write the deliverable early'. On a weak model that is the whole gap.", "Gains are per task family. A harness tuned on an easy task did not transfer to medium or hard ones; plan one adaptation per workflow.", "It memorises when it can. Verifier-free does not mean leak-free: audit every adopted harness for answers and instance ids.", "Some failures need enforcement, not instructions: a model that computes the answer but forgets to write it needs a hook.", "On rubric-graded professional work the gain is small and partly format: held-out LAB gains came mostly from teaching the deliverable shape the judge reads.", "A small model improving its own harness can make it worse: Haiku as its own improver lost 10 of 55 checks on the demo legal task."], "benchmarking": ["Calibrate first. Two pilots at ceiling saved hours of meaningless runs.", "Run an A/A check. It is the only reason we caught a fake +0.11 gain.", "Classify infrastructure failures by content, not status codes. 'Not logged in' arrived as success.", "Review before running. Three adversarial reviewers caught a silent blocker and seven grader bugs before any treatment result existed.", "Pre-register and amend in public. Four amendments, each written before the affected results.", "Sandbox model-driven processes: they will look around (190 blocked 'ls ..'), and the environment held real tokens.", "Verifier-free improvement needs a train/test split by instance: score a harness on data its improver never saw, and treat in-task gains as test-time adaptation.", "Diagnostic commands have side effects: `docker ps` started a VM that took two cores on a saturated host.", "Every new artifact is a new leak path: version control put the graders into .git, readable from agent workspaces. Re-check the sandbox after any change to the project layout.", "Verify credentials from the exact environment the runs use: a login that worked in one terminal still read 'not logged in' from the app's processes."], "claude_code": ["Haiku 5.5 inside Claude Code already solved every tier here; measure before optimising a harness.", "Harness\u00b2 components map onto CLAUDE.md, .claude/skills, scripts, .claude/agents and hooks.", "Nested claude -p needs isolation flags, an env allow-list and staggered starts to stay reproducible."]}}, "prereg": "# HPB \u00d7 Harness\u00b2 \u2014 pre-registration (written 2026-10-19 01:20 IST, before any treatment run)\n\nTask data hash: 8aec868f593e. Base-harness pilots were run only for calibration, on an earlier task version.\n\n## Arms\n- **Executors**\n  - ADK + qwen3:8b (local; primary arm, chosen because it has headroom).\n  - Claude Code + Haiku 5.5 (negative control: at ceiling in the pilot).\n- **Improver** (all methods): Claude Sonnet 5.5, effort high, through the harness2 `claude_cli` channel, sandboxed.\n- **Conditions**\n  - `base`: one-sentence system prompt.\n  - `h2`: Harness\u00b2 parallel k=1, unmodified core, domains in order easy\u2192medium\u2192hard, library on.\n  - `h2seq`: Harness\u00b2 sequential k=2, `data` domain only.\n  - `ar`: Karpathy-style autoresearch, 4 iterations on the domain's easy task with the real grader. An edit is kept only if its single rollout strictly beats the incumbent. The final harness is frozen.\n\n## Measurements (fresh rollouts, unique run ids; nothing reused from the improvement runs)\n- `base`: R=4 per task (ADK); R=3 (CC).\n- `h2` in-task: the harness adopted for task t, re-rolled R times on t.\n- `h2` variant: the same harness on t's fresh-seed variant (data/ops only), R=2. This is the memorisation check.\n- `h2` transfer: the harness adopted on the domain's easy task, re-rolled on that domain's medium and hard tasks, R times.\n- `ar`: the frozen harness re-rolled on easy (in-sample), medium and hard (transfer), and on variants.\n\n## Endpoints\n- **Primary (per executor):** the paired change in mean partial score, `h2` in-task minus `base`, averaged over the 9 tasks.\n- **Secondary:**\n  - Transfer change versus `base` on medium and hard tasks (h2-transfer, ar-transfer).\n  - all-pass@R and pass^k.\n  - Variant change (memorisation).\n  - Cost per point gained.\n- **Statistics**\n  - Hierarchical bootstrap: resample tasks, then rollouts; 10k draws; 95% CI.\n  - Exact sign-flip permutation test over the per-task deltas.\n  - Results are descriptive at n=9. No per-domain or per-tier inference.\n\n## Failure handling\n- Timeouts and step-limit exhaustion are agent failures and score 0.\n- Plumbing failures (CLI or model-server errors) are retried up to 3 times. They are reported, never scored.\n\n## Leak audit\n- Grep adopted harnesses for instance literals (expected numbers, ids).\n- Grep executor trajectories and improver tool streams for grader paths and for \"Operation not permitted\" (blocked escape attempts).\n- Any hit voids the affected cell.\n\n## Amendment 1 (01:27 IST, before any treatment result)\nAt launch, ADK aborted whole runs when a tool raised. \"No such directory\" was now an error,\nand it killed the run instead of reaching the model. Every ADK tool now returns\n`ERROR: ...` text as its observation, as standard agent frameworks do. All ADK results were\ndiscarded and the ADK arm relaunched. The CC arm was unaffected.\n\n## Amendment 2 (01:33 IST, before any treatment result)\nThe host is CPU-saturated (load avg about 200 from EDR, syspolicyd and Spotlight). ADK rollouts\nthat use all 40 steps take 5-15 min. ADK re-roll counts after the Harness2 and autoresearch\nruns drop to R=3 (in-task, transfer, autoresearch) and R=2 (variants). Base stays at R=4.\nThe CC arm keeps R=3 throughout.\n\n## Amendment 3 (02:00 IST, before any ADK treatment result)\nThe ADK sequential k=2 arm is dropped to free local-GPU capacity for the primary ADK\ncomparison. Sequential k=2 is reported for the CC arm only.\n\n## Amendment 4 (02:25 IST)\nFound: under concurrent startup, the Claude CLI sometimes returned \"Not logged in \u00b7 Please run\n/login\" with subtype=success. It hit 11/237 CC executor rollouts (including the first base\nrollout of every CC Harness\u00b2 domain) and 4 improver sessions. The infra classifier missed it.\nFix: auth failures are now infra (executor rollouts are re-run, never scored) and improver\nsessions retry with backoff. All CC-arm derived results were discarded and the CC arm was re-run.\nCached CC rollouts are reused only when their harness fingerprint matches and they are not\nauth failures. ADK: the improver never hit this (0/14 sessions). The ADK Harness2 and\nautoresearch processes were restarted on the fixed code and resume from cache.\n\n## Amendment 5 (2026-10-19 12:05 IST): ablations, written before any ablation result\nRoot: `experiments/ablations/`. Driver: `hpb/ablate.py`, which imports harness2 core and does not modify it. Tables: `hpb/ablations.py` writes them to `experiments/ablations/RESULTS.md`. Every ablation uses Harness\u00b2 parallel k=1 with the leak guard and c8 hook from study 2 (`experiments/leak-guard-results.md`).\n\n**1. Self-improvement (CC arm).** Study 1 used Sonnet 5.5 as the improver for Haiku 5.5, so its gains may be distillation. CC is at ceiling with 40 turns.\n- **Turn cap.** In a pilot (2 base rollouts per task at caps 3/4/5, roots `cc-pilot-t*`, not reused), the mean was 0.37/0.50/0.44, so `HPB_CC_MAX_TURNS=4` was fixed.\n- **Runs at the cap.** Base R=4 (variants R=2) in `cc-sonnet`. Two Harness\u00b2 runs: `cc-sonnet` (Sonnet improver) and `cc-haiku` (`HPB_IMPROVER=claude-haiku-5-5`). Both share the same 9 `base1` evidence rollouts and the same base eval rows.\n- **Eval.** In-task, variant and transfer, R=4 (variants R=2).\n- **Endpoints.** Each improver's in-task \u0394 vs base, and Haiku minus Sonnet (in-task).\n- **ADK.** No ADK self-improvement arm. harness2's only non-Claude channel is OpenCode, which is not installed. A qwen3:8b improver would also add about 27 multi-step sessions on the shared 8 Ollama slots.\n\n**2. No-probe (ADK).** `ablate.py --no-probe` runs the same INV and DOM stages, `recursion._run_stage`, with the library on. It then composes `agg1` from the two proposals with no probe rollouts.\n- The aggregate prompt's sentence \"Each candidate was rolled out ONCE and you have that rollout.\" is replaced by a statement that no candidate was rolled out.\n- `agg1` is rolled and adopted as usual. Budget: R=2, P=3 per task.\n- Base rollouts and base eval rows are shared with `experiments/adk-guard`.\n- **Comparison.** In-task R=3 vs base, and vs adk-guard parallel k=1 in-task (no-probe minus probe), over all 9 tasks.\n\n**3. Library off (ADK).** `ablate.py --no-library --tiers medium hard`: each medium and hard task runs as a one-task stream with a fresh, empty library. Easy tasks already see an empty library in the library-on run.\n- Base is shared with adk-guard.\n- **Comparison.** In-task R=3 vs base, and vs adk-guard in-task (library off minus on), over the 6 medium and hard tasks.\n\n**Statistics and leak rule.** Unchanged (eval.py, now via `hpb/stats.py`).\n\n**Added: check-level flips.** For each task, a grader check counts as fail\u2192pass (or pass\u2192fail) when its pass rate over the rollouts rises (or falls) by \u22650.5 between reference and treatment. It is reported in `eval.py report` and in RESULTS.md.\n\n**Re-rolls.** ADK ablation eval rolls in-task only (`eval.py --only intask`) to fit the shared GPU.\n\n## Amendment 6 (12:20 IST, before any ablation or LAB treatment result is read)\nLeak prevention, defence in depth:\n1. Guard v1 (leak-guard session): reject the task's own answers or ids and \"workspace fact\" blocks at adoption.\n2. Guard v2 (hpb/leakguard.py, HPB_LEAKGUARD=2): also rejects distinctive numbers or rare ids from the instance data, verbatim 8-word passages, and 3+ case-specific names. Restated instructions are allowed. On by default for new arms; in-flight arms keep v1 for consistency.\n3. Post-hoc audit of every adopted harness with v2 in every arm (flags study 1 at 7/8, study 2 at 0/9).\n4. Headline metric: fresh-seed or held-out-task performance, which is leak-free by construction. The in-task number is reported as test-time adaptation.\n\n## Amendment 7 (2026-10-19 13:40 IST): post-hoc additions to the ablations, made after results were seen\n- **ITT rows.** Some arms adopted nothing on some tasks, because harness2's k=1 selection has no base fallback when the final delivers nothing. For those tasks, `eval.py --only itt` re-rolls the non-adopted final, and RESULTS.md reports these ITT rows next to the adopted-only primary rows. They were added after the non-adoptions were seen.\n- **Exposure check.** From 12:28 to 13:20 IST `.git` was readable inside the sandbox; it is now denied in `adapters.sandboxed`. A cell would be voided if its rollout read repo content through git. The scan found none.\n- **Missing meta.** A rollout whose agent died without writing meta is now infra, not an agent failure.\n"};
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const fmt = (x, d = 2) => (x == null ? "–" : Number(x).toFixed(d));
+const sgn = (x) => (x >= 0 ? "+" : "") + fmt(x);
+const tip = $("#tip");
+function showTip(e, html) {
+  tip.innerHTML = html; tip.hidden = false;
+  const r = tip.getBoundingClientRect();
+  let x = e.clientX + 14, y = e.clientY + 14;
+  if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 14;
+  if (y + r.height > innerHeight - 8) y = e.clientY - r.height - 14;
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+function bindTips(root) {
+  root.querySelectorAll("[data-tip]").forEach((n) => {
+    n.addEventListener("mousemove", (e) => showTip(e, n.dataset.tip));
+    n.addEventListener("mouseleave", () => (tip.hidden = true));
+    n.addEventListener("focus", (e) => { const r = n.getBoundingClientRect(); showTip({ clientX: r.right, clientY: r.top }, n.dataset.tip); });
+    n.addEventListener("blur", () => (tip.hidden = true));
+  });
+}
+const B = (label) => DATA.board.find((r) => r.label === label) || null;
+const line = (r) => r ? `${sgn(r.delta)} (95% CI ${fmt(r.lo)} to ${fmt(r.hi)}; ${r.up} up, ${r.down} down of ${r.n})` : "pending";
+
+/* ---------------------------------------------------------------- verdict */
+function verdict() {
+  const g = (l) => B(l);
+  const s2v = g("ADK, fresh-seed variants") && DATA.board.filter((r) => r.study.startsWith("Study 2") && r.label === "ADK, fresh-seed variants")[0];
+  const fl = (DATA.flips.find((f) => f.comparison === "Haiku improver vs base, ITT") || { per_task: [] }).per_task.find((p) => p.lost > 0);
+  const demo = ((DATA.lab.arm_a || {}).per_task || []).find((p) => p.task.startsWith("draft-markup-of-procedural-order"));
+  const chk = (v) => fmt(v * demo.n_checks, 1);
+  const V = DATA.voids;
+  const items = [
+    `<b>It works where there is headroom and a stronger improver.</b> A weak local model (ADK + qwen3:8b) with the leak guard on: ${line(s2v)} on fresh instances its improver never saw. Claude Code capped at four turns: ${line(g("Claude Code (4-turn cap), Sonnet improver"))}. Full-strength Claude Code was already at ceiling, and Harness² correctly changed nothing.`,
+    `<b>Self-improvement is real but weaker.</b> With Haiku improving its own harness instead of Sonnet: ${line(g("Claude Code (4-turn cap), Haiku improves itself (ITT)"))}, about half the gain, and Haiku minus Sonnet is ${line(g("Haiku minus Sonnet as improver (ITT)"))}. ${fl ? `One task regressed (${fl.task} ${fmt(fl.base)} → ${fmt(fl.treat)}).` : ""} On the legal tasks, Haiku as its own improver: ${line(g("Haiku improves itself, in-task"))}${demo ? `; the ${demo.n_checks}-check demo task fell from ${chk(demo.base)} to ${chk(demo.treat)} checks` : ""}.`,
+    `<b>Each job is its own jump, not a staircase.</b> A harness adapted on an easy task, reused on harder ones: ${line(DATA.board.filter((r) => r.study.startsWith("Study 2") && r.label === "ADK, easy harness on medium/hard")[0])}. Turning the lesson library off: ${line(g("ADK, library off minus on (ITT)"))}, all of it on one task. Skipping the probe step: ${line(g("ADK, no probe minus probe (ITT)"))}, so we did not reproduce the paper's claim that probing first matters.`,
+    `<b>It leaks unless you stop it.</b> Unguarded, ${V.study1.void} of ${V.study1.of} adopted harnesses carried the task's own answers or ids. With the guard, ${V.study2.void} of ${V.study2.of} did, and the gain held. On the legal tasks, both Sonnet and Haiku improvers wrote answer keys for the matter in front of them without ever seeing the rubric; the layer-2 guard rejected one live.`,
+    `<b>On Google's own legal tasks the gain is real but small, and partly format.</b> Sonnet harnesses on matters their improver never saw: ${line(g("Sonnet harnesses on unseen matters (held-out)"))}; without the leaky harness ${line(g("Held-out, leaky harness removed"))}. It is concentrated in redline-to-redline transfer, much of it teaching the deliverable format the judge's reader expects. In-task: ${line(g("Sonnet improver, in-task"))}, or ${line(g("Sonnet improver, in-task, leaky task removed"))} clean. The harness2 README reports up to +11.8 points for one step (quoted, not measured here).`,
+  ];
+  $("#verdict-body").innerHTML = `<ul>${items.map((i) => `<li>${i}</li>`).join("")}</ul>`;
+  $("#lab-status").textContent = "LAB: final (36 held-out runs, R=3)";
+}
+
+/* ---------------------------------------------------------------- scoreboard (HTML forest plot) */
+const KIND = {
+  primary: ["Main result", "var(--accent)"], baseline: ["Autoresearch baseline", "var(--s-ar)"],
+  diff: ["Variant minus variant", "var(--s-h2)"], null: ["At ceiling (negative control)", "var(--ink-3)"],
+  leaky: ["As run, includes leaked cells", "var(--warn)"],
+};
+function board() {
+  const lo = -0.6, hi = 1.3, pct = (v) => ((Math.max(lo, Math.min(hi, v)) - lo) / (hi - lo)) * 100;
+  $("#board-legend").innerHTML = Object.entries(KIND).map(([k, [n, c]]) => `<span class="${k === "leaky" ? "hollow" : ""}" style="--c:${c}">${n}</span>`).join("");
+  let h = `<div class="forest"><div class="f-axis"><span></span><div class="f-scale">${[-0.5, 0, 0.5, 1].map((t) => `<i style="left:${pct(t)}%">${t > 0 ? "+" : ""}${t}</i>`).join("")}</div></div>`;
+  let study = null;
+  for (const r of DATA.board) {
+    if (r.study !== study) { study = r.study; h += `<div class="f-group">${esc(study)}</div>`; }
+    const [kn, col] = KIND[r.kind] || KIND.primary;
+    const tipHtml = `<b>${esc(r.label)}</b><br>Δ ${sgn(r.delta)} · 95% CI ${fmt(r.lo)} to ${fmt(r.hi)}<br>${r.up} up, ${r.down} down of ${r.n} tasks · sign-flip p=${fmt(r.p, 3)}${r.note ? `<br><i>${esc(r.note)}</i>` : ""}`;
+    h += `<div class="f-row" tabindex="0" data-tip="${esc(tipHtml)}"><span class="f-label">${esc(r.label)}</span><div class="f-strip">
+      <b class="f-zero" style="left:${pct(0)}%"></b>
+      <b class="f-ci" style="left:${pct(r.lo)}%;width:${Math.max(0.4, pct(r.hi) - pct(r.lo))}%;background:${col}"></b>
+      <b class="f-pt ${r.kind === "leaky" ? "hollow" : ""}" style="left:${pct(r.delta)}%;--c:${col}"></b>
+      <em class="f-val" style="left:${pct(Math.max(r.hi, r.delta))}%">${sgn(r.delta)}</em></div></div>`;
+  }
+  $("#board-chart").innerHTML = h + "</div>";
+  bindTips($("#board-chart"));
+  $("#board-table").innerHTML = `<table><thead><tr><th>Study</th><th>Comparison</th><th class="r">Δ</th><th class="r">95% CI</th><th class="r">Up / down</th><th class="r">Tasks</th><th class="r">p</th></tr></thead><tbody>${DATA.board.map((r) => `<tr><td>${esc(r.study)}</td><td>${esc(r.label)}</td><td class="r">${sgn(r.delta)}</td><td class="r">[${fmt(r.lo)}, ${fmt(r.hi)}]</td><td class="r">${r.up} / ${r.down}</td><td class="r">${r.n}</td><td class="r">${fmt(r.p, 3)}</td></tr>`).join("")}</tbody></table>`;
+}
+
+/* ---------------------------------------------------------------- job after job */
+function jobs() {
+  const W = 300, H = 220, L = 34, R = 14, T = 16, Bm = 34;
+  const x = (i) => L + i * ((W - L - R) / 2), y = (v) => T + (1 - v) * (H - T - Bm);
+  const out = [];
+  for (const d of ["data", "ops", "swe"]) {
+    const js = DATA.jobs.filter((j) => j.domain === d);
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${d}: score per job">`;
+    for (const v of [0, 0.5, 1]) s += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--rule)"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end" class="tk">${v}</text>`;
+    js.forEach((j, i) => (s += `<text x="${x(i)}" y="${H - 12}" text-anchor="middle" class="tk">${j.tier}</text>`));
+    const carried = js.map((j, i) => (i === 0 ? { ...j, carried: j.adapted } : j));
+    const series = [["base", "var(--s-base)", "", js, "Base harness"], ["adapted", "var(--s-h2)", "", js, "Adapted on this job"],
+                    ["carried", "var(--ink-3)", 'stroke-dasharray="4 4"', carried, "Easy-job harness carried forward"], ["nolib", "var(--s-ar)", "", js, "Adapted, library off"]];
+    for (const [key, col, dash, arr, name] of series) {
+      const pts = arr.map((j, i) => (j[key] == null ? null : [x(i), y(j[key]), j])).filter(Boolean);
+      if (pts.length > 1 && key !== "nolib") s += `<polyline fill="none" stroke="${col}" stroke-width="2" ${dash} points="${pts.map((p) => p[0] + "," + p[1]).join(" ")}"/>`;
+      const off = { base: -5, adapted: 0, carried: 5, nolib: 9 }[key];
+      for (const [px, py, j] of pts) s += `<circle cx="${px + off}" cy="${py}" r="${key === "adapted" ? 5 : 4}" fill="${key === "carried" ? "var(--paper)" : col}" stroke="${col}" stroke-width="2" tabindex="0" data-tip="${esc(`<b>${j.task}</b> · ${name}: ${fmt(j[key])}`)}"/>`;
+    }
+    out.push(`<figure class="chart"><h3>${d}</h3>${s}</svg></figure>`);
+  }
+  $("#jobs-charts").innerHTML = out.join("");
+  bindTips($("#jobs-charts"));
+  const dh = DATA.jobs.find((j) => j.task === "data-h");
+  $("#jobs-caption").innerHTML = `Orange reaches the top on almost every job, but only because each job is adapted afresh. The gray dashed line, the easy job's harness reused unchanged, falls back to base or below on harder jobs. Switching the library off (aqua) left most jobs where they were; the exception is data-hard (${fmt(dh?.adapted)} with the library, ${fmt(dh?.nolib)} without). swe stays low: the 8B model rarely fixes multi-file repos even with help.`;
+}
+
+/* ---------------------------------------------------------------- check flips */
+function flips() {
+  const out = [];
+  for (const f of DATA.flips) {
+    const max = Math.max(1, ...f.per_task.map((p) => Math.max(p.gained, p.lost)));
+    const rows = f.per_task.map((p) => {
+      const tipHtml = `<b>${esc(p.task)}</b><br>${p.gained} checks gained, ${p.lost} lost<br>mean ${fmt(p.base)} → ${fmt(p.treat)}${p.n_checks ? ` of ${p.n_checks} checks` : ""}`;
+      return `<div class="fl-row" tabindex="0" data-tip="${esc(tipHtml)}"><span class="fl-task">${esc(p.task.replace(/^draft-markup-of-/, "markup: ").replace(/^identify-arbitration-agreement-issues/, "agreement issues"))}</span>
+        <span class="fl-lost"><b style="width:${(p.lost / max) * 100}%"></b><em>${p.lost || ""}</em></span>
+        <span class="fl-gain"><b style="width:${(p.gained / max) * 100}%"></b><em>${p.gained || ""}</em></span></div>`;
+    }).join("");
+    out.push(`<figure class="chart flipfig"><h3>${esc(f.comparison)}</h3><div class="fl-head"><span></span><span>lost</span><span>gained</span></div>${rows}</figure>`);
+  }
+  $("#flip-charts").innerHTML = out.join("");
+  bindTips($("#flip-charts"));
+}
+
+/* ---------------------------------------------------------------- cost vs gain */
+function cost() {
+  const pts = DATA.cost.filter((c) => c.per_task != null && c.delta != null);
+  const W = 760, H = 330, L = 52, R = 24, T = 18, Bm = 44;
+  const xmax = Math.max(0.8, ...pts.map((p) => p.per_task)) * 1.08;
+  const x = (v) => L + (v / xmax) * (W - L - R), y = (v) => T + (1 - (v + 0.1) / 1.15) * (H - T - Bm);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Improver dollars per task against score change">`;
+  for (const v of [0, 0.25, 0.5, 0.75, 1]) s += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--rule)"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end" class="tk">${v > 0 ? "+" : ""}${v}</text>`;
+  for (let v = 0; v <= xmax; v += 0.25) s += `<text x="${x(v)}" y="${H - 22}" text-anchor="middle" class="tk">$${v.toFixed(2)}</text>`;
+  s += `<text x="${(L + W - R) / 2}" y="${H - 4}" text-anchor="middle" class="tk">improver spend per task</text><text x="12" y="${T + 6}" class="tk">Δ</text>`;
+  const placed = [];
+  for (const p of pts.sort((a, b) => b.delta - a.delta)) {
+    const px = x(p.per_task), py = y(p.delta);
+    let ly = py + 4, lx = px + 10, anchor = "start";
+    if (lx + 230 > W) { lx = px - 10; anchor = "end"; }
+    while (placed.some((q) => Math.abs(q - ly) < 15 && true)) ly += 15;
+    placed.push(ly);
+    const col = p.arm.startsWith("CC") ? "var(--s-base)" : p.arm.startsWith("LAB") ? "var(--accent)" : p.arm.includes("autoresearch") ? "var(--s-ar)" : "var(--s-h2)";
+    s += `<circle cx="${px}" cy="${py}" r="6" fill="${col}" stroke="var(--paper)" stroke-width="2" tabindex="0" data-tip="${esc(`<b>${p.arm}</b><br>$${fmt(p.per_task)} per task · Δ ${sgn(p.delta)} (${p.metric})`)}"/>`;
+    s += `<text x="${lx}" y="${ly}" text-anchor="${anchor}" class="lbl">${esc(p.arm)}</text>`;
+  }
+  $("#cost-chart").innerHTML = s + "</svg><figcaption>Blue: Claude Code arms. Orange: ADK Harness² arms. Aqua: autoresearch. Violet: LAB legal tasks (Claude rubric judge costs, about $4 per judged run, not included).</figcaption>";
+  bindTips($("#cost-chart"));
+}
+
+/* ---------------------------------------------------------------- lineage */
+const TYPES = { ask: ["You asked", "var(--ink-2)", "◇"], decision: ["Decision", "var(--accent)", "■"], finding: ["Finding", "var(--s-base)", "●"], bug: ["Bug caught", "var(--bad)", "▲"], amendment: ["Pre-reg amendment", "var(--warn)", "◆"] };
+let lineageFilter = "all";
+function lineage() {
+  const ev = [...DATA.lineage.events].sort((a, b) => a.t.localeCompare(b.t));
+  $("#lineage-filters").innerHTML = [["all", "All", ""], ...Object.entries(TYPES).map(([k, v]) => [k, v[0], v[2]])]
+    .map(([k, n, g]) => `<button type="button" id="lf-${k}" class="${k === lineageFilter ? "on" : ""}" data-k="${k}">${g ? `<span aria-hidden="true">${g}</span> ` : ""}${n} <small>${k === "all" ? ev.length : ev.filter((e) => e.type === k).length}</small></button>`).join("");
+  $("#lineage-filters").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { lineageFilter = b.dataset.k; lineage(); }));
+  const mins = (t) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+  const t0 = 0, t1 = Math.max(...ev.map((e) => mins(e.t))) + 20, W = 900, H = 120, L = 112, R = 12;
+  const x = (t) => L + ((mins(t) - t0) / (t1 - t0)) * (W - L - R);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Events over time by type">`;
+  Object.keys(TYPES).forEach((k, i) => (s += `<text x="0" y="${16 + i * 20 + 4}" class="tk">${TYPES[k][0]}</text><line x1="${L}" x2="${W - R}" y1="${16 + i * 20}" y2="${16 + i * 20}" stroke="var(--rule)"/>`));
+  for (let h = 0; h * 60 <= t1; h += 2) s += `<text x="${L + ((h * 60) / (t1 - t0)) * (W - L - R)}" y="${H - 4}" text-anchor="middle" class="tk">${String(h).padStart(2, "0")}:00</text>`;
+  ev.forEach((e) => {
+    const i = Object.keys(TYPES).indexOf(e.type); if (i < 0) return;
+    const dim = lineageFilter !== "all" && lineageFilter !== e.type;
+    s += `<circle cx="${x(e.t)}" cy="${16 + i * 20}" r="5" fill="${TYPES[e.type][1]}" opacity="${dim ? 0.15 : 0.9}" tabindex="0" data-tip="${esc(`<b>${e.t} · ${TYPES[e.type][0]}</b><br>${e.title}`)}"/>`;
+  });
+  $("#lineage-strip").innerHTML = s + "</svg>";
+  bindTips($("#lineage-strip"));
+  $("#lineage-list").innerHTML = ev.filter((e) => lineageFilter === "all" || e.type === lineageFilter).map((e) => {
+    const [n, c, g] = TYPES[e.type] || ["Event", "var(--ink-3)", "•"];
+    const meta = [e.why && `<b>Why:</b> ${esc(e.why)}`, e.found_by && `<b>Found by:</b> ${esc(e.found_by)}`, e.evidence && `<b>Evidence:</b> <span class="mono">${esc(e.evidence)}</span>`].filter(Boolean).join(" · ");
+    return `<li><time>${e.t}</time><span class="chip" style="color:${c}"><span aria-hidden="true">${g}</span> ${n}</span><div><h3>${esc(e.title)}</h3>${e.what ? `<p>${esc(e.what)}</p>` : ""}${meta ? `<p class="meta2">${meta}</p>` : ""}</div></li>`;
+  }).join("");
+}
+
+/* ---------------------------------------------------------------- learnings, exhibit, comparisons */
+function learnings() {
+  const L = DATA.lineage.learnings, names = { harness2: "About Harness²", benchmarking: "About benchmarking agents", claude_code: "About Claude Code" };
+  $("#learnings-body").innerHTML = Object.entries(names).map(([k, n]) => `<div><h3>${n}</h3><ul class="tight">${(L[k] || []).map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>`).join("");
+}
+function exhibit() {
+  const hl = (t) => esc(t).replace(/^(.*(?:Workspace fact|workspace fact|errors=\d+|users=\d+|top_code=E\d+).*)$/gm, '<mark>$1</mark>');
+  const { before, after } = DATA.exhibit;
+  $("#exhibit").innerHTML = `<figure><figcaption>Study 1, no guard · <span class="mono">${esc(before?.path)}</span></figcaption><pre class="code">${before ? hl(before.text) : "–"}</pre></figure>
+    <figure><figcaption>Study 2, leak guard on · <span class="mono">${esc(after?.path)}</span></figcaption><pre class="code">${after ? esc(after.text) : "–"}</pre></figure>`;
+}
+function comparisons() {
+  const s2 = (l) => DATA.board.find((r) => r.study.startsWith("Study 2") && r.label === l);
+  $("#vs-h2").textContent = `Fresh-seed: ${line(s2("ADK, fresh-seed variants"))}`;
+  $("#vs-ar").textContent = `Tuned task: ${line(B("Autoresearch (grader in loop), tuned task"))}`;
+  $("#vs-h2t").textContent = line(s2("ADK, easy harness on medium/hard"));
+  $("#vs-art").textContent = line(B("Autoresearch, medium/hard"));
+  $("#prereg").textContent = DATA.prereg || "";
+}
+
+window.addEventListener("DOMContentLoaded", () => { verdict(); board(); jobs(); flips(); cost(); lineage(); learnings(); exhibit(); comparisons(); });
+
+</script>

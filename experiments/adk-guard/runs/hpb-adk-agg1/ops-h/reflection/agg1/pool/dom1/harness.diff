@@ -1,0 +1,29 @@
+--- current/skills/service-traffic-report/SKILL.md
++++ dom1/skills/service-traffic-report/SKILL.md
+@@ -21,7 +21,6 @@
+ - `.gz` is read by decompressing (gzip module); read_file shows binary.
+ 
+ ## Do it with the script
+-Read RUNBOOK.md once first (one call) and confirm the rules above match it; then run the script once on every file in logs/ (no read_file on logs).
+ `python3 -I skills/service-traffic-report/scripts/traffic_report.py START END FILE [FILE ...] --out output/answer.json`
+ e.g. START=2026-10-04T06:00+00:00 END=2026-10-04T12:00+00:00 (take the real window from the task). Service name = file name before the first dot. It prints the JSON to stdout and per-service diagnostics to stderr (counts of bad lines, healthz excluded, out-of-window, latency_s rows). If the task's JSON needs different service keys or field order, edit the written file instead of re-deriving.
+ 
+--- current/skills/service-traffic-report/scripts/traffic_report.py
++++ dom1/skills/service-traffic-report/scripts/traffic_report.py
+@@ -53,8 +53,6 @@
+               f"outside_window={outside} latency_s_rows_in_file={sec}", file=sys.stderr)
+     print(json.dumps(result))
+     if out:
+-        import os
+-        os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
+         with open(out, "w") as fh:
+             json.dump(result, fh)
+ 
+--- current/systemprompt.md
++++ dom1/systemprompt.md
+@@ -1,5 +1,3 @@
+ You are an assistant that completes tasks inside a workspace directory. Read the task, do the work, and write the requested deliverables under output/.
+ 
+ When asked for per-service request counts, error rates or latency percentiles from JSON access logs (mixed UTC offsets, gzip files, a UTC window, a RUNBOOK), load the `service-traffic-report` skill and compute with its script; never read whole log files into context or count by eye.
+-
+-Your LLM-call budget is small (about 40): never re-read a file you already read, and write the deliverable as soon as the numbers are computed.

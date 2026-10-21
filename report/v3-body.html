@@ -1,0 +1,148 @@
+<main>
+  <header style="display:grid;gap:1rem">
+    <div class="kicker">Field test · google-research/harness2 @ 1cfe254 · four studies · 19 Oct 2026</div>
+    <h1>Harness² on the Bench</h1>
+    <p class="lede">Google's Harness² rewrites an agent's prompts, skills and scripts while the model stays fixed. We ran it on our own benchmark and on Google's own legal tasks, with a weak local model and with Claude Code. We also ran the ablations the paper's claims rest on, and we audited every harness it wrote for leaked answers.</p>
+    <div class="meta"><span>executors: Claude Code + Haiku 5.5 · Google ADK + qwen3:8b</span><span>improvers: Claude Sonnet 5.5 · Haiku 5.5</span><span id="lab-status"></span></div>
+    <nav aria-label="Sections"><a href="#verdict">Verdict</a><a href="#board">Scoreboard</a><a href="#jobs">Job after job</a><a href="#flips">Check flips</a><a href="#cost">Cost</a><a href="#lineage">Decision lineage</a><a href="#learnings">Learnings</a><a href="#wrote">What it wrote</a><a href="#method">Method</a><a href="#vs">vs autoresearch</a><a href="#apply">Claude Code</a><a href="#repro">Reproduce</a></nav>
+  </header>
+
+  <section id="verdict">
+    <div class="kicker">Verdict</div>
+    <div class="verdict" id="verdict-body"></div>
+  </section>
+
+  <section id="board" class="wide" style="gap:1rem">
+    <div class="kicker">Scoreboard</div>
+    <h2>Every comparison, one scale</h2>
+    <p>Each row is the mean change in the fraction of grader checks passed, against that study's base harness, with a 95% hierarchical-bootstrap interval. Rows below zero mean the treatment did worse. "Minus" rows compare two variants of Harness² directly.</p>
+    <div class="legend" id="board-legend"></div>
+    <figure class="chart" id="board-chart"></figure>
+    <details><summary>Scoreboard as a table</summary><div class="tbl" id="board-table" style="margin-top:.6rem"></div></details>
+  </section>
+
+  <section id="jobs" class="wide" style="gap:1rem">
+    <div class="kicker">Job after job</div>
+    <h2>A jump on every job, not a staircase</h2>
+    <p style="max-width:46rem">The video's slide shows the model flat and the agent climbing job after job. In the code, every task starts again from the original harness, and only the improver's lesson library carries forward. Here is what the weak model did, task by task, in each domain's order (study 2, leak guard on).</p>
+    <div class="legend"><span style="--c:var(--s-base)">Base harness</span><span style="--c:var(--s-h2)">Harness² adapted on this job</span><span style="--c:var(--ink-3)">Easy-job harness carried forward</span><span style="--c:var(--s-ar)">Adapted with the lesson library off</span></div>
+    <div class="charts three" id="jobs-charts"></div>
+    <p class="caption" id="jobs-caption" style="max-width:46rem"></p>
+  </section>
+
+  <section id="flips" class="wide" style="gap:1rem">
+    <div class="kicker">Check flips</div>
+    <h2>Which grader checks moved</h2>
+    <p style="max-width:46rem">A check counts as gained when its pass rate across re-rolls rose by at least half from base to treatment, and as lost when it fell by as much. Losses are where a harness edit broke something the agent used to get right.</p>
+    <div class="charts" id="flip-charts"></div>
+  </section>
+
+  <section id="cost" class="wide" style="gap:1rem">
+    <div class="kicker">Cost against gain</div>
+    <h2>What a point of improvement costs</h2>
+    <p style="max-width:46rem">Improver spend per task (proposals, compositions, selection and reflection; executor and judge costs excluded) against the change it bought, using each arm's cleanest metric.</p>
+    <figure class="chart" id="cost-chart"></figure>
+  </section>
+
+  <section id="lineage" class="wide" style="gap:1rem">
+    <div class="kicker">Decision lineage</div>
+    <h2>How we got here, and what each finding changed</h2>
+    <div class="filters" id="lineage-filters" role="group" aria-label="Filter events by type"></div>
+    <figure class="chart" id="lineage-strip"></figure>
+    <ol class="timeline" id="lineage-list"></ol>
+  </section>
+
+  <section id="learnings">
+    <div class="kicker">Learnings</div>
+    <h2>What we would tell the next team</h2>
+    <div class="grid3" id="learnings-body"></div>
+  </section>
+
+  <section id="wrote">
+    <div class="kicker">What it wrote</div>
+    <h2>The same skill, before and after the leak guard</h2>
+    <p>Both harnesses were adopted for the ops-easy log task. Without the guard, the improver ran its own script on the task files and recorded the answers. With the guard, the proposal was rejected, retried, and came back as method only.</p>
+    <div class="twocol even" id="exhibit"></div>
+  </section>
+
+  <section id="method">
+    <div class="kicker">Method</div>
+    <h2>How we tested</h2>
+    <div class="grid3">
+      <div><h3>Benchmarks</h3><p><b>HPB</b>: our own 9 tasks (data, ops, SWE-style repos × easy, medium, hard) with hidden programmatic graders and fresh-seed copies. <b>LAB</b>: four of Google's own arbitration tasks from harvey-labs (37–59 rubric checks each), scored by a Claude rubric judge that mirrors LAB's scorer.</p></div>
+      <div><h3>Agents and improvers</h3><p>Claude Code (<code>claude -p</code>, Haiku 5.5) and a Google ADK agent on local qwen3:8b. Improvers: Sonnet 5.5, or Haiku 5.5 improving itself. Harness² core ran unmodified behind our adapter. Production cloud projects were never used.</p></div>
+      <div><h3>Measurement</h3><p>Pre-registered endpoints with seven dated amendments. Fresh re-rolls of every adopted harness (R=3–4). Hierarchical bootstrap with exact sign-flip tests. Fresh-seed and held-out tasks as the leak-free headline, with in-task results labelled as test-time adaptation.</p></div>
+    </div>
+    <div class="callout">
+      <h3>Leak and isolation defences, in layers</h3>
+      <ol class="steps">
+        <li>Every model process runs in a macOS <code>sandbox-exec</code> profile with an environment allow-list. Reads of graders, other runs, credentials and <code>.git</code> are denied, writes are allowed only in the workspace, and web tools are off.</li>
+        <li>Guard v1 at adoption rejects the task's own answers, its ids, and "workspace fact" blocks. Harness² retries the proposal once, then falls back.</li>
+        <li>Guard v2 (<code>hpb/leakguard.py</code>) also rejects distinctive numbers and ids from the data, case-specific names, and 8-word passages copied from the sources.</li>
+        <li>A read-only audit of every adopted harness in every arm, plus a scan of every agent and improver log for grader paths.</li>
+        <li>The headline metric is data the improver never saw.</li>
+      </ol>
+    </div>
+    <p>Diagrams: <a href="../docs/diagrams/harness2-loop.svg">the Harness² task loop</a>, <a href="../docs/diagrams/test-rig.svg">the test rig</a> and <a href="../docs/diagrams/method.svg">our method</a>.</p>
+  </section>
+
+  <section id="vs">
+    <div class="kicker">Compared with Karpathy's autoresearch</div>
+    <h2>Same idea, opposite source of truth</h2>
+    <div class="tbl"><table>
+      <thead><tr><th></th><th>Harness²</th><th>autoresearch</th></tr></thead>
+      <tbody>
+        <tr><td>Who decides "better"</td><td>The improver, by contrasting executions; no ground truth</td><td>A fixed scalar from the real grader</td></tr>
+        <tr><td>Keep or revert</td><td>Compose from evidence; keeping the base harness is allowed</td><td>Keep only if the score strictly improves</td></tr>
+        <tr><td>Our weak-model result</td><td id="vs-h2"></td><td id="vs-ar"></td></tr>
+        <tr><td>Transfer to harder tasks</td><td id="vs-h2t"></td><td id="vs-art"></td></tr>
+        <tr><td>Main risk we saw</td><td>Writes answers into skills unless guarded</td><td>One noisy rollout decides each keep</td></tr>
+      </tbody>
+    </table></div>
+    <p>With a trustworthy check, autoresearch's loop is simpler and cheaper. Without one, Harness² still makes progress, and its evidence-reading kept it from touching a Claude Code harness that already worked.</p>
+  </section>
+
+  <section id="apply">
+    <div class="kicker">Using it with Claude Code</div>
+    <h2>Where it earns its cost</h2>
+    <div class="tbl"><table><thead><tr><th>Harness² component</th><th>Claude Code file</th><th>Good edit, from our runs</th></tr></thead><tbody>
+      <tr><td>system prompt, guardrails, memory, tool guidance</td><td><code>CLAUDE.md</code></td><td>"Write the deliverable early; never re-run a command that just failed"</td></tr>
+      <tr><td>skills</td><td><code>.claude/skills/&lt;n&gt;/SKILL.md</code></td><td>A domain procedure with its own tested stdlib script</td></tr>
+      <tr><td>scripts</td><td><code>scripts/*.py</code></td><td>A checker that writes <code>output/</code> itself</td></tr>
+      <tr><td>subagents</td><td><code>.claude/agents/*.md</code></td><td>A reader for large inputs that returns a small table</td></tr>
+      <tr><td>plugins (c8)</td><td>hooks in <code>.claude/settings.json</code></td><td>A Stop hook that blocks "done" until <code>output/</code> exists</td></tr>
+    </tbody></table></div>
+    <div class="grid3">
+      <div><h3>Use it when</h3><p>A cheaper or local model does repeated work and fails for process reasons: running out of steps, skipping a check, forgetting to write the file. That is where we saw the gains (+0.42 on Claude Code capped at four turns, +0.97 on a local 8B model).</p></div>
+      <div><h3>Pair it with</h3><p>A stronger improver than the agent (self-improvement gave half the gain and caused a regression), the leak guard, and a held-out re-roll before you commit any <code>CLAUDE.md</code> or skill change.</p></div>
+      <div><h3>Skip it when</h3><p>The agent is already at ceiling (full-strength Claude Code: no change), or you expect one harness to cover a whole area: harnesses tuned on easy tasks did not transfer to harder ones.</p></div>
+    </div>
+    <h3>A recipe</h3>
+    <ol class="steps">
+      <li>Collect 10 to 30 representative tasks, each with a cheap check so <em>you</em> can evaluate. Harness² never sees the check.</li>
+      <li>Re-roll the current setup three or more times per task. Drop tasks that are always perfect or always zero.</li>
+      <li>Run Harness² <span class="mono">k=1</span>, sandboxed, with no secrets in the agent's environment and the leak guard on.</li>
+      <li>Re-roll each adopted harness on fresh instances of the same task, and compare with base outside the noise.</li>
+      <li>Grep the diff for numbers, ids and names from the task inputs. Keep process; delete facts.</li>
+      <li>Commit to <code>CLAUDE.md</code> and <code>.claude/skills/</code>, and keep the re-roll suite as a regression gate.</li>
+    </ol>
+  </section>
+
+  <section id="repro">
+    <div class="kicker">Reproduce</div>
+    <h2>Commands</h2>
+    <pre class="code">cd GoogleHarness2 &amp;&amp; git log --oneline        # every arm is committed
+cd repo &amp;&amp; uv venv --python 3.12 .venv &amp;&amp; uv pip install -e '.[render]' &amp;&amp; harness2-demo --output runs/demo --k 2
+cd ../hpb
+../repo/.venv/bin/python bench.py               # grader self-test, 15 tasks
+../repo/.venv/bin/python leakguard.py           # leak detector self-check
+../repo/.venv/bin/python run.py adk --mode parallel --k 1      # Harness² (needs: ollama serve, qwen3:8b)
+../repo/.venv/bin/python eval.py adk h2 --run parallel-k1 --reps 3 &amp;&amp; ../repo/.venv/bin/python eval.py adk report
+../repo/.venv/bin/python ablate.py adk --no-probe ...          # ablations, see experiments/ablations/RESULTS.md
+../repo/.venv/bin/python lab.py base|h2|adopted|transfer        # LAB legal tasks, see experiments/lab/RESULTS.md
+HPB_LEAKGUARD=2 ...                             # second leak-guard layer for new runs
+../repo/.venv/bin/python build_v3.py            # rebuild this page from the arms' outputs</pre>
+    <details><summary>Pre-registration and amendments</summary><pre class="code" id="prereg" style="margin-top:.6rem"></pre></details>
+  </section>
+</main>
+<div id="tip" hidden></div>

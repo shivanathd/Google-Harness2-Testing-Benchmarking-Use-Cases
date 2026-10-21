@@ -1,0 +1,21 @@
+{
+ "cond": "h2-sequential-k2/intask",
+ "task": "data-m",
+ "rep": 2,
+ "partial": 1.0,
+ "all_pass": true,
+ "checks": {
+  "net_usd": true,
+  "transactions": true,
+  "refunds": true
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/cc/runs/hpb-cc-seq2/data-m/harnesses/c1",
+ "cost_usd": 0.00647237,
+ "tokens_in": 138942,
+ "tokens_out": 2908,
+ "wall_s": 25.6,
+ "error": "",
+ "infra_error": false,
+ "turns": 7,
+ "tool_calls": null
+}

@@ -1,0 +1,3 @@
+- read_file returns only a slice (max_lines) of a file and reports the total line count; do not draw counts from a slice. Use run_command with scripts for aggregation.
+- run_command: workspace root is the cwd. Helper scripts live in scripts/ (e.g. `python3 scripts/log_window.py app.log 2026-10-03T09:00 2026-10-03T12:00`). Run `ls scripts` if unsure.
+- write_file: write final JSON to output/<name>; verify afterwards with `cat`.

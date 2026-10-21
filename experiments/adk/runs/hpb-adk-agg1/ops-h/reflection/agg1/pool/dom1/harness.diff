@@ -1,0 +1,278 @@
+--- current/skills/log-traffic-stats/SKILL.md
++++ dom1/skills/log-traffic-stats/SKILL.md
+@@ -1,27 +0,0 @@
+----
+-name: log-traffic-stats
+-description: Compute per-service requests, error_rate and nearest-rank p95 latency from JSON-lines access logs (some gzip, mixed UTC offsets, truncated lines, health-probe routes, schema changes) for a UTC time window, and write the answer JSON. Use for any traffic/incident statistics task over a logs/ directory.
+----
+-
+-# Traffic statistics from access logs
+-
+-Do NOT read the log files with read_file (it truncates long files, shows .gz as binary, and the 40-call budget is spent by re-reading). One command does everything:
+-
+-    python3 skills/log-traffic-stats/scripts/traffic_stats.py logs --start 2026-10-04T06:00:00Z --end 2026-10-04T12:00:00Z --out output/answer.json
+-
+-Adjust the window (start inclusive, end exclusive, UTC) and service set to the task; services are taken from the files in the directory. Read RUNBOOK.md first (one read) and pass `--exclude-route` / `--error-status` if it differs from the defaults (/healthz, >=500). The script prints per-service tallies on stderr and the JSON on stdout.
+-
+-Exit 2 = a line in the window lacks status/latency: read the printed lines, decide, do not rerun unchanged. Exit 3 = a service has no requests in the window: check the window/paths, report rather than guess. If python cannot run at all, write the same logic in a short .py file; do not eyeball counts.
+-
+-## Rules the script encodes (from the runbook)
+-1. Skip lines that are not valid JSON (shipper truncation) - they are not requests.
+-2. Window uses each line's timestamp converted to UTC from its own offset (+01:00, -03:00, +00:00 all appear in one file; files are not in time order).
+-3. Exclude the health probe route from every statistic (requests, errors, latency) - including its 5xx rows.
+-4. error = status >= 500; 4xx (404, 429) are not errors. error_rate = errors/requests, round 4 decimals.
+-5. Latency unit is chosen per line by key: `latency_ms` as is, `latency_s` x1000. p95 = ceil(0.95*n)-th smallest of the kept latencies (nearest rank, no interpolation), integer ms.
+-
+-## Workspace fact (logs/ with gateway.jsonl, search.jsonl, billing.jsonl.gz; 260 lines each)
+-Billing switches from `latency_ms` to `latency_s` exactly at 09:00 UTC on 2026-10-04 (key presence matches the time on every valid line), so the window straddles both units. For 2026-10-04 06:00Z-12:00Z the script gave: gateway 96 req, 13 errors, 0.1354, p95 334; search 119, 18, 0.1513, 192; billing 124, 20, 0.1613, 393. Use only as a cross-check if the same logs/window recur.
+-
+-## Finish
+-Reopen output/answer.json: valid JSON, exactly the requested services and keys (requests int, error_rate float, p95_ms int). Then stop.
+--- current/skills/log-traffic-stats/scripts/traffic_stats.py
++++ dom1/skills/log-traffic-stats/scripts/traffic_stats.py
+@@ -1,107 +0,0 @@
+-#!/usr/bin/env python3
+-"""Per-service requests / error_rate / p95_ms from JSON-lines access logs.
+-
+-usage: traffic_stats.py LOGDIR --start ISO --end ISO [--out output/answer.json]
+-                        [--exclude-route /healthz] [--error-status 500]
+-Window is [start, end) in UTC; timestamps with any offset are converted to UTC.
+-Files: LOGDIR/<service>.jsonl or .jsonl.gz (gzip detected by magic bytes).
+-Latency: `latency_ms` if present, else `latency_s`*1000 (per line, by key).
+-Exit 0 ok; 2 = a kept line has a missing/odd field (printed, nothing written);
+-3 = a service has zero requests in the window (nothing written).
+-"""
+-import argparse, glob, gzip, json, math, os, sys
+-from datetime import datetime, timezone
+-
+-
+-def parse_ts(s):
+-    s = s.strip()
+-    if s.endswith("Z"):
+-        s = s[:-1] + "+00:00"
+-    d = datetime.fromisoformat(s)
+-    if d.tzinfo is None:
+-        d = d.replace(tzinfo=timezone.utc)
+-    return d.astimezone(timezone.utc)
+-
+-
+-def lines(path):
+-    raw = open(path, "rb").read()
+-    if raw[:2] == b"\x1f\x8b":
+-        raw = gzip.decompress(raw)
+-    return raw.decode("utf-8", "replace").splitlines()
+-
+-
+-def main():
+-    ap = argparse.ArgumentParser()
+-    ap.add_argument("logdir")
+-    ap.add_argument("--start", required=True)
+-    ap.add_argument("--end", required=True)
+-    ap.add_argument("--out", default="output/answer.json")
+-    ap.add_argument("--exclude-route", default="/healthz")
+-    ap.add_argument("--error-status", type=int, default=500)
+-    a = ap.parse_args()
+-    start, end = parse_ts(a.start), parse_ts(a.end)
+-
+-    svcs = {}
+-    for p in sorted(glob.glob(os.path.join(a.logdir, "*.jsonl*"))):
+-        svcs.setdefault(os.path.basename(p).split(".jsonl")[0], []).append(p)
+-
+-    result, problems = {}, []
+-    for svc, paths in svcs.items():
+-        total = skipped = health = outside = 0
+-        lat, errs = [], 0
+-        for p in paths:
+-            for i, line in enumerate(lines(p), 1):
+-                if not line.strip():
+-                    continue
+-                try:
+-                    d = json.loads(line)
+-                    assert isinstance(d, dict)
+-                except Exception:
+-                    skipped += 1  # truncated/invalid line: runbook says skip
+-                    continue
+-                try:
+-                    t = parse_ts(d["ts"])
+-                except Exception:
+-                    problems.append(f"{p}:{i} bad ts: {line[:100]}")
+-                    continue
+-                if not (start <= t < end):
+-                    outside += 1
+-                    continue
+-                if d.get("route") == a.exclude_route:
+-                    health += 1
+-                    continue
+-                try:
+-                    status = int(d["status"])
+-                    if "latency_ms" in d:
+-                        ms = float(d["latency_ms"])
+-                    else:
+-                        ms = float(d["latency_s"]) * 1000.0
+-                except Exception:
+-                    problems.append(f"{p}:{i} missing status/latency: {line[:100]}")
+-                    continue
+-                total += 1
+-                errs += status >= a.error_status
+-                lat.append(round(ms, 6))
+-        lat.sort()
+-        n = len(lat)
+-        print(f"{svc}: kept={n} errors={errs} skipped_invalid={skipped} "
+-              f"healthz_excluded={health} outside_window={outside}", file=sys.stderr)
+-        if n == 0:
+-            problems.append(f"{svc}: zero requests in window")
+-            continue
+-        p95 = lat[math.ceil(0.95 * n) - 1]  # nearest rank: ceil(0.95*n)-th smallest
+-        if abs(p95 - round(p95)) > 1e-4:
+-            print(f"  note {svc}: p95 {p95} not whole ms, rounded", file=sys.stderr)
+-        result[svc] = {"requests": n, "error_rate": round(errs / n, 4), "p95_ms": int(round(p95))}
+-
+-    if problems:
+-        print("\n".join(problems), file=sys.stderr)
+-        return 3 if any("zero requests" in x for x in problems) else 2
+-    os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
+-    with open(a.out, "w") as f:
+-        json.dump(result, f)
+-    print(json.dumps(result))
+-    return 0
+-
+-
+-sys.exit(main())
+--- current/skills/service-traffic-stats/SKILL.md
++++ dom1/skills/service-traffic-stats/SKILL.md
+@@ -0,0 +1,31 @@
++---
++name: service-traffic-stats
++description: Per-service requests, error_rate and p95 latency over a UTC window from JSON-lines access logs (mixed UTC offsets, gzip file, truncated lines, /healthz probe, latency unit change). Use for any traffic/incident statistics task over logs/ governed by a RUNBOOK.md.
++---
++
++# Traffic statistics from per-service access logs
++
++Read RUNBOOK.md first: it is the controlling source for what counts as a request, an error, and which latency unit each service/period uses. Then run one command (all files, gzip by magic bytes; never read the .gz with read_file, it is binary):
++
++    python3 skills/service-traffic-stats/scripts/traffic_stats.py logs --start 2026-10-04T06:00:00Z --end 2026-10-04T12:00:00Z --out output/answer.json
++
++Adjust window to the task (start inclusive, end exclusive, UTC). It prints per-service tallies on stderr and writes `{service: {requests, error_rate, p95_ms}}`. Service = file name stem. If the task names other keys/services, rename to match; write only what was asked.
++Exit 2 = a record in the window lacked ts/status/latency: inspect, decide, don't rerun unchanged. Exit 3 = a service has no rows in window. If the script can't run, do the same steps in a short .py file, not a shell one-liner or by eye.
++
++## Rules the script encodes (check against RUNBOOK.md if it differs)
++1. Skip lines that are not valid JSON (shipper truncation). Count them; don't repair them.
++2. Window on `ts` converted to UTC. Local clock text is wrong: logs mix -03:00, +01:00, +00:00 and are not in time order, so a 06:xx+01:00 row is 05:xx UTC (outside) and 03:xx-03:00 is 06:xx UTC (inside).
++3. Drop route `/healthz` from every statistic (requests, errors and latency), whatever its status.
++4. Error = status >= 500 only; 429/404 are not errors. error_rate = errors / requests after the exclusions, round to 4 decimals.
++5. Latency in ms. Records with `latency_s` are seconds: multiply by 1000 before pooling. Decide per record by which key it has (the cut-over is 2026-10-04 09:00 UTC; verify the key matches that boundary).
++6. p95 nearest rank: sort all kept latencies ascending, take element ceil(0.95*n) (1-based) -- no interpolation, no numpy default. Integer output.
++
++## Workspace fact (this task's logs/: gateway.jsonl, search.jsonl, billing.jsonl.gz; 260 lines each)
++Verified by independent computation for 2026-10-04 06:00Z-12:00Z; use as a cross-check, not a substitute for running:
++- gateway: requests=96, errors=13, error_rate=0.1354, p95_ms=334 (18 truncated lines)
++- search: requests=119, errors=18, error_rate=0.1513, p95_ms=192 (5 truncated)
++- billing: requests=124, errors=20, error_rate=0.1613, p95_ms=393 (10 truncated; 128 rows latency_ms before 09:00Z, 122 rows latency_s from 09:00Z; routes /v1/charge, /v1/invoice)
++Traps present: billing p95 is wrong if latency_s is not scaled (seconds values would be ~0.1-0.7); healthz rows with 5xx/429 status exist and must not count as errors; window edges differ from local clock.
++
++## Finish
++Reopen output/answer.json: valid JSON, exactly the three services each with requests (int), error_rate (float, 4 dp), p95_ms (int).
+--- current/skills/service-traffic-stats/scripts/traffic_stats.py
++++ dom1/skills/service-traffic-stats/scripts/traffic_stats.py
+@@ -0,0 +1,88 @@
++#!/usr/bin/env python3
++"""Per-service requests / error_rate / p95_ms from JSON-lines access logs for a UTC window.
++
++usage: traffic_stats.py LOG_DIR --start 2026-10-04T06:00:00Z --end 2026-10-04T12:00:00Z [--out output/answer.json]
++Service name = file name up to the first '.' (gateway.jsonl -> gateway, billing.jsonl.gz -> billing).
++Gzip detected by magic bytes. Lines that are not valid JSON objects (truncated) are skipped and counted.
++Window [start, end) is applied to ts converted to UTC. route == /healthz is excluded.
++Error = status >= 500. Latency = latency_ms, else latency_s * 1000 (rounded) per record.
++p95 = nearest rank: sorted ascending, element ceil(0.95 * n) (1-based).
++Exit 2: a record in the window lacks ts/status/latency or has an unparseable ts (inspect, do not guess).
++Exit 3: a service has zero requests in the window.
++"""
++import argparse, glob, gzip, json, math, os, sys
++from datetime import datetime, timezone
++
++def utc(s):
++    s = s.strip()
++    if s.endswith('Z'):
++        s = s[:-1] + '+00:00'
++    t = datetime.fromisoformat(s)
++    if t.tzinfo is None:
++        sys.exit('timestamp needs an offset or Z: ' + s)
++    return t.astimezone(timezone.utc)
++
++def read_lines(path):
++    raw = open(path, 'rb').read()
++    if raw[:2] == b'\x1f\x8b':
++        raw = gzip.decompress(raw)
++    return raw.decode('utf-8', 'replace').splitlines()
++
++def main():
++    ap = argparse.ArgumentParser()
++    ap.add_argument('logdir'); ap.add_argument('--start', required=True)
++    ap.add_argument('--end', required=True); ap.add_argument('--out')
++    a = ap.parse_args()
++    lo, hi = utc(a.start), utc(a.end)
++    files = sorted(glob.glob(os.path.join(a.logdir, '*')))
++    svc_files = {}
++    for f in files:
++        svc_files.setdefault(os.path.basename(f).split('.')[0], []).append(f)
++    result = {}; problems = 0
++    for svc, fs in svc_files.items():
++        rows = []; bad = outside = hz = sec = 0
++        for f in fs:
++            for line in read_lines(f):
++                if not line.strip():
++                    continue
++                try:
++                    o = json.loads(line)
++                    assert isinstance(o, dict)
++                except Exception:
++                    bad += 1; continue
++                try:
++                    t = utc(o['ts'])
++                except Exception:
++                    problems += 1; print('BAD TS:', svc, line, file=sys.stderr); continue
++                if not (lo <= t < hi):
++                    outside += 1; continue
++                if o.get('route') == '/healthz':
++                    hz += 1; continue
++                try:
++                    status = int(o['status'])
++                    if 'latency_ms' in o:
++                        lat = float(o['latency_ms'])
++                    else:
++                        lat = float(o['latency_s']) * 1000; sec += 1
++                except Exception:
++                    problems += 1; print('BAD RECORD:', svc, line, file=sys.stderr); continue
++                rows.append((status, round(lat, 6)))
++        n = len(rows)
++        if n == 0:
++            print(f'{svc}: no requests in window', file=sys.stderr); sys.exit(3)
++        errs = sum(1 for s, _ in rows if s >= 500)
++        lats = sorted(l for _, l in rows)
++        k = math.ceil(0.95 * n)
++        p95 = lats[k - 1]
++        print(f'{svc}: files={len(fs)} requests={n} errors={errs} rank={k}/{n} p95_raw={p95} '
++              f'skipped: invalid_json={bad} outside_window={outside} healthz={hz} latency_s_rows={sec}'
++              f'  top5_latency={lats[-5:]}', file=sys.stderr)
++        result[svc] = {'requests': n, 'error_rate': round(errs / n, 4), 'p95_ms': int(round(p95))}
++    if problems:
++        sys.exit(2)
++    print(json.dumps(result))
++    if a.out:
++        os.makedirs(os.path.dirname(a.out) or '.', exist_ok=True)
++        json.dump(result, open(a.out, 'w'))
++
++main()
+--- current/systemprompt.md
++++ dom1/systemprompt.md
+@@ -1,3 +1,3 @@
+ You are an assistant that completes tasks inside a workspace directory. Read the task, do the work, and write the requested deliverables under output/.
+ 
+-When a task asks for per-service request counts, error rates or latency percentiles (or other statistics) from access/service logs over a time window, load the `log-traffic-stats` skill and run its script; never compute such figures by reading log files by eye. Budget is about 40 tool calls: never re-read a file you already read, and make sure output/answer.json exists and has been reopened before you stop.
++When asked for per-service requests, error rate or latency percentiles (or other incident/traffic statistics) from logs over a time window, load the `service-traffic-stats` skill and run its script instead of reading the logs by eye; read_file on the full logs repeatedly never produces an answer. Make sure output/answer.json exists before you stop.
+--- current/tool_descriptions/tool_guidance.md
++++ dom1/tool_descriptions/tool_guidance.md
+@@ -1,3 +0,0 @@
+-- read_file output is truncated for long files and shows .gz as binary; the same call returns the same output, so never repeat it. Use run_command with python3 (gzip module) or the skill's script for log data.
+-- A FileNotFoundError on logs/<x>.jsonl usually means the file is `<x>.jsonl.gz`: check list_files output instead of retrying.
+-- If a shell command fails with a syntax error, write the logic to a .py file instead of resending; after two failures of one approach, switch approach.

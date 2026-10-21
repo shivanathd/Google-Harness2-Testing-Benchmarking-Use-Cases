@@ -1,0 +1,8 @@
+{
+  "chosen_label": "c1",
+  "candidate_ids": {
+    "A": "c1",
+    "B": "c2"
+  },
+  "reason": "Both candidates contain exactly the same output/answer.json: {\"net_usd\": 24317.47, \"transactions\": 16, \"refunds\": 5}. They match on delivery, shape, and values, so nothing separates them. I did not recompute the figures against the source, so I can't say whether the shared answer is correct."
+}

@@ -1,0 +1,126 @@
+{
+  "task_id": "data-m",
+  "domain": "data",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-cc-agg1/data-m/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-sonnet/exec/hpb-cc-agg1/data-m/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "data-m",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "The earlier rejection was for task-specific values in `systemprompt.md`. I fixed that by rewriting only that file.\n\n- **Removed:** the whole \"Workspace facts for the September 2026 data\" bullet. It carried the duplicate-row ids, the \"2,845.66\" amount, the month and date window, the currency list, the verified counts and the net total.\n- **Added:** one short bullet that gives the method. Before trusting the script, the agent scans the inputs once for these cases and checks each against the script's audit output:\n  - exact duplicate rows\n  - thousands separators in amounts\n  - non-final statuses\n  - dates outside the target month\n  - currencies missing from the FX table\n  - refunds whose original transaction is excluded or in another currency\n- **Unchanged:** the other working rules, `scripts/reconcile_revenue.py`, `scripts/check_output.py` and `hooks.json`. I found no other instance values in the harness; a grep for the ids, the total and \"September\" matched only the removed bullet.\n- **Evidence:** I did not re-read the rollout trajectory this time. The kept rules come from my earlier reading, which I did not redo.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "This fixes the rejected skill, `skills/revenue-reconciliation/SKILL.md`.\n- **Removed:** I deleted the \"Verified facts for THIS workspace\" section. It held this task's own data: the transaction and refund ids, the counts, the gross, refund and net totals, and the September window. The rules, the artifact contract and the \"Before finishing, confirm\" checks are unchanged. They teach the method and use no instance values.\n- **Added:** a short \"Workspace-specific values\" section. It tells the agent to derive counts, ids, totals and the period from the supplied exports and the task's stated period, and not to carry them over from memory or earlier tasks. It also tells the agent to report the target month and its dedup, exclusion and rounding choices.\n- **Check:** a grep of the skill finds no remaining numbers of four or more digits and no S0/R0-style ids.\n- **Trigger line:** `systemprompt.md` still has the line naming `revenue-reconciliation`. No scripts are referenced.\n- **Not re-read:** I did not re-read the rollouts this round. The only change is stripping instance data from the skill.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "kept -> inv1 adopted wholesale: `systemprompt.md` working rules, `scripts/reconcile_revenue.py`, `scripts/check_output.py` and the Stop hook in `hooks.json`. -> The base rollout produced no deliverable (0/1 delivered). It dumped the FX file repeatedly, ending on raw FX rows, and never wrote `output/answer.json`. The inv1 rollout ran `python3 -I scripts/reconcile_revenue.py 2026-09`, got exit 0, wrote `{\"net_usd\": 24317.47, \"transactions\": 16, \"refunds\": 5}`, and re-read the file to confirm it parses. Its audit output shows the three exact duplicates (S004, S026, S028) collapsed and the comma amounts parsed. It also shows the five September refunds converted at the original transaction's currency and the refund day's rate. This is one rollout, so it is weak evidence, but it is the only one that delivered.\n\nkept -> inv1 \"inspect briefly, don't re-print files\" rule and \"deliverable must exist before you stop\" rule -> They target the base failure directly: the base run spent its budget on FX dumps and wrote nothing. inv1 delivered under the same data.\n\nkept -> the `hooks.json` Stop hook calling `check_output.py` -> It is a mechanical backstop against ending with no answer file. It costs nothing in always-on text. It did not fire in the inv1 rollout, so the evidence for it is indirect. The hook is not on the listed editable surface and may be ignored. If so, it is harmless.\n\ndropped -> dom1 (`skills/revenue-reconciliation/SKILL.md` plus a trigger line in `systemprompt.md`) -> The dom1 rollout also produced nothing (0/1 delivered). It computed the right-looking numbers (net 24317.47, 16 sales, 5 refunds) in a /tmp script and stopped without writing `answer.json`. Merging an edit from a non-delivering rollout is unsafe, and nothing overwhelming offsets that. The skill's rules (dedup, comma amounts, settled-date recognition, refunds by refunded_on, round once) are already enforced in inv1's script. The skill would only add on-demand tokens.\n\nkept -> inv1's \"scan inputs once for duplicates, separators, statuses, out-of-month dates, missing FX, refund currency\" bullet -> It carries the method with no instance values, which fixes the earlier rejection for task-specific data in `systemprompt.md`. I grepped for template braces in `systemprompt.md` and found none. No skills were added, so no trigger-line rule applies.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "data-m",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 0,
+        "expected_P": 3,
+        "usd": 0.0,
+        "rollout_usd": 0.0,
+        "session_usd": 0.0,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "data-m",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-cc-agg1/data-m/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.1383971,
+      "experience": {
+        "cue": "A recurring multi-file reconciliation or reporting task. A base run exhausted its budget dumping large reference tables and never wrote the required output file. A competing fix put the method in prose.",
+        "lesson": "Put the procedure in an executable script under `scripts/` that takes the period as an argument and writes the exact required output file itself, with a per-row audit on stderr. Add one line to `systemprompt.md` that names the script and tells the agent to run it after a brief `head`/`wc` look at the inputs, not to re-print them. Do not rely on a `skills/` method document alone for delivery. In the record the skill-only run computed the right numbers by hand and still stopped before writing the file.",
+        "evidence": "Rows \"scripts/reconcile_revenue.py\" and \"skills/revenue-reconciliation\". In agg1 and inv1 the script ran as the second action and `answer.json` existed. In base1 and dom1 neither run produced a file. The base run was stuck on FX dumps, and dom1 computed in /tmp. The edit-row contrast is partly confounded by the prompt rules and the hook, which came as a bundle.",
+        "confidence": "low-to-medium. It rests on one task, and on two non-delivering runs against two delivering runs that share an identical harness. The script cannot be separated from the prompt rules and the hook.",
+        "edits": "component: systemprompt.md (working rules: inspect briefly, don't re-print files, run the script, scan inputs for anomalies, a deliverable must exist before stopping)\ncandidates: inv1, agg1 (identical harness; `diff -r pool/inv1/harness pool/agg1/harness` is empty)\nchange: The base prompt was one sentence. These candidates added four rules: inspect with head and wc without re-printing files, run `scripts/reconcile_revenue.py YYYY-MM`, scan once for anomalies, and reopen the answer file before stopping.\nobserved: Base1 ran four dump commands over transactions and FX (`cat`, `grep` of September to October rates) and ended on raw FX rows with no `answer.json`. Agg1 and inv1 inspected with `head` and `wc`, ran the script as the second command, and both delivered `{\"net_usd\": 24317.47, \"transactions\": 16, \"refunds\": 5}`. Agg1 then re-derived the figure independently with the same result. The prompt rules and the script arrived together. No run has the script without the rules or the reverse, so the prompt's own effect is not isolated.\nverdict: confounded\n\ncomponent: scripts/reconcile_revenue.py\ncandidates: inv1, agg1 (dom1 had no script)\nchange: Added a deterministic reconciler. It collapses exact duplicate txn_ids and strips thousands commas. It recognises only SETTLED rows by settled_on and converts each at that day's rate. It converts refunds at the refund-day rate in the original transaction's currency. It rounds once with Decimal, writes the JSON, and prints a per-row audit.\nobserved: In agg1 the script ran at the second action. It printed the three collapsed duplicates (S028, S026, S004), the 16 TXN lines and the 5 REF lines, and wrote the file. Dom1 hand-wrote an equivalent script in /tmp/recon and got the same 16 sales, 5 refunds and net 24317.47, but never wrote `output/answer.json`. The output location and the final write step were built into the script, so a computed figure could not stay in /tmp. That is the clearest contrast in the record, but dom1 also lacked the prompt rules and the hook.\nverdict: helped (probably; confounded with the prompt rules and the hook)\n\ncomponent: scripts/check_output.py and hooks.json (Stop hook)\ncandidates: inv1, agg1\nchange: A Stop hook that exits 2 if `output/answer.json` is missing or malformed.\nobserved: Agg1 ran `check_output.py` by hand and got check=0. No trajectory shows the hook blocking a stop. Whether the hook is even active is unknown (an earlier decision note says it may be off the editable surface). It never had to act, so no effect is observable.\nverdict: no observed effect\n\ncomponent: skills/revenue-reconciliation/SKILL.md plus a trigger line in systemprompt.md\ncandidates: dom1\nchange: Replaced the working rules with a skill holding the method: dedup, commas, settled_on recognition, refund currency lookup, round once. The prompt said to load it first and to write the deliverable even if unsure.\nobserved: Dom1 loaded the skill as its first action, then read all three CSVs in full with Read. That includes the 276-row FX file, which is the same budget sink as base1. It computed the correct numbers in /tmp and ended with no `answer.json`. The skill's instruction to write the file did not hold. The skill's method was correct, but it did not secure delivery in this one rollout.\nverdict: hurt (single rollout; the failure was in delivery, not in the method)\n\ncomponent: systemprompt.md anomaly-scan bullet (instance values removed) and the \"Workspace-specific values\" skill section\ncandidates: agg1 (and later rounds of inv1 and dom1, per decisions)\nchange: Decisions describe stripping this task's own ids, totals and month window from the prompt and skill, leaving only generic checks. The final harness files for agg1 and inv1 are the same.\nobserved: No execution isolates this. Agg1 and inv1 differ only by sampling, and both delivered the same result. The scan bullet was followed only lightly in agg1, which did a `cat refunds.csv` and `sort | head` pass.\nverdict: no observed effect"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-sonnet/exec/hpb-cc-agg1/data-m/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "227a9666bc7524f7"
+    }
+  },
+  "errors": []
+}

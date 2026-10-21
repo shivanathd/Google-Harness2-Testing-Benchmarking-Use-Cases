@@ -1,0 +1,1570 @@
+{
+ "voids": {
+  "study1": {
+   "void": 6,
+   "of": 8
+  },
+  "study2": {
+   "void": 0,
+   "of": 9
+  }
+ },
+ "board": [
+  {
+   "study": "Study 1 \u00b7 HPB",
+   "label": "Claude Code + Haiku, Harness\u00b2 in-task",
+   "delta": 0.0,
+   "lo": 0.0,
+   "hi": 0.0,
+   "n": 9,
+   "up": 0,
+   "down": 0,
+   "p": 1.0,
+   "kind": "null",
+   "note": "At ceiling: every condition scores 1.0"
+  },
+  {
+   "study": "Study 1 \u00b7 HPB",
+   "label": "ADK + qwen3:8b, in-task (as run)",
+   "delta": 0.7392857142857143,
+   "lo": 0.5291666666666667,
+   "hi": 0.9270833333333334,
+   "n": 8,
+   "up": 8,
+   "down": 0,
+   "p": 0.0078125,
+   "kind": "leaky",
+   "note": "6 of 8 cells contained the task's own answers or ids"
+  },
+  {
+   "study": "Study 1 \u00b7 HPB",
+   "label": "ADK, in-task, leak-void cells removed",
+   "delta": 0.33214285714285713,
+   "lo": 0.2,
+   "hi": 0.5357142857142858,
+   "n": 2,
+   "up": 2,
+   "down": 0,
+   "p": 0.5,
+   "kind": "primary",
+   "note": ""
+  },
+  {
+   "study": "Study 1 \u00b7 HPB",
+   "label": "ADK, fresh-seed variants",
+   "delta": 0.8055555555555556,
+   "lo": 0.47222222222222227,
+   "hi": 1.0,
+   "n": 6,
+   "up": 5,
+   "down": 0,
+   "p": 0.0625,
+   "kind": "primary",
+   "note": ""
+  },
+  {
+   "study": "Study 1 \u00b7 HPB",
+   "label": "ADK, easy harness on medium/hard",
+   "delta": 0.014550264550264556,
+   "lo": -0.07473544973544972,
+   "hi": 0.11441798941798942,
+   "n": 6,
+   "up": 1,
+   "down": 2,
+   "p": 1.0,
+   "kind": "primary",
+   "note": ""
+  },
+  {
+   "study": "Study 1 \u00b7 HPB",
+   "label": "Autoresearch (grader in loop), tuned task",
+   "delta": 0.6555555555555556,
+   "lo": 0.15555555555555559,
+   "hi": 1.0,
+   "n": 3,
+   "up": 3,
+   "down": 0,
+   "p": 0.25,
+   "kind": "baseline",
+   "note": ""
+  },
+  {
+   "study": "Study 1 \u00b7 HPB",
+   "label": "Autoresearch, medium/hard",
+   "delta": 0.054232804232804244,
+   "lo": -0.07407407407407407,
+   "hi": 0.23677248677248683,
+   "n": 6,
+   "up": 1,
+   "down": 2,
+   "p": 1.0,
+   "kind": "baseline",
+   "note": ""
+  },
+  {
+   "study": "Study 2 \u00b7 leak guard",
+   "label": "ADK, in-task (0 leak-void cells)",
+   "delta": 0.647089947089947,
+   "lo": 0.3907407407407407,
+   "hi": 0.8776455026455027,
+   "n": 9,
+   "up": 8,
+   "down": 0,
+   "p": 0.0078125,
+   "kind": "primary",
+   "note": ""
+  },
+  {
+   "study": "Study 2 \u00b7 leak guard",
+   "label": "ADK, fresh-seed variants",
+   "delta": 0.9722222222222222,
+   "lo": 0.888888888888889,
+   "hi": 1.0,
+   "n": 6,
+   "up": 6,
+   "down": 0,
+   "p": 0.03125,
+   "kind": "primary",
+   "note": ""
+  },
+  {
+   "study": "Study 2 \u00b7 leak guard",
+   "label": "ADK, easy harness on medium/hard",
+   "delta": -0.02777777777777778,
+   "lo": -0.1111111111111111,
+   "hi": 0.038690476190476185,
+   "n": 6,
+   "up": 1,
+   "down": 2,
+   "p": 0.75,
+   "kind": "primary",
+   "note": ""
+  },
+  {
+   "study": "Ablations",
+   "label": "Claude Code (4-turn cap), Sonnet improver",
+   "delta": 0.4226190476190476,
+   "lo": 0.17261904761904762,
+   "hi": 0.6944444444444444,
+   "n": 9,
+   "up": 8,
+   "down": 0,
+   "p": 0.0078125,
+   "kind": "primary",
+   "note": ""
+  },
+  {
+   "study": "Ablations",
+   "label": "Claude Code (4-turn cap), Haiku improves itself (ITT)",
+   "delta": 0.17261904761904762,
+   "lo": -0.07738095238095238,
+   "hi": 0.4166666666666667,
+   "n": 9,
+   "up": 6,
+   "down": 1,
+   "p": 0.171875,
+   "kind": "primary",
+   "note": ""
+  },
+  {
+   "study": "Ablations",
+   "label": "Haiku minus Sonnet as improver (ITT)",
+   "delta": -0.25,
+   "lo": -0.5277777777777778,
+   "hi": 0.0,
+   "n": 9,
+   "up": 0,
+   "down": 3,
+   "p": 0.25,
+   "kind": "diff",
+   "note": ""
+  },
+  {
+   "study": "Ablations",
+   "label": "ADK, no probe minus probe (ITT)",
+   "delta": -0.003703703703703703,
+   "lo": -0.1111111111111111,
+   "hi": 0.09735449735449736,
+   "n": 9,
+   "up": 1,
+   "down": 1,
+   "p": 1.0,
+   "kind": "diff",
+   "note": ""
+  },
+  {
+   "study": "Ablations",
+   "label": "ADK, library off minus on (ITT)",
+   "delta": -0.13333333333333336,
+   "lo": -0.3888888888888889,
+   "hi": 0.011904761904761918,
+   "n": 6,
+   "up": 0,
+   "down": 2,
+   "p": 0.5,
+   "kind": "diff",
+   "note": ""
+  },
+  {
+   "study": "LAB legal tasks",
+   "label": "Sonnet improver, in-task",
+   "delta": 0.09642606782437294,
+   "lo": -0.0075918079096045366,
+   "hi": 0.2164209664209665,
+   "n": 4,
+   "up": 3,
+   "down": 1,
+   "p": 0.25,
+   "kind": "leaky",
+   "note": "Includes one task whose harness carried that matter's facts (+0.27)"
+  },
+  {
+   "study": "LAB legal tasks",
+   "label": "Sonnet improver, in-task, leaky task removed",
+   "delta": 0.038478000342407115,
+   "lo": -0.025894538606403044,
+   "hi": 0.13329909262112652,
+   "n": 3,
+   "up": 2,
+   "down": 1,
+   "p": 0.5,
+   "kind": "primary",
+   "note": ""
+  },
+  {
+   "study": "LAB legal tasks",
+   "label": "Haiku improves itself, in-task",
+   "delta": -0.0413537285359319,
+   "lo": -0.14696969696969697,
+   "hi": 0.03095892502672168,
+   "n": 4,
+   "up": 1,
+   "down": 3,
+   "p": 0.625,
+   "kind": "primary",
+   "note": "Layer-2 guard rejected an answer key live during this arm"
+  },
+  {
+   "study": "LAB legal tasks",
+   "label": "Sonnet harnesses on unseen matters (held-out)",
+   "delta": 0.06903722867705922,
+   "lo": -0.010663841807909608,
+   "hi": 0.16004641004641007,
+   "n": 4,
+   "up": 3,
+   "down": 1,
+   "p": 0.25,
+   "kind": "leaky",
+   "note": "4 adopted harnesses x 3 unseen matters (R=3), one unit per target matter"
+  },
+  {
+   "study": "LAB legal tasks",
+   "label": "Held-out, leaky harness removed",
+   "delta": 0.04471883285442613,
+   "lo": -0.04075500770416028,
+   "hi": 0.1412302132641116,
+   "n": 4,
+   "up": 2,
+   "down": 1,
+   "p": 0.5,
+   "kind": "primary",
+   "note": "Gain concentrated in redline-to-redline transfer"
+  }
+ ],
+ "jobs": [
+  {
+   "task": "data-e",
+   "domain": "data",
+   "tier": "easy",
+   "base": 0.0,
+   "adapted": 1.0,
+   "carried": null,
+   "nolib": null
+  },
+  {
+   "task": "data-m",
+   "domain": "data",
+   "tier": "medium",
+   "base": 0.0,
+   "adapted": 1.0,
+   "carried": 0.0,
+   "nolib": 1.0
+  },
+  {
+   "task": "data-h",
+   "domain": "data",
+   "tier": "hard",
+   "base": 0.08333333333333333,
+   "adapted": 1.0,
+   "carried": 0.0,
+   "nolib": 0.3333333333333333
+  },
+  {
+   "task": "ops-e",
+   "domain": "ops",
+   "tier": "easy",
+   "base": 0.5,
+   "adapted": 1.0,
+   "carried": null,
+   "nolib": null
+  },
+  {
+   "task": "ops-m",
+   "domain": "ops",
+   "tier": "medium",
+   "base": 0.16666666666666666,
+   "adapted": 1.0,
+   "carried": 0.0,
+   "nolib": 1.0
+  },
+  {
+   "task": "ops-h",
+   "domain": "ops",
+   "tier": "hard",
+   "base": 0.0,
+   "adapted": 1.0,
+   "carried": 0.0,
+   "nolib": 1.0
+  },
+  {
+   "task": "swe-e",
+   "domain": "swe",
+   "tier": "easy",
+   "base": 0.2,
+   "adapted": 0.2,
+   "carried": null,
+   "nolib": null
+  },
+  {
+   "task": "swe-m",
+   "domain": "swe",
+   "tier": "medium",
+   "base": 0.0,
+   "adapted": 0.13333333333333333,
+   "carried": 0.0,
+   "nolib": null
+  },
+  {
+   "task": "swe-h",
+   "domain": "swe",
+   "tier": "hard",
+   "base": 0.17857142857142855,
+   "adapted": 0.6190476190476191,
+   "carried": 0.26190476190476186,
+   "nolib": 0.6190476190476191
+  }
+ ],
+ "flips": [
+  {
+   "comparison": "Sonnet improver vs base",
+   "per_task": [
+    {
+     "task": "data-e",
+     "gained": 0,
+     "lost": 0,
+     "base": 0.75,
+     "treat": 1.0
+    },
+    {
+     "task": "data-m",
+     "gained": 0,
+     "lost": 0,
+     "base": 0.75,
+     "treat": 1.0
+    },
+    {
+     "task": "data-h",
+     "gained": 3,
+     "lost": 0,
+     "base": 0.5,
+     "treat": 1.0
+    },
+    {
+     "task": "ops-e",
+     "gained": 0,
+     "lost": 0,
+     "base": 0.75,
+     "treat": 1.0
+    },
+    {
+     "task": "ops-m",
+     "gained": 3,
+     "lost": 0,
+     "base": 0.0,
+     "treat": 1.0
+    },
+    {
+     "task": "ops-h",
+     "gained": 9,
+     "lost": 0,
+     "base": 0.0,
+     "treat": 1.0
+    },
+    {
+     "task": "swe-e",
+     "gained": 0,
+     "lost": 0,
+     "base": 1.0,
+     "treat": 1.0
+    },
+    {
+     "task": "swe-m",
+     "gained": 10,
+     "lost": 0,
+     "base": 0.5,
+     "treat": 1.0
+    },
+    {
+     "task": "swe-h",
+     "gained": 0,
+     "lost": 0,
+     "base": 0.9464285714285714,
+     "treat": 1.0
+    }
+   ]
+  },
+  {
+   "comparison": "Haiku improver vs base, ITT",
+   "per_task": [
+    {
+     "task": "data-e",
+     "gained": 0,
+     "lost": 0,
+     "base": 0.75,
+     "treat": 1.0
+    },
+    {
+     "task": "data-m",
+     "gained": 0,
+     "lost": 0,
+     "base": 0.75,
+     "treat": 1.0
+    },
+    {
+     "task": "data-h",
+     "gained": 3,
+     "lost": 0,
+     "base": 0.5,
+     "treat": 1.0
+    },
+    {
+     "task": "ops-e",
+     "gained": 0,
+     "lost": 3,
+     "base": 0.75,
+     "treat": 0.25
+    },
+    {
+     "task": "ops-m",
+     "gained": 3,
+     "lost": 0,
+     "base": 0.0,
+     "treat": 0.5
+    },
+    {
+     "task": "ops-h",
+     "gained": 0,
+     "lost": 0,
+     "base": 0.0,
+     "treat": 0.0
+    },
+    {
+     "task": "swe-e",
+     "gained": 0,
+     "lost": 0,
+     "base": 1.0,
+     "treat": 1.0
+    },
+    {
+     "task": "swe-m",
+     "gained": 10,
+     "lost": 0,
+     "base": 0.5,
+     "treat": 1.0
+    },
+    {
+     "task": "swe-h",
+     "gained": 0,
+     "lost": 0,
+     "base": 0.9464285714285714,
+     "treat": 1.0
+    }
+   ]
+  },
+  {
+   "comparison": "probe (parallel k=1) vs base",
+   "per_task": [
+    {
+     "task": "data-e",
+     "gained": 2,
+     "lost": 0,
+     "base": 0.0,
+     "treat": 1.0
+    },
+    {
+     "task": "data-m",
+     "gained": 3,
+     "lost": 0,
+     "base": 0.0,
+     "treat": 1.0
+    },
+    {
+     "task": "data-h",
+     "gained": 3,
+     "lost": 0,
+     "base": 0.08333333333333333,
+     "treat": 1.0
+    },
+    {
+     "task": "ops-e",
+     "gained": 2,
+     "lost": 0,
+     "base": 0.5,
+     "treat": 1.0
+    },
+    {
+     "task": "ops-m",
+     "gained": 3,
+     "lost": 0,
+     "base": 0.16666666666666666,
+     "treat": 1.0
+    },
+    {
+     "task": "ops-h",
+     "gained": 9,
+     "lost": 0,
+     "base": 0.0,
+     "treat": 1.0
+    },
+    {
+     "task": "swe-e",
+     "gained": 0,
+     "lost": 0,
+     "base": 0.2,
+     "treat": 0.2
+    },
+    {
+     "task": "swe-m",
+     "gained": 0,
+     "lost": 0,
+     "base": 0.0,
+     "treat": 0.13333333333333333
+    },
+    {
+     "task": "swe-h",
+     "gained": 7,
+     "lost": 0,
+     "base": 0.17857142857142855,
+     "treat": 0.6190476190476191
+    }
+   ]
+  },
+  {
+   "comparison": "LAB held-out: adopted harness on unseen matters",
+   "per_task": [
+    {
+     "task": "arbitration-agreement \u2192 procedural-order",
+     "gained": 16,
+     "lost": 0,
+     "base": 0.6060606060606061,
+     "treat": 0.8242424242424242
+    },
+    {
+     "task": "arbitration-agreement \u2192 proposed-interim-order",
+     "gained": 10,
+     "lost": 0,
+     "base": 0.7117117117117117,
+     "treat": 0.972972972972973
+    },
+    {
+     "task": "arbitration-agreement \u2192 identify-arbitration-a",
+     "gained": 1,
+     "lost": 3,
+     "base": 0.7333333333333333,
+     "treat": 0.7166666666666667
+    },
+    {
+     "task": "procedural-order \u2192 arbitration-agreement",
+     "gained": 0,
+     "lost": 2,
+     "base": 0.9717514124293786,
+     "treat": 0.9548022598870056
+    },
+    {
+     "task": "procedural-order \u2192 proposed-interim-order",
+     "gained": 10,
+     "lost": 0,
+     "base": 0.7117117117117117,
+     "treat": 0.954954954954955
+    },
+    {
+     "task": "procedural-order \u2192 identify-arbitration-a",
+     "gained": 1,
+     "lost": 0,
+     "base": 0.7333333333333333,
+     "treat": 0.75
+    },
+    {
+     "task": "proposed-interim-order \u2192 arbitration-agreement",
+     "gained": 0,
+     "lost": 0,
+     "base": 0.9717514124293786,
+     "treat": 0.9887005649717514
+    },
+    {
+     "task": "proposed-interim-order \u2192 procedural-order",
+     "gained": 16,
+     "lost": 0,
+     "base": 0.6060606060606061,
+     "treat": 0.8303030303030303
+    },
+    {
+     "task": "proposed-interim-order \u2192 identify-arbitration-a",
+     "gained": 3,
+     "lost": 0,
+     "base": 0.7333333333333333,
+     "treat": 0.7916666666666666
+    },
+    {
+     "task": "identify-arbitration-a \u2192 arbitration-agreement",
+     "gained": 0,
+     "lost": 4,
+     "base": 0.9717514124293786,
+     "treat": 0.943502824858757
+    },
+    {
+     "task": "identify-arbitration-a \u2192 procedural-order",
+     "gained": 1,
+     "lost": 5,
+     "base": 0.6060606060606061,
+     "treat": 0.4484848484848485
+    },
+    {
+     "task": "identify-arbitration-a \u2192 proposed-interim-order",
+     "gained": 0,
+     "lost": 0,
+     "base": 0.7117117117117117,
+     "treat": 0.7207207207207207
+    }
+   ]
+  },
+  {
+   "comparison": "LAB legal, Sonnet improver vs base",
+   "per_task": [
+    {
+     "task": "draft-markup-of-arbitration-agreement",
+     "gained": 0,
+     "lost": 0,
+     "base": 0.9717514124293786,
+     "treat": 0.9887005649717514,
+     "n_checks": 59
+    },
+    {
+     "task": "draft-markup-of-procedural-order",
+     "gained": 12,
+     "lost": 1,
+     "base": 0.6060606060606061,
+     "treat": 0.7212121212121212,
+     "n_checks": 55
+    },
+    {
+     "task": "draft-markup-of-proposed-interim-order",
+     "gained": 10,
+     "lost": 0,
+     "base": 0.7117117117117117,
+     "treat": 0.981981981981982,
+     "n_checks": 37
+    },
+    {
+     "task": "identify-arbitration-agreement-issues",
+     "gained": 1,
+     "lost": 2,
+     "base": 0.7333333333333333,
+     "treat": 0.7166666666666667,
+     "n_checks": 40
+    }
+   ]
+  }
+ ],
+ "cost": [
+  {
+   "arm": "ADK, Harness\u00b2 (study 1)",
+   "usd": 3.9259,
+   "tasks": 9,
+   "delta": 0.8055555555555556,
+   "metric": "fresh-seed",
+   "per_task": 0.436
+  },
+  {
+   "arm": "ADK, Harness\u00b2 + leak guard",
+   "usd": 5.7426,
+   "tasks": 9,
+   "delta": 0.9722222222222222,
+   "metric": "fresh-seed",
+   "per_task": 0.638
+  },
+  {
+   "arm": "ADK, no probe",
+   "usd": 1.8177,
+   "tasks": 9,
+   "delta": 0.6433862433862434,
+   "metric": "in-task ITT",
+   "per_task": 0.202
+  },
+  {
+   "arm": "ADK, autoresearch",
+   "usd": 0.5306,
+   "tasks": 3,
+   "delta": 0.6555555555555556,
+   "metric": "tuned task",
+   "per_task": 0.177
+  },
+  {
+   "arm": "CC (4-turn cap), Sonnet improver",
+   "usd": 1.9673,
+   "tasks": 9,
+   "delta": 0.4226190476190476,
+   "metric": "in-task",
+   "per_task": 0.219
+  },
+  {
+   "arm": "CC (4-turn cap), Haiku self-improver",
+   "usd": 0.5339,
+   "tasks": 9,
+   "delta": 0.17261904761904762,
+   "metric": "in-task ITT",
+   "per_task": 0.059
+  },
+  {
+   "arm": "CC full, Sonnet improver",
+   "usd": 2.8092,
+   "tasks": 9,
+   "delta": 0.0,
+   "metric": "in-task",
+   "per_task": 0.312
+  },
+  {
+   "arm": "LAB legal, Sonnet improver",
+   "usd": 6.045,
+   "tasks": 4,
+   "delta": 0.04471883285442613,
+   "metric": "held-out, clean",
+   "per_task": 1.511
+  },
+  {
+   "arm": "LAB legal, Haiku self-improver",
+   "usd": 1.3943,
+   "tasks": 4,
+   "delta": -0.0413537285359319,
+   "metric": "in-task",
+   "per_task": 0.349
+  }
+ ],
+ "lab": {
+  "full": {
+   "mean_delta": 0.09642606782437294,
+   "ci95": [
+    -0.0075918079096045366,
+    0.2164209664209665
+   ],
+   "n_tasks": 4,
+   "per_task": [
+    {
+     "task": "draft-markup-of-arbitration-agreement",
+     "treat": 0.9887005649717514,
+     "base": 0.9717514124293786,
+     "delta": 0.016949152542372836,
+     "n_checks": 59,
+     "gained": 0,
+     "lost": 0
+    },
+    {
+     "task": "draft-markup-of-procedural-order",
+     "treat": 0.7212121212121212,
+     "base": 0.6060606060606061,
+     "delta": 0.11515151515151512,
+     "n_checks": 55,
+     "gained": 12,
+     "lost": 1
+    },
+    {
+     "task": "draft-markup-of-proposed-interim-order",
+     "treat": 0.981981981981982,
+     "base": 0.7117117117117117,
+     "delta": 0.2702702702702704,
+     "n_checks": 37,
+     "gained": 10,
+     "lost": 0
+    },
+    {
+     "task": "identify-arbitration-agreement-issues",
+     "treat": 0.7166666666666667,
+     "base": 0.7333333333333333,
+     "delta": -0.016666666666666607,
+     "n_checks": 40,
+     "gained": 1,
+     "lost": 2
+    }
+   ],
+   "improved": 3,
+   "regressed": 1,
+   "signflip_p": 0.25
+  },
+  "clean": {
+   "mean_delta": 0.038478000342407115,
+   "ci95": [
+    -0.025894538606403044,
+    0.13329909262112652
+   ],
+   "n_tasks": 3,
+   "per_task": [
+    {
+     "task": "draft-markup-of-arbitration-agreement",
+     "treat": 0.9887005649717514,
+     "base": 0.9717514124293786,
+     "delta": 0.016949152542372836,
+     "n_checks": 59,
+     "gained": 0,
+     "lost": 0
+    },
+    {
+     "task": "draft-markup-of-procedural-order",
+     "treat": 0.7212121212121212,
+     "base": 0.6060606060606061,
+     "delta": 0.11515151515151512,
+     "n_checks": 55,
+     "gained": 12,
+     "lost": 1
+    },
+    {
+     "task": "identify-arbitration-agreement-issues",
+     "treat": 0.7166666666666667,
+     "base": 0.7333333333333333,
+     "delta": -0.016666666666666607,
+     "n_checks": 40,
+     "gained": 1,
+     "lost": 2
+    }
+   ],
+   "improved": 2,
+   "regressed": 1,
+   "signflip_p": 0.5
+  },
+  "arm_a": {
+   "mean_delta": -0.0413537285359319,
+   "ci95": [
+    -0.14696969696969697,
+    0.03095892502672168
+   ],
+   "n_tasks": 4,
+   "per_task": [
+    {
+     "task": "draft-markup-of-arbitration-agreement",
+     "treat": 0.96045197740113,
+     "base": 0.9717514124293786,
+     "delta": -0.011299435028248594,
+     "n_checks": 59,
+     "gained": 0,
+     "lost": 0
+    },
+    {
+     "task": "draft-markup-of-procedural-order",
+     "treat": 0.42424242424242425,
+     "base": 0.6060606060606061,
+     "delta": -0.18181818181818182,
+     "n_checks": 55,
+     "gained": 1,
+     "lost": 5
+    },
+    {
+     "task": "draft-markup-of-proposed-interim-order",
+     "treat": 0.7477477477477478,
+     "base": 0.7117117117117117,
+     "delta": 0.03603603603603611,
+     "n_checks": 37,
+     "gained": 1,
+     "lost": 0
+    },
+    {
+     "task": "identify-arbitration-agreement-issues",
+     "treat": 0.725,
+     "base": 0.7333333333333333,
+     "delta": -0.008333333333333304,
+     "n_checks": 40,
+     "gained": 1,
+     "lost": 2
+    }
+   ],
+   "improved": 1,
+   "regressed": 3,
+   "signflip_p": 0.625
+  },
+  "heldout": {
+   "mean_delta": 0.06903722867705922,
+   "ci95": [
+    -0.010663841807909608,
+    0.16004641004641007
+   ],
+   "n_tasks": 4,
+   "per_task": [
+    {
+     "task": "draft-markup-of-arbitration-agreement",
+     "treat": 0.9623352165725048,
+     "base": 0.9717514124293786,
+     "delta": -0.00941619585687381,
+     "n_checks": 59,
+     "gained": 0,
+     "lost": 0
+    },
+    {
+     "task": "draft-markup-of-procedural-order",
+     "treat": 0.701010101010101,
+     "base": 0.6060606060606061,
+     "delta": 0.0949494949494949,
+     "n_checks": 55,
+     "gained": 3,
+     "lost": 0
+    },
+    {
+     "task": "draft-markup-of-proposed-interim-order",
+     "treat": 0.882882882882883,
+     "base": 0.7117117117117117,
+     "delta": 0.1711711711711713,
+     "n_checks": 37,
+     "gained": 7,
+     "lost": 0
+    },
+    {
+     "task": "identify-arbitration-agreement-issues",
+     "treat": 0.7527777777777778,
+     "base": 0.7333333333333333,
+     "delta": 0.019444444444444486,
+     "n_checks": 40,
+     "gained": 1,
+     "lost": 0
+    }
+   ],
+   "improved": 3,
+   "regressed": 1,
+   "signflip_p": 0.25,
+   "cells": [
+    {
+     "src": "draft-markup-of-arbitration-agreement",
+     "task": "draft-markup-of-procedural-order",
+     "treat": 0.8242424242424242,
+     "base": 0.6060606060606061,
+     "delta": 0.21818181818181814,
+     "n_checks": 55,
+     "gained": 16,
+     "lost": 0
+    },
+    {
+     "src": "draft-markup-of-arbitration-agreement",
+     "task": "draft-markup-of-proposed-interim-order",
+     "treat": 0.972972972972973,
+     "base": 0.7117117117117117,
+     "delta": 0.26126126126126137,
+     "n_checks": 37,
+     "gained": 10,
+     "lost": 0
+    },
+    {
+     "src": "draft-markup-of-arbitration-agreement",
+     "task": "identify-arbitration-agreement-issues",
+     "treat": 0.7166666666666667,
+     "base": 0.7333333333333333,
+     "delta": -0.016666666666666607,
+     "n_checks": 40,
+     "gained": 1,
+     "lost": 3
+    },
+    {
+     "src": "draft-markup-of-procedural-order",
+     "task": "draft-markup-of-arbitration-agreement",
+     "treat": 0.9548022598870056,
+     "base": 0.9717514124293786,
+     "delta": -0.016949152542372947,
+     "n_checks": 59,
+     "gained": 0,
+     "lost": 2
+    },
+    {
+     "src": "draft-markup-of-procedural-order",
+     "task": "draft-markup-of-proposed-interim-order",
+     "treat": 0.954954954954955,
+     "base": 0.7117117117117117,
+     "delta": 0.2432432432432433,
+     "n_checks": 37,
+     "gained": 10,
+     "lost": 0
+    },
+    {
+     "src": "draft-markup-of-procedural-order",
+     "task": "identify-arbitration-agreement-issues",
+     "treat": 0.75,
+     "base": 0.7333333333333333,
+     "delta": 0.01666666666666672,
+     "n_checks": 40,
+     "gained": 1,
+     "lost": 0
+    },
+    {
+     "src": "draft-markup-of-proposed-interim-order",
+     "task": "draft-markup-of-arbitration-agreement",
+     "treat": 0.9887005649717514,
+     "base": 0.9717514124293786,
+     "delta": 0.016949152542372836,
+     "n_checks": 59,
+     "gained": 0,
+     "lost": 0
+    },
+    {
+     "src": "draft-markup-of-proposed-interim-order",
+     "task": "draft-markup-of-procedural-order",
+     "treat": 0.8303030303030303,
+     "base": 0.6060606060606061,
+     "delta": 0.22424242424242424,
+     "n_checks": 55,
+     "gained": 16,
+     "lost": 0
+    },
+    {
+     "src": "draft-markup-of-proposed-interim-order",
+     "task": "identify-arbitration-agreement-issues",
+     "treat": 0.7916666666666666,
+     "base": 0.7333333333333333,
+     "delta": 0.05833333333333335,
+     "n_checks": 40,
+     "gained": 3,
+     "lost": 0
+    },
+    {
+     "src": "identify-arbitration-agreement-issues",
+     "task": "draft-markup-of-arbitration-agreement",
+     "treat": 0.943502824858757,
+     "base": 0.9717514124293786,
+     "delta": -0.02824858757062154,
+     "n_checks": 59,
+     "gained": 0,
+     "lost": 4
+    },
+    {
+     "src": "identify-arbitration-agreement-issues",
+     "task": "draft-markup-of-procedural-order",
+     "treat": 0.4484848484848485,
+     "base": 0.6060606060606061,
+     "delta": -0.1575757575757576,
+     "n_checks": 55,
+     "gained": 1,
+     "lost": 5
+    },
+    {
+     "src": "identify-arbitration-agreement-issues",
+     "task": "draft-markup-of-proposed-interim-order",
+     "treat": 0.7207207207207207,
+     "base": 0.7117117117117117,
+     "delta": 0.009009009009009028,
+     "n_checks": 37,
+     "gained": 0,
+     "lost": 0
+    }
+   ]
+  },
+  "heldout_clean": {
+   "mean_delta": 0.04471883285442613,
+   "ci95": [
+    -0.04075500770416028,
+    0.1412302132641116
+   ],
+   "n_tasks": 4,
+   "per_task": [
+    {
+     "task": "draft-markup-of-arbitration-agreement",
+     "treat": 0.9491525423728814,
+     "base": 0.9717514124293786,
+     "delta": -0.02259887005649719,
+     "n_checks": 59,
+     "gained": 0,
+     "lost": 5
+    },
+    {
+     "task": "draft-markup-of-procedural-order",
+     "treat": 0.6363636363636364,
+     "base": 0.6060606060606061,
+     "delta": 0.030303030303030276,
+     "n_checks": 55,
+     "gained": 1,
+     "lost": 1
+    },
+    {
+     "task": "draft-markup-of-proposed-interim-order",
+     "treat": 0.882882882882883,
+     "base": 0.7117117117117117,
+     "delta": 0.1711711711711713,
+     "n_checks": 37,
+     "gained": 7,
+     "lost": 0
+    },
+    {
+     "task": "identify-arbitration-agreement-issues",
+     "treat": 0.7333333333333334,
+     "base": 0.7333333333333333,
+     "delta": 1.1102230246251565e-16,
+     "n_checks": 40,
+     "gained": 1,
+     "lost": 3
+    }
+   ],
+   "improved": 2,
+   "regressed": 1,
+   "signflip_p": 0.5,
+   "cells": [
+    {
+     "src": "draft-markup-of-arbitration-agreement",
+     "task": "draft-markup-of-procedural-order",
+     "treat": 0.8242424242424242,
+     "base": 0.6060606060606061,
+     "delta": 0.21818181818181814,
+     "n_checks": 55,
+     "gained": 16,
+     "lost": 0
+    },
+    {
+     "src": "draft-markup-of-arbitration-agreement",
+     "task": "draft-markup-of-proposed-interim-order",
+     "treat": 0.972972972972973,
+     "base": 0.7117117117117117,
+     "delta": 0.26126126126126137,
+     "n_checks": 37,
+     "gained": 10,
+     "lost": 0
+    },
+    {
+     "src": "draft-markup-of-arbitration-agreement",
+     "task": "identify-arbitration-agreement-issues",
+     "treat": 0.7166666666666667,
+     "base": 0.7333333333333333,
+     "delta": -0.016666666666666607,
+     "n_checks": 40,
+     "gained": 1,
+     "lost": 3
+    },
+    {
+     "src": "draft-markup-of-procedural-order",
+     "task": "draft-markup-of-arbitration-agreement",
+     "treat": 0.9548022598870056,
+     "base": 0.9717514124293786,
+     "delta": -0.016949152542372947,
+     "n_checks": 59,
+     "gained": 0,
+     "lost": 2
+    },
+    {
+     "src": "draft-markup-of-procedural-order",
+     "task": "draft-markup-of-proposed-interim-order",
+     "treat": 0.954954954954955,
+     "base": 0.7117117117117117,
+     "delta": 0.2432432432432433,
+     "n_checks": 37,
+     "gained": 10,
+     "lost": 0
+    },
+    {
+     "src": "draft-markup-of-procedural-order",
+     "task": "identify-arbitration-agreement-issues",
+     "treat": 0.75,
+     "base": 0.7333333333333333,
+     "delta": 0.01666666666666672,
+     "n_checks": 40,
+     "gained": 1,
+     "lost": 0
+    },
+    {
+     "src": "identify-arbitration-agreement-issues",
+     "task": "draft-markup-of-arbitration-agreement",
+     "treat": 0.943502824858757,
+     "base": 0.9717514124293786,
+     "delta": -0.02824858757062154,
+     "n_checks": 59,
+     "gained": 0,
+     "lost": 4
+    },
+    {
+     "src": "identify-arbitration-agreement-issues",
+     "task": "draft-markup-of-procedural-order",
+     "treat": 0.4484848484848485,
+     "base": 0.6060606060606061,
+     "delta": -0.1575757575757576,
+     "n_checks": 55,
+     "gained": 1,
+     "lost": 5
+    },
+    {
+     "src": "identify-arbitration-agreement-issues",
+     "task": "draft-markup-of-proposed-interim-order",
+     "treat": 0.7207207207207207,
+     "base": 0.7117117117117117,
+     "delta": 0.009009009009009028,
+     "n_checks": 37,
+     "gained": 0,
+     "lost": 0
+    }
+   ]
+  }
+ },
+ "exhibit": {
+  "before": {
+   "path": "skills/log-window-stats/SKILL.md",
+   "text": "---\nname: log-window-stats\ndescription: Count ERROR events, distinct users and top error code from a multi-timezone service log for a UTC time window. Use for any incident/traffic statistics task over raw log files.\n---\n\n# Log window statistics (errors / distinct users / top code)\n\nANALYTIC MOVE: classify each log line as event vs. non-event, convert event time to UTC, filter to the window, then count. Eyeballing a 100+ line log gives wrong numbers (a prior run counted by eye and answered errors=21 where the correct count was 15) \u2014 compute, don't estimate. If a shell is available, run `python3 skills/log-window-stats/scripts/log_window_stats.py app.log 2026-10-03T09:00:00Z 2026-10-03T12:00:00Z --level ERROR --out output/answer.json` (start inclusive, end exclusive; adjust log path, window and level to the task). It prints each matched event and the tallies on stderr, writes the three-key JSON, and refuses (exit 3) on a tied top code or empty match and (exit 2) on unparseable header lines: inspect, don't retry blindly. If there is no shell, apply the rules below line by line and list every counted event (UTC time, user, code) before totalling.\n\n## What counts as an event\n1. An EVENT is a line that STARTS with an ISO timestamp followed by LEVEL, `[service]`, `user=`. Lines indented under it (Traceback, `File ...`, `RuntimeError: upstream ERROR user=X code=Y`) are continuation text of the previous event: NEVER count them, and never take the user/code from them \u2014 the event's own `user=`/`code=` fields are the truth (the traceback often names a different user and code).\n2. Level is the token right after the timestamp. Only `ERROR` counts. `INFO ... msg=retrying after ERROR code=...` is INFO; `WARN ... slow response` is WARN, even though both carry a `code=`. A substring match on \"ERROR\" overcounts.\n3. Every timestamp has its own offset (`Z`, `+01:00`, `+05:30`, `-07:00` seen in this workspace). Convert to UTC (subtract the offset) BEFORE filtering; the file is not in time order, and the date part of the local stamp can differ from the UTC date (e.g. `2026-10-02T23:31-07:00` is 2026-10-03 06:31Z). Do not filter on the local clock text.\n4. Window is start-inclusive, end-exclusive: 12:00:00Z is out, 09:00:00Z is in. Check events near the edges explicitly (e.g. +05:30 stamps around 14:30\u201317:30 local, +01:00 around 10:00\u201313:00 local, -07:00 around 02:00\u201305:00 local).\n\n## Answer fields\n- errors = number of qualifying events (not distinct).\n- users = distinct `user=` values of those same events.\n- top_code = most frequent `code=` among those same events; check for a tie and report the tie in your reply if one exists (don't silently pick).\nWrite exactly the requested JSON keys/types (ints, string code) \u2014 no extra keys.\n\n## Cross-check before writing\n- errors equals the sum of per-code counts; users <= errors.\n- Recount boundary events and one event per offset by hand.\n- Workspace fact (this app.log, 163 lines, 4 offsets): script gives errors=15, users=6, top_code=E500 (E500 x5, E403 x4, E401 x4) for the 09:00\u201312:00Z 2026-10-03 window. Treat as a check if the same file/window recurs; recompute for any other input.\n- After writing, reopen output/answer.json"
+  },
+  "after": {
+   "path": "skills/log-window-stats/SKILL.md",
+   "text": "---\nname: log-window-stats\ndescription: Count events, distinct users and top error code for a level inside a UTC time window from a multi-timezone service log (incident / traffic statistics).\n---\n\n# Log window statistics (practitioner rules)\n\nDeliverable: the exact JSON shape the task names, values as plain numbers/strings computed by you (never estimated from reading the log by eye).\n\n## Define the event first\n- An EVENT is a record whose line starts at column 0 with a timestamp, then a level token (ERROR/WARN/INFO), then `[service]`. Level is the token right after the timestamp, nothing else.\n- Not events, even though they contain the text \"ERROR\": indented traceback continuation lines (they may mention a different user or code than the parent event), and lower-level lines that merely quote an error (e.g. an INFO line saying it is retrying after an error). WARN lines may also carry `code=`; they are not ERROR.\n- Attribute user and code from the event's own header line only, never from its continuation lines.\n\n## Window\n- Convert every timestamp to UTC using its own offset before comparing (`Z` and numeric offsets, including non-whole-hour ones, may be mixed; lines need not be in chronological order). Start inclusive, end exclusive: an event exactly at the window end is out, exactly at the start is in.\n- Do not filter on the local clock digits or on the date prefix; an event with a local date before the window date can fall inside the UTC window, and vice versa.\n\n## Calculations\n- errors = number of qualifying events (not users, not lines).\n- users = distinct `user=` values among those same events.\n- top_code = most frequent `code=` among those same events; if the script warns of a tie, re-check the event filter; if the tie is real, pick by the task's stated rule, else say so in the final reply (the file still holds one code).\n\n## Check before writing\n- Run `python3 -I skills/log-window-stats/scripts/log_window_stats.py app.log START_UTC END_UTC ERROR` (START/END as ISO with offset, e.g. YYYY-MM-DDTHH:MM:00+00:00). It prints counts plus every qualifying event line number; spot-check 2-3 boundary-near events by hand-converting their offset.\n- Confirm users <= errors, the code counts sum to errors, and the JSON keys are exactly those requested.\n"
+  }
+ },
+ "lineage": {
+  "note": "Decision lineage for the Harness\u00b2 field test, 19 Oct 2026 (IST). Types: ask = user request, decision, finding, bug, amendment (to PREREG.md).",
+  "events": [
+   {
+    "t": "00:15",
+    "type": "ask",
+    "title": "Test Harness\u00b2 hands-on",
+    "what": "Understand google-research/harness2, take cues from a demo video, research with Perplexity and Context7, preflight, design and run benchmarks, explain it with archify and an HTML report, with Claude Code use cases.",
+    "led_to": [
+     "research",
+     "preflight"
+    ]
+   },
+   {
+    "t": "00:16",
+    "type": "ask",
+    "id": "autoresearch",
+    "title": "Compare with Karpathy's autoresearch",
+    "what": "Added a grader-in-the-loop keep-if-better baseline on the same harness surface.",
+    "led_to": [
+     "ar-baseline"
+    ]
+   },
+   {
+    "t": "00:17",
+    "type": "finding",
+    "id": "research",
+    "title": "Context7 has no harness2 docs",
+    "what": "Context7 indexes unrelated 'harness' libraries only, so the cloned repo became the primary reference. Context7 was used later for Google ADK (it surfaced the ollama_chat gotcha).",
+    "evidence": "resolve-library-id results"
+   },
+   {
+    "t": "00:19",
+    "type": "finding",
+    "title": "Cost model: 4k rollouts + 3k improver stages per task",
+    "what": "Read from recursion.py. The improver already supports a claude_cli channel, which made a Claude-driven test possible.",
+    "evidence": "repo/harness2/core/recursion.py docstring; proposer.py"
+   },
+   {
+    "t": "00:20",
+    "type": "decision",
+    "id": "preflight",
+    "title": "No official benchmarks: the only GCP project is production",
+    "what": "LAB, JobBench and WorkBuddy need Vertex Gemini. The only gcloud project is a production project, so it stayed untouched. We built our own benchmark instead.",
+    "why": "Never bill or touch a production project for experiments.",
+    "evidence": "gcloud config get project"
+   },
+   {
+    "t": "00:20",
+    "type": "ask",
+    "title": "Use a custom agent, no secret accounts",
+    "what": "Build an ADK-based agent if Claude Code can't be used; find any way to test.",
+    "led_to": [
+     "adk"
+    ]
+   },
+   {
+    "t": "00:22",
+    "type": "decision",
+    "id": "adk",
+    "title": "Second executor: Google ADK on local qwen3:8b",
+    "what": "Ollama from the official GitHub release, no account. ADK via LiteLLM with the ollama_chat provider (from Context7). This mirrors the video's 'mid-tier model plus a better harness' claim.",
+    "why": "No API keys or extra accounts; a weak model gives headroom."
+   },
+   {
+    "t": "00:24",
+    "type": "finding",
+    "title": "Nested Claude runs loaded the user's 60+ MCP servers and hooks",
+    "what": "Isolated with --setting-sources project plus an empty strict MCP config: 31k-token context, about 3 s startup, no user hooks.",
+    "evidence": "canary test PELICAN-42"
+   },
+   {
+    "t": "00:25",
+    "type": "ask",
+    "title": "Adversarial review and security review before the benchmark",
+    "led_to": [
+     "reviews"
+    ]
+   },
+   {
+    "t": "00:31",
+    "type": "finding",
+    "id": "ceiling",
+    "title": "Claude Code + Haiku 5.5 at ceiling (18/18)",
+    "what": "The first easy-only benchmark leaves no headroom, and the ADK runs crashed on a missing mcp module.",
+    "evidence": "experiments/cc/pilot.json"
+   },
+   {
+    "t": "00:41",
+    "type": "ask",
+    "title": "Add difficulty tiers, SWE-style tasks",
+    "led_to": [
+     "tiers"
+    ]
+   },
+   {
+    "t": "00:45",
+    "type": "decision",
+    "id": "tiers",
+    "title": "Rebuild as 3 domains x 3 tiers",
+    "what": "data, ops and swe at easy, medium and hard. Hard tiers hide rules in POLICY.md or RUNBOOK.md; SWE tiers are multi-file repos with hidden regression tests.",
+    "evidence": "hpb/bench.py, hpb/tiers.py"
+   },
+   {
+    "t": "00:43",
+    "type": "finding",
+    "title": "qwen3 at 18 tok/s with thinking on",
+    "what": "Flash attention gave 27 tok/s. Later we found the /no_think tag is ignored via LiteLLM; only think=False works.",
+    "evidence": "serve.log timings"
+   },
+   {
+    "t": "00:50",
+    "type": "finding",
+    "title": "Still at ceiling with tiers: CC 27/27",
+    "what": "Leak audit clean (no grader reads). CC becomes the negative control; ADK carries the headroom question.",
+    "evidence": "pilot streams"
+   },
+   {
+    "t": "00:53",
+    "type": "decision",
+    "id": "reviews",
+    "title": "zen has no model keys: run the three review stances as Claude subagents",
+    "what": "Critical, supportive and neutral reviewers read the code directly.",
+    "why": "Keep the skill's method when its tool is unavailable."
+   },
+   {
+    "t": "00:58",
+    "type": "bug",
+    "title": "Surface name 'hpb' disables every Harness\u00b2 edit",
+    "what": "harness2's prompt builder only knows opencode and codex. Every proposal would raise and fall back to base, so the result would silently read 'Harness\u00b2 = base'.",
+    "found_by": "supportive reviewer"
+   },
+   {
+    "t": "01:00",
+    "type": "bug",
+    "title": "Agents could read graders and answers on disk",
+    "what": "Workspaces sat next to hpb/ and to earlier pilot answers; trajectories leaked absolute paths.",
+    "found_by": "critical reviewer",
+    "led_to": [
+     "sandbox"
+    ]
+   },
+   {
+    "t": "00:55",
+    "type": "bug",
+    "title": "Secrets in agent environment",
+    "what": "GITHUB_TOKEN and three API keys were passed to claude --dangerously-skip-permissions.",
+    "found_by": "security review",
+    "led_to": [
+     "sandbox"
+    ]
+   },
+   {
+    "t": "01:02",
+    "type": "bug",
+    "title": "Impossible data and grader flaws",
+    "what": "Refunds dated before settlement, chargebacks before capture, a test-customer rule that never fired, a forgeable stdout grader, valid_json counted as credit, an out-of-scope hidden test.",
+    "found_by": "neutral and critical reviewers"
+   },
+   {
+    "t": "01:10",
+    "type": "decision",
+    "id": "sandbox",
+    "title": "macOS sandbox-exec plus env allow-list for every model process",
+    "what": "Deny reads of graders, experiments and credential dirs; deny writes outside the workspace; no web tools; no session persistence.",
+    "evidence": "hpb/adapters.py sandboxed()"
+   },
+   {
+    "t": "01:20",
+    "type": "decision",
+    "title": "Pre-register endpoints and the leak rule",
+    "what": "Primary endpoint per executor, bootstrap + sign-flip, failure handling, and 'any instance literal in a harness voids the cell'.",
+    "evidence": "experiments/PREREG.md"
+   },
+   {
+    "t": "01:27",
+    "type": "amendment",
+    "title": "A1: ADK aborted runs on tool exceptions",
+    "what": "Tools now return ERROR text as an observation; ADK arm discarded and relaunched.",
+    "evidence": "PREREG.md amendment 1"
+   },
+   {
+    "t": "01:33",
+    "type": "amendment",
+    "title": "A2: host load ~200, fewer ADK re-rolls",
+    "what": "EDR, syspolicyd and Spotlight saturated the CPU. ADK re-rolls cut to R=3/R=2; base kept at R=4.",
+    "evidence": "PREREG.md amendment 2"
+   },
+   {
+    "t": "02:00",
+    "type": "amendment",
+    "title": "A3: drop ADK sequential k=2",
+    "what": "Freed local GPU time for the primary comparison.",
+    "evidence": "PREREG.md amendment 3"
+   },
+   {
+    "t": "02:15",
+    "type": "bug",
+    "id": "auth",
+    "title": "Login failures counted as agent failures",
+    "what": "Concurrent CLI starts returned 'Not logged in' with subtype=success (11 of 237 rollouts, 4 improver sessions), producing a fake +0.11 Harness\u00b2 gain on Claude Code. Exposed by an A/A check: autoresearch's frozen harness equalled base yet scored higher.",
+    "found_by": "our leak audit"
+   },
+   {
+    "t": "02:25",
+    "type": "amendment",
+    "title": "A4: classify auth failures as infra, re-run the CC arm",
+    "what": "Whole CC arm re-run from clean derived state; the improver retries auth with backoff.",
+    "evidence": "PREREG.md amendment 4"
+   },
+   {
+    "t": "02:45",
+    "type": "finding",
+    "title": "Clean CC result: Harness\u00b2 keeps base on 9/9",
+    "what": "Every condition scores 1.0. Harness\u00b2 proposes edits, then composes back to the base harness. Negative control passed.",
+    "evidence": "experiments/cc/eval/report.json"
+   },
+   {
+    "t": "03:48",
+    "type": "finding",
+    "id": "adk-result",
+    "title": "ADK: +0.74 in-task, +0.81 on fresh data, +0.02 transfer",
+    "what": "Weak model goes from mostly failing to 3/3 on 6 of 8 tasks; gains hold on unseen instances; no carry-over to harder tiers.",
+    "evidence": "experiments/adk/eval/report.json"
+   },
+   {
+    "t": "03:55",
+    "type": "finding",
+    "id": "leak",
+    "title": "The improver wrote answers into the harness",
+    "what": "Ops skills recorded the exact expected values as 'workspace facts'; data skills carried instance ids. 6 of 8 in-task cells void under the pre-registered rule; on the 2 clean tasks the gain is +0.33. harness2's guard checks grader verdicts, not computed answers.",
+    "led_to": [
+     "leakguard"
+    ]
+   },
+   {
+    "t": "04:05",
+    "type": "decision",
+    "title": "Report all three numbers, not the flattering one",
+    "what": "As-run, strict (voided cells removed), and fresh-seed variants. Variants cannot leak by construction."
+   },
+   {
+    "t": "10:20",
+    "type": "decision",
+    "id": "leakguard",
+    "title": "Follow-up: leak guard plus hook component, ADK rerun",
+    "what": "validate_tree rejects harnesses with the task's answers or ids; a hook forces output/ before finishing (the data-e-v failure printed the right answer instead of writing it)."
+   },
+   {
+    "t": "10:28",
+    "type": "ask",
+    "title": "Compare with a second video run",
+    "what": "A Gemini 3.5 Flash run on a LAB legal task went from 20/55 to 22/55, with one model doing job, fix and grade.",
+    "led_to": [
+     "gaps"
+    ]
+   },
+   {
+    "t": "10:29",
+    "type": "finding",
+    "id": "gaps",
+    "title": "Four gaps: self-improvement, no-probe ablation, library on/off, official tasks",
+    "what": "Our improver was stronger than the agents; we never tested the paper's 'probe before adopting' claim, never isolated the library, and never ran Google's own tasks. Two follow-up sessions opened."
+   },
+   {
+    "t": "11:43",
+    "type": "finding",
+    "id": "guard-result",
+    "title": "Leak guard works: voided in-task cells 6/8 \u2192 0/9",
+    "what": "With guard v1 plus the c8 Stop hook, ADK in-task +0.65 (8 up, 0 down) and fresh-seed variants +0.97 (6/6 up). The one remaining flag was a policy constant ($15.00) colliding with a count.",
+    "evidence": "experiments/leak-guard-results.md"
+   },
+   {
+    "t": "12:00",
+    "type": "bug",
+    "title": "Docker Desktop woken by a status check; load average 409",
+    "what": "A `docker ps` run to answer 'are you using Docker?' started Docker Desktop's VM (224% CPU). Together with about 16 parallel Haiku rollouts, user hooks timed out. Quit Docker; asked both sessions to cap concurrency at 4.",
+    "found_by": "hook timeouts"
+   },
+   {
+    "t": "12:15",
+    "type": "decision",
+    "title": "Leak prevention in depth (guard v2 + audit + held-out headline)",
+    "what": "hpb/leakguard.py adds data, entity and verbatim checks; a read-only audit covers every arm; the LAB session was asked to wire it in, since its guard only blocked fact phrasing; fresh/held-out results become the headline.",
+    "evidence": "PREREG.md amendment 6"
+   },
+   {
+    "t": "13:20",
+    "type": "bug",
+    "title": "git init opened a new leak path: .git readable from the sandbox",
+    "what": "Committing the project put the graders (hpb/bench.py) and results into .git, which the sandbox did not deny. Agents do run `git log` in their workspaces. Exposure window 12:28\u201313:20. No exec stream shows git show, cat-file or a grep of graders. LAB rubric text was never committed (eval rows hold criterion ids and pass/fail only). Fix: deny ROOT/.git in sandboxed().",
+    "found_by": "ablation session audit"
+   },
+   {
+    "t": "15:00",
+    "type": "bug",
+    "title": "Claude CLI OAuth expired machine-wide; a second classifier gap",
+    "what": "Every claude -p call returned 'Failed to authenticate: OAuth session expired'. That string was not in the infra list, so rollouts would have scored as agent failures. Added to AUTH_FAIL; no recorded result was affected. LAB paused.",
+    "evidence": "commit b99175f"
+   },
+   {
+    "t": "18:23",
+    "type": "ask",
+    "title": "Approve the full held-out LAB matrix at R=3 (~$144)",
+    "what": "After a re-login. The first status check still read loggedIn false from this app's environment; a second check confirmed true, and an isolated nested run returned PONG before anything was spent."
+   },
+   {
+    "t": "20:50",
+    "type": "finding",
+    "id": "lab-final",
+    "title": "LAB final: held-out +6.9 pts, Haiku self-improver \u22124.1",
+    "what": "Adopted Sonnet harnesses on matters their improver never saw: +0.069 over 12 cells (+0.059 without the leaky one). Concentrated in redline-to-redline transfer and partly format alignment with the judge's reader. Haiku improving itself lost ground (demo task 33.3 \u2192 23.3 of 55). Both improvers wrote answer keys without seeing the rubric. Spend since approval about $126.",
+    "evidence": "experiments/lab/RESULTS.md (f983b68)"
+   }
+  ],
+  "learnings": {
+   "harness2": [
+    "It helps where there is headroom and does nothing where there is none, and it knows the difference: it kept the base harness on all 9 Claude Code tasks.",
+    "Its edits are process: a domain skill with a tested script, a trigger line, and rules like 'write the deliverable early'. On a weak model that is the whole gap.",
+    "Gains are per task family. A harness tuned on an easy task did not transfer to medium or hard ones; plan one adaptation per workflow.",
+    "It memorises when it can. Verifier-free does not mean leak-free: audit every adopted harness for answers and instance ids.",
+    "Some failures need enforcement, not instructions: a model that computes the answer but forgets to write it needs a hook.",
+    "On rubric-graded professional work the gain is small and partly format: held-out LAB gains came mostly from teaching the deliverable shape the judge reads.",
+    "A small model improving its own harness can make it worse: Haiku as its own improver lost 10 of 55 checks on the demo legal task."
+   ],
+   "benchmarking": [
+    "Calibrate first. Two pilots at ceiling saved hours of meaningless runs.",
+    "Run an A/A check. It is the only reason we caught a fake +0.11 gain.",
+    "Classify infrastructure failures by content, not status codes. 'Not logged in' arrived as success.",
+    "Review before running. Three adversarial reviewers caught a silent blocker and seven grader bugs before any treatment result existed.",
+    "Pre-register and amend in public. Four amendments, each written before the affected results.",
+    "Sandbox model-driven processes: they will look around (190 blocked 'ls ..'), and the environment held real tokens.",
+    "Verifier-free improvement needs a train/test split by instance: score a harness on data its improver never saw, and treat in-task gains as test-time adaptation.",
+    "Diagnostic commands have side effects: `docker ps` started a VM that took two cores on a saturated host.",
+    "Every new artifact is a new leak path: version control put the graders into .git, readable from agent workspaces. Re-check the sandbox after any change to the project layout.",
+    "Verify credentials from the exact environment the runs use: a login that worked in one terminal still read 'not logged in' from the app's processes."
+   ],
+   "claude_code": [
+    "Haiku 5.5 inside Claude Code already solved every tier here; measure before optimising a harness.",
+    "Harness\u00b2 components map onto CLAUDE.md, .claude/skills, scripts, .claude/agents and hooks.",
+    "Nested claude -p needs isolation flags, an env allow-list and staggered starts to stay reproducible."
+   ]
+  }
+ },
+ "prereg": "# HPB \u00d7 Harness\u00b2 \u2014 pre-registration (written 2026-10-19 01:20 IST, before any treatment run)\n\nTask data hash: 8aec868f593e. Base-harness pilots were run only for calibration, on an earlier task version.\n\n## Arms\n- **Executors**\n  - ADK + qwen3:8b (local; primary arm, chosen because it has headroom).\n  - Claude Code + Haiku 5.5 (negative control: at ceiling in the pilot).\n- **Improver** (all methods): Claude Sonnet 5.5, effort high, through the harness2 `claude_cli` channel, sandboxed.\n- **Conditions**\n  - `base`: one-sentence system prompt.\n  - `h2`: Harness\u00b2 parallel k=1, unmodified core, domains in order easy\u2192medium\u2192hard, library on.\n  - `h2seq`: Harness\u00b2 sequential k=2, `data` domain only.\n  - `ar`: Karpathy-style autoresearch, 4 iterations on the domain's easy task with the real grader. An edit is kept only if its single rollout strictly beats the incumbent. The final harness is frozen.\n\n## Measurements (fresh rollouts, unique run ids; nothing reused from the improvement runs)\n- `base`: R=4 per task (ADK); R=3 (CC).\n- `h2` in-task: the harness adopted for task t, re-rolled R times on t.\n- `h2` variant: the same harness on t's fresh-seed variant (data/ops only), R=2. This is the memorisation check.\n- `h2` transfer: the harness adopted on the domain's easy task, re-rolled on that domain's medium and hard tasks, R times.\n- `ar`: the frozen harness re-rolled on easy (in-sample), medium and hard (transfer), and on variants.\n\n## Endpoints\n- **Primary (per executor):** the paired change in mean partial score, `h2` in-task minus `base`, averaged over the 9 tasks.\n- **Secondary:**\n  - Transfer change versus `base` on medium and hard tasks (h2-transfer, ar-transfer).\n  - all-pass@R and pass^k.\n  - Variant change (memorisation).\n  - Cost per point gained.\n- **Statistics**\n  - Hierarchical bootstrap: resample tasks, then rollouts; 10k draws; 95% CI.\n  - Exact sign-flip permutation test over the per-task deltas.\n  - Results are descriptive at n=9. No per-domain or per-tier inference.\n\n## Failure handling\n- Timeouts and step-limit exhaustion are agent failures and score 0.\n- Plumbing failures (CLI or model-server errors) are retried up to 3 times. They are reported, never scored.\n\n## Leak audit\n- Grep adopted harnesses for instance literals (expected numbers, ids).\n- Grep executor trajectories and improver tool streams for grader paths and for \"Operation not permitted\" (blocked escape attempts).\n- Any hit voids the affected cell.\n\n## Amendment 1 (01:27 IST, before any treatment result)\nAt launch, ADK aborted whole runs when a tool raised. \"No such directory\" was now an error,\nand it killed the run instead of reaching the model. Every ADK tool now returns\n`ERROR: ...` text as its observation, as standard agent frameworks do. All ADK results were\ndiscarded and the ADK arm relaunched. The CC arm was unaffected.\n\n## Amendment 2 (01:33 IST, before any treatment result)\nThe host is CPU-saturated (load avg about 200 from EDR, syspolicyd and Spotlight). ADK rollouts\nthat use all 40 steps take 5-15 min. ADK re-roll counts after the Harness2 and autoresearch\nruns drop to R=3 (in-task, transfer, autoresearch) and R=2 (variants). Base stays at R=4.\nThe CC arm keeps R=3 throughout.\n\n## Amendment 3 (02:00 IST, before any ADK treatment result)\nThe ADK sequential k=2 arm is dropped to free local-GPU capacity for the primary ADK\ncomparison. Sequential k=2 is reported for the CC arm only.\n\n## Amendment 4 (02:25 IST)\nFound: under concurrent startup, the Claude CLI sometimes returned \"Not logged in \u00b7 Please run\n/login\" with subtype=success. It hit 11/237 CC executor rollouts (including the first base\nrollout of every CC Harness\u00b2 domain) and 4 improver sessions. The infra classifier missed it.\nFix: auth failures are now infra (executor rollouts are re-run, never scored) and improver\nsessions retry with backoff. All CC-arm derived results were discarded and the CC arm was re-run.\nCached CC rollouts are reused only when their harness fingerprint matches and they are not\nauth failures. ADK: the improver never hit this (0/14 sessions). The ADK Harness2 and\nautoresearch processes were restarted on the fixed code and resume from cache.\n\n## Amendment 5 (2026-10-19 12:05 IST): ablations, written before any ablation result\nRoot: `experiments/ablations/`. Driver: `hpb/ablate.py`, which imports harness2 core and does not modify it. Tables: `hpb/ablations.py` writes them to `experiments/ablations/RESULTS.md`. Every ablation uses Harness\u00b2 parallel k=1 with the leak guard and c8 hook from study 2 (`experiments/leak-guard-results.md`).\n\n**1. Self-improvement (CC arm).** Study 1 used Sonnet 5.5 as the improver for Haiku 5.5, so its gains may be distillation. CC is at ceiling with 40 turns.\n- **Turn cap.** In a pilot (2 base rollouts per task at caps 3/4/5, roots `cc-pilot-t*`, not reused), the mean was 0.37/0.50/0.44, so `HPB_CC_MAX_TURNS=4` was fixed.\n- **Runs at the cap.** Base R=4 (variants R=2) in `cc-sonnet`. Two Harness\u00b2 runs: `cc-sonnet` (Sonnet improver) and `cc-haiku` (`HPB_IMPROVER=claude-haiku-5-5`). Both share the same 9 `base1` evidence rollouts and the same base eval rows.\n- **Eval.** In-task, variant and transfer, R=4 (variants R=2).\n- **Endpoints.** Each improver's in-task \u0394 vs base, and Haiku minus Sonnet (in-task).\n- **ADK.** No ADK self-improvement arm. harness2's only non-Claude channel is OpenCode, which is not installed. A qwen3:8b improver would also add about 27 multi-step sessions on the shared 8 Ollama slots.\n\n**2. No-probe (ADK).** `ablate.py --no-probe` runs the same INV and DOM stages, `recursion._run_stage`, with the library on. It then composes `agg1` from the two proposals with no probe rollouts.\n- The aggregate prompt's sentence \"Each candidate was rolled out ONCE and you have that rollout.\" is replaced by a statement that no candidate was rolled out.\n- `agg1` is rolled and adopted as usual. Budget: R=2, P=3 per task.\n- Base rollouts and base eval rows are shared with `experiments/adk-guard`.\n- **Comparison.** In-task R=3 vs base, and vs adk-guard parallel k=1 in-task (no-probe minus probe), over all 9 tasks.\n\n**3. Library off (ADK).** `ablate.py --no-library --tiers medium hard`: each medium and hard task runs as a one-task stream with a fresh, empty library. Easy tasks already see an empty library in the library-on run.\n- Base is shared with adk-guard.\n- **Comparison.** In-task R=3 vs base, and vs adk-guard in-task (library off minus on), over the 6 medium and hard tasks.\n\n**Statistics and leak rule.** Unchanged (eval.py, now via `hpb/stats.py`).\n\n**Added: check-level flips.** For each task, a grader check counts as fail\u2192pass (or pass\u2192fail) when its pass rate over the rollouts rises (or falls) by \u22650.5 between reference and treatment. It is reported in `eval.py report` and in RESULTS.md.\n\n**Re-rolls.** ADK ablation eval rolls in-task only (`eval.py --only intask`) to fit the shared GPU.\n\n## Amendment 6 (12:20 IST, before any ablation or LAB treatment result is read)\nLeak prevention, defence in depth:\n1. Guard v1 (leak-guard session): reject the task's own answers or ids and \"workspace fact\" blocks at adoption.\n2. Guard v2 (hpb/leakguard.py, HPB_LEAKGUARD=2): also rejects distinctive numbers or rare ids from the instance data, verbatim 8-word passages, and 3+ case-specific names. Restated instructions are allowed. On by default for new arms; in-flight arms keep v1 for consistency.\n3. Post-hoc audit of every adopted harness with v2 in every arm (flags study 1 at 7/8, study 2 at 0/9).\n4. Headline metric: fresh-seed or held-out-task performance, which is leak-free by construction. The in-task number is reported as test-time adaptation.\n\n## Amendment 7 (2026-10-19 13:40 IST): post-hoc additions to the ablations, made after results were seen\n- **ITT rows.** Some arms adopted nothing on some tasks, because harness2's k=1 selection has no base fallback when the final delivers nothing. For those tasks, `eval.py --only itt` re-rolls the non-adopted final, and RESULTS.md reports these ITT rows next to the adopted-only primary rows. They were added after the non-adoptions were seen.\n- **Exposure check.** From 12:28 to 13:20 IST `.git` was readable inside the sandbox; it is now denied in `adapters.sandboxed`. A cell would be voided if its rollout read repo content through git. The scan found none.\n- **Missing meta.** A rollout whose agent died without writing meta is now infra, not an agent failure.\n"
+}

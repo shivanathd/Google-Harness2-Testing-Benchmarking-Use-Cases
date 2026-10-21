@@ -1,0 +1,205 @@
+--- current/scripts/traffic_report.py
++++ inv1/scripts/traffic_report.py
+@@ -0,0 +1,74 @@
++#!/usr/bin/env python3
++"""Per-service traffic stats from JSONL access logs (plain or .gz).
++
++usage: python3 scripts/traffic_report.py START END [--logs logs] [--out output/answer.json]
++  START/END: ISO timestamps with offset, e.g. 2026-10-04T06:00:00+00:00 (END exclusive;
++  a bare 'Z' or no offset is read as UTC).
++Writes {service: {requests, error_rate, p95_ms}} and prints per-service diagnostics
++(skipped lines, excluded health probes, latency units used) to stderr.
++Exit 1 if no log files are found or a service ends up with zero requests.
++"""
++import argparse, glob, gzip, json, math, os, sys
++from datetime import datetime, timezone
++
++def parse_ts(s):
++    d = datetime.fromisoformat(str(s).replace("Z", "+00:00"))
++    return d.replace(tzinfo=timezone.utc) if d.tzinfo is None else d
++
++def lat_ms(r):
++    # per-record unit: latency_ms is ms, latency_s is seconds (billing after its schema change)
++    if r.get("latency_ms") is not None:
++        return float(r["latency_ms"]), "ms"
++    if r.get("latency_s") is not None:
++        return float(r["latency_s"]) * 1000.0, "s"
++    return None, None
++
++def main():
++    ap = argparse.ArgumentParser()
++    ap.add_argument("start"); ap.add_argument("end")
++    ap.add_argument("--logs", default="logs"); ap.add_argument("--out", default="output/answer.json")
++    ap.add_argument("--exclude-route", default="/healthz")
++    a = ap.parse_args()
++    t0, t1 = parse_ts(a.start), parse_ts(a.end)
++    files = sorted(glob.glob(os.path.join(a.logs, "*.jsonl")) + glob.glob(os.path.join(a.logs, "*.jsonl.gz")))
++    if not files:
++        sys.exit("no *.jsonl / *.jsonl.gz files in " + a.logs)
++    out = {}
++    for f in files:
++        name = os.path.basename(f).split(".jsonl")[0]
++        op = gzip.open if f.endswith(".gz") else open
++        bad = health = outside = 0
++        lats, errs, units = [], 0, {}
++        with op(f, "rt", encoding="utf-8", errors="replace") as fh:
++            for line in fh:
++                line = line.strip()
++                if not line:
++                    continue
++                try:
++                    r = json.loads(line)
++                    ts = parse_ts(r["ts"]); status = int(r["status"]); route = str(r["route"])
++                    ms, u = lat_ms(r)
++                    if not isinstance(r, dict) or ms is None:
++                        raise ValueError
++                except Exception:
++                    bad += 1; continue
++                if route.split("?")[0] == a.exclude_route:
++                    health += 1; continue
++                if not (t0 <= ts < t1):
++                    outside += 1; continue
++                lats.append(round(ms, 6)); units[u] = units.get(u, 0) + 1
++                errs += status >= 500
++        n = len(lats)
++        print(f"{name}: kept={n} errors={errs} unparseable={bad} healthz={health} out_of_window={outside} units={units}", file=sys.stderr)
++        if n == 0:
++            sys.exit(f"{name}: zero requests in window - check window/offsets")
++        lats.sort()
++        p95 = lats[math.ceil(0.95 * n) - 1]  # nearest rank
++        out[name] = {"requests": n, "error_rate": round(errs / n, 4), "p95_ms": int(round(p95))}
++    os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
++    with open(a.out, "w") as fh:
++        json.dump(out, fh, indent=1)
++    print(json.dumps(out))
++
++if __name__ == "__main__":
++    main()
+--- current/skills/log-traffic-report/SKILL.md
++++ inv1/skills/log-traffic-report/SKILL.md
+@@ -1,29 +0,0 @@
+----
+-name: log-traffic-report
+-description: Compute per-service request count, error rate and p95 latency for a UTC time window from JSONL access logs (mixed timezone offsets, gzip, truncated lines, healthz probe, latency unit change), following the fleet RUNBOOK.
+----
+-
+-# Service-log traffic statistics
+-
+-Controlling source: `RUNBOOK.md` in the workspace (re-read it; its rules override this file if they differ).
+-The task's window is in UTC and is start-inclusive, end-exclusive.
+-
+-## Rules to apply to every line (check each before finishing)
+-1. Parse each line as JSON; skip lines that fail (shipper truncation). Count them per file; do not guess the missing fields.
+-2. Timestamps carry mixed offsets within ONE file (in this workspace: -03:00, +00:00, +01:00 in all three services, and files are not time-sorted). Convert every `ts` to UTC before the window test. Never filter on the local clock text or on file position.
+-3. Drop route `/healthz` (any status) before computing requests, errors and percentiles.
+-4. requests = remaining in-window lines, all statuses (2xx, 3xx, 4xx, 5xx). errors = status >= 500 only; 429/404 are not errors. error_rate = errors / requests, round to 4 decimals.
+-5. Latency in ms. Records with `latency_s` are seconds: multiply by 1000. Decide per record by which field it has, not by file name (in this workspace billing has both fields; `latency_s` appears only from 09:00 UTC on, so the window mixes both units; other services only have `latency_ms`). Never feed raw seconds into the percentile.
+-6. p95 nearest-rank: sort ascending, rank = ceil(0.95 * n) (1-based), take that element, output as integer. No interpolation. Compute ceil with integer arithmetic to avoid float error.
+-7. Gzip logs (`billing.jsonl.gz` in this workspace) are read as text via gzip; `logs/billing.jsonl` does not exist.
+-
+-## How
+-`read_file` output is capped (≈65 lines, cut mid-line) so the logs cannot be hand-tallied from it; re-reading the same range returns the same text. Run the helper instead:
+-
+-    python3 skills/log-traffic-report/scripts/traffic_stats.py logs 2026-10-04T06:00:00+00:00 2026-10-04T12:00:00+00:00 output/answer.json
+-
+-(adjust window to the task). It prints per-service audit counts to stderr (unparseable, outside window, healthz excluded). If no shell is available, page with `start_line`/small `max_lines` and tally with explicit UTC conversion; never submit estimates.
+-
+-## Before finishing
+-- answer.json has exactly the keys the task names, `requests` int, `error_rate` float (4 dp), `p95_ms` int, for every service in logs/ (gateway, search, billing here).
+-- Sanity: requests + healthz + outside-window + unparseable = total lines per file; error_rate in [0,1]; p95_ms lies in a plausible ms range (hundreds, not 0.4 — that would be unconverted seconds).
+--- current/skills/log-traffic-report/scripts/traffic_stats.py
++++ inv1/skills/log-traffic-report/scripts/traffic_stats.py
+@@ -1,76 +0,0 @@
+-#!/usr/bin/env python3
+-"""Per-service requests / error_rate / p95_ms from JSONL access logs.
+-
+-usage: python3 skills/log-traffic-report/scripts/traffic_stats.py LOGDIR START END [OUT_JSON]
+-  START/END are UTC ISO instants, e.g. 2026-10-04T06:00:00+00:00 (END exclusive).
+-Reads LOGDIR/*.jsonl and *.jsonl.gz. Prints a per-service audit line to stderr and the
+-answer dict to stdout (also written to OUT_JSON if given).
+-"""
+-import glob, gzip, json, math, os, sys
+-from datetime import datetime, timezone
+-
+-
+-def parse_utc(s):
+-    d = datetime.fromisoformat(s.replace("Z", "+00:00"))
+-    return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
+-
+-
+-def latency_ms(rec):
+-    if "latency_ms" in rec:
+-        return float(rec["latency_ms"])
+-    if "latency_s" in rec:
+-        return round(float(rec["latency_s"]) * 1000, 3)
+-    return None
+-
+-
+-def main():
+-    logdir, start, end = sys.argv[1], parse_utc(sys.argv[2]), parse_utc(sys.argv[3])
+-    out = {}
+-    files = sorted(glob.glob(os.path.join(logdir, "*.jsonl")) + glob.glob(os.path.join(logdir, "*.jsonl.gz")))
+-    for path in files:
+-        svc = os.path.basename(path).split(".jsonl")[0]
+-        opener = gzip.open if path.endswith(".gz") else open
+-        bad = health = outside = 0
+-        rows = []
+-        with opener(path, "rt") as f:
+-            for line in f:
+-                if not line.strip():
+-                    continue
+-                try:
+-                    r = json.loads(line)
+-                    t = parse_utc(r["ts"]).astimezone(timezone.utc)
+-                    st = int(r["status"])
+-                    lat = latency_ms(r)
+-                    route = r["route"]
+-                    if lat is None:
+-                        raise ValueError("no latency")
+-                except (ValueError, KeyError, TypeError):
+-                    bad += 1
+-                    continue
+-                if not (start <= t < end):
+-                    outside += 1
+-                    continue
+-                if route == "/healthz":
+-                    health += 1
+-                    continue
+-                rows.append((st, lat))
+-        n = len(rows)
+-        errs = sum(1 for s, _ in rows if s >= 500)
+-        lats = sorted(l for _, l in rows)
+-        k = -(-95 * n // 100)  # nearest rank: ceil(0.95*n), integer arithmetic
+-        p95 = lats[k - 1] if n else None
+-        out[svc] = {"requests": n,
+-                    "error_rate": round(errs / n, 4) if n else None,
+-                    "p95_ms": int(round(p95)) if n else None}
+-        print(f"{svc}: file={path} unparseable_skipped={bad} outside_window={outside} "
+-              f"healthz_excluded={health} requests={n} errors={errs} rank={k} p95_raw={p95}",
+-              file=sys.stderr)
+-    text = json.dumps(out)
+-    if len(sys.argv) > 4:
+-        os.makedirs(os.path.dirname(sys.argv[4]) or ".", exist_ok=True)
+-        with open(sys.argv[4], "w") as f:
+-            f.write(text)
+-    print(text)
+-
+-
+-main()
+--- current/systemprompt.md
++++ inv1/systemprompt.md
+@@ -1,3 +1,13 @@
+ You are an assistant that completes tasks inside a workspace directory. Read the task, do the work, and write the requested deliverables under output/.
+ 
+-When the task is to compute traffic, error-rate or latency statistics from service access logs (JSONL, any compression, time window), load the `log-traffic-report` skill before doing anything else, and write answer.json early rather than re-reading files.
++
++## Working procedure (log / traffic analysis tasks)
++
++- Tool budget is small (a prior run died at the 40-LLM-call limit with no output after re-reading the same log files ~13 times and never opening RUNBOOK.md). Read each file at most once; never re-list or re-read to "check again".
++- Call 1: read RUNBOOK.md (and any other rules file) before touching data. Its rules (excluded routes, what counts as an error, truncated lines, unit/schema changes mid-log) override your assumptions.
++- Compressed logs (`*.jsonl.gz`): the name you see in list_files is the real path; `read_file` on the name without `.gz` fails with FileNotFoundError, and read_file cannot decompress. Do not retry; use a shell command (`zcat`/python) instead.
++- Do the counting with code, not by eye. If a shell is available, run `python3 scripts/traffic_report.py START END` (ISO timestamps with offset; END exclusive; window taken from the task, e.g. `YYYY-MM-DDTHH:MM:SS+00:00 YYYY-MM-DDTHH:MM:SS+00:00`). It handles gzip, truncated lines, per-line timezone offsets (convert to UTC before windowing), the `/healthz` exclusion, per-record `latency_ms` vs `latency_s` (x1000), status>=500 errors, nearest-rank p95 (ceil(0.95*n)-th smallest), and writes output/answer.json in the task's shape. Read its stderr diagnostics (kept / unparseable / healthz / out_of_window / units) and sanity-check that they match the RUNBOOK; if the runbook has a rule the script does not implement, adjust the script copy, do not hand-count.
++- If no shell exists, read each log once, tally in a single pass, and write output/answer.json no later than call 15; a rough but written answer beats exhausting the budget.
++- Finish by re-reading output/answer.json: valid JSON, exactly the keys/fields the task named, one entry per service file in logs/, numeric values (not strings or formulas).
++
++Checks to re-derive from the data (do not assume): whether timestamps carry mixed offsets and files are unordered; whether each log has truncated lines and /healthz probes (including non-200 ones) to drop; whether any service switches latency field/unit partway through (decide per record by field presence, not per file). Report any such finding in your final message.

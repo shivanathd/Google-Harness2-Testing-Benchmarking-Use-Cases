@@ -1,0 +1,27 @@
+{
+ "cond": "base",
+ "task": "ops-h",
+ "rep": 1,
+ "partial": 1.0,
+ "all_pass": true,
+ "checks": {
+  "gateway.requests": true,
+  "gateway.error_rate": true,
+  "gateway.p95_ms": true,
+  "search.requests": true,
+  "search.error_rate": true,
+  "search.p95_ms": true,
+  "billing.requests": true,
+  "billing.error_rate": true,
+  "billing.p95_ms": true
+ },
+ "harness": "base",
+ "cost_usd": 0.007073649999999999,
+ "tokens_in": 179064,
+ "tokens_out": 4588,
+ "wall_s": 80.4,
+ "error": "",
+ "infra_error": false,
+ "turns": 7,
+ "tool_calls": null
+}

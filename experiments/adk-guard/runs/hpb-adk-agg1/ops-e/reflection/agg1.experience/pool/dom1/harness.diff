@@ -1,0 +1,11 @@
+--- current/skills/log-window-stats/SKILL.md
++++ dom1/skills/log-window-stats/SKILL.md
+@@ -19,7 +19,7 @@
+ ## Calculations
+ - errors = number of qualifying events (not users, not lines).
+ - users = distinct `user=` values among those same events.
+-- top_code = most frequent `code=` among those same events; if the script warns of a tie, re-check the event filter; if the tie is real, pick by the task's stated rule, else say so in the final reply (the file still holds one code).
++- top_code = most frequent `code=` among those same events; check for a tie and report the tie rather than silently picking one if there is one.
+ 
+ ## Check before writing
+ - Run `python3 -I skills/log-window-stats/scripts/log_window_stats.py app.log START_UTC END_UTC ERROR` (START/END as ISO with offset, e.g. YYYY-MM-DDTHH:MM:00+00:00). It prints counts plus every qualifying event line number; spot-check 2-3 boundary-near events by hand-converting their offset.

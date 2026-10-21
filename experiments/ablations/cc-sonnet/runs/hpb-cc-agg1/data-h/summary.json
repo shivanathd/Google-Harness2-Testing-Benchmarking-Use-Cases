@@ -1,0 +1,124 @@
+{
+  "task_id": "data-h",
+  "domain": "data",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-cc-agg1/data-h/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-sonnet/exec/hpb-cc-agg1/data-h/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "data-h",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [
+        "inv1",
+        "dom1",
+        "agg1"
+      ],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.10538940000000001,
+          "cached": false,
+          "notes": "KEEP_BASE. I changed no files in `context/harness/`.\n\n- **What the run did:** base1 is the only rollout. It read POLICY.md and all four CSVs in two commands, then wrote one short Decimal script. The script gave 9 transactions, 3 chargebacks and a net of 5072.12. It then wrote `output/answer.json` as `{\"net_usd\": 5072.12, \"transactions\": 9, \"chargebacks\": 3}`. The agent did not reopen that file after writing it. The Write call confirmed creation, and I checked the contents in `deliverables/base1`.\n\n- **My re-derivation from the source CSVs:** I got the same counts and net.\n  - **Late-August captures:** ch_000 and ch_028 convert to UTC dates of Aug 31, so neither counts as September revenue. ch_000's September chargeback (cb_2) is still booked in September, with its reversal and fee.\n  - **Test customer:** cb_5 (ch_022, customer C09) is excluded because C09 is a test customer.\n  - **Test-customer charges:** ch_090 and ch_091 (large C09 charges) are excluded for the same reason.\n  - **UTC conversion:** the script used `astimezone(utc)` on both `captured_at` and `chargeback_at`.\n  - **Minor units:** it divided USD, EUR and INR by 100, left JPY as whole yen, and rounded once at the end.\n\n- **Why no edit:** the run showed no divergence, tool error, budget blow-up or missed deliverable that any text would have changed. There is only one rollout, so nothing to compare against.\n\n- **Library example not copied:** the `data-m` library harness (a reconcile script plus a Stop hook) came from a task where the base run dumped reference tables and never wrote its output. Nothing in base1 resembles that failure. That harness is also hard-coded to transactions, refunds and daily FX columns, which don't match this workspace's charges, chargebacks and monthly FX. Copying it would add always-on cost with no moment in a trajectory behind it.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.059431700000000004,
+          "cached": false,
+          "notes": "KEEP_BASE. I made no edits to the harness.\n\n- **What base1 did:** It read POLICY.md and the four CSVs. It then wrote one Decimal-based script and wrote output/answer.json as `{\"net_usd\": 5072.12, \"transactions\": 9, \"chargebacks\": 3}`.\n- **How I checked it:** I re-derived the answer by hand from the source files. Each rule that could have gone wrong was handled correctly:\n  - **UTC month boundary:** ch_028 (2026-09-01T03:49+05:30) falls on Aug 31 UTC and is excluded. ch_009 (2026-09-30T13:08-05:00) falls on Sep 30 UTC and is included.\n  - **Minor units:** the script divided USD, EUR and INR amounts by 100 and treated JPY as whole yen.\n  - **Test customers:** C09 and C10 are excluded everywhere. That drops ch_022, ch_090, ch_091 and the cb_5 chargeback.\n  - **Chargebacks:** they are booked by `chargeback_at` UTC regardless of charge date. cb_2 reverses ch_000, an August charge, in September. cb_0 and cb_6 reverse ch_002 and ch_023.\n  - **Fees and rounding:** it charged the 15.00 USD fee per chargeback and rounded only the final figure.\n- **Why no change:** The run shows no divergence, no repeated failure and no realised risk. The agent applied every POLICY.md rule correctly without extra guidance. Adding a skill or always-on prose would cost context on every run and change no behaviour.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.0595994,
+          "cached": false,
+          "notes": "kept -> KEEP_BASE, no files in `context/harness/` changed -> base1 is the only base rollout. It read POLICY.md and the four CSVs and wrote one Decimal script. The script handled UTC month boundaries (ch_028 excluded, ch_009 included), minor units, test customers C09/C10, chargebacks booked by `chargeback_at`, the 15.00 USD fee and a single final rounding. It then wrote `output/answer.json` as `{\"net_usd\": 5072.12, \"transactions\": 9, \"chargebacks\": 3}`. The rollout delivered, and both candidate authors independently re-derived the same figures. There is no failure to act on, and 1 rollout cannot show a repeated failure anyway.\ndropped -> inv1 (edit proposal) -> `pool/inv1/harness.diff` is 0 bytes, so it changed nothing, and its decision note says KEEP_BASE. Nothing in base1 gives a moment to motivate an always-on process rule.\ndropped -> dom1 (edit proposal) -> `pool/dom1/harness.diff` is 0 bytes, and its decision note says KEEP_BASE. base1 applied every POLICY.md rule correctly without extra domain text, so no LongTermMEMORY addition is warranted.\ndropped -> library harness `data-m` (reconcile script plus Stop hook) as a template -> it came from a task where the base run never wrote its output, and nothing in base1 resembles that. Its script is also hard-coded to transactions, refunds and daily FX, which don't match this workspace's charges, chargebacks and monthly FX. Copying it would add always-on cost for no evidence-backed gain.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "data-h",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 3,
+        "expected_P": 3,
+        "usd": 0.224421,
+        "rollout_usd": 0.0,
+        "session_usd": 0.224421,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "data-h",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-cc-agg1/data-h/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.0713608,
+      "experience": {},
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-sonnet/exec/hpb-cc-agg1/data-h/agg1",
+      "chosen_tree_is_base": true,
+      "harness_fingerprint": "f4ac612e934c8767"
+    }
+  },
+  "errors": []
+}

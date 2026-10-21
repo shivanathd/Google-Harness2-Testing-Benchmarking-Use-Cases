@@ -1,0 +1,21 @@
+{
+ "cond": "base",
+ "task": "data-h-v",
+ "rep": 2,
+ "partial": 1.0,
+ "all_pass": true,
+ "checks": {
+  "net_usd": true,
+  "transactions": true,
+  "chargebacks": true
+ },
+ "harness": "base",
+ "cost_usd": 0.0081449,
+ "tokens_in": 103476,
+ "tokens_out": 6992,
+ "wall_s": 86.4,
+ "error": "error_max_turns",
+ "infra_error": false,
+ "turns": 5,
+ "tool_calls": null
+}

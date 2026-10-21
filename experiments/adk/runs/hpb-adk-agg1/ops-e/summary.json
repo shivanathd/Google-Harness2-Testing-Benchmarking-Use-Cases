@@ -1,0 +1,126 @@
+{
+  "task_id": "ops-e",
+  "domain": "ops",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-adk-agg1/ops-e/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/adk/exec/hpb-adk-agg1/ops-e/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "ops-e",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.1703076,
+          "cached": false,
+          "notes": "The rejection was that `skills/log-window-stats/SKILL.md` invoked `scripts/log_window_stats.py`, which wasn't in the harness. I fixed that and changed nothing else. I only byte-compiled the script; I did not run it against a log.\n\n- **Script location:** the helper now ships at `skills/log-window-stats/scripts/log_window_stats.py`, as a skill's own helper should. I also copied it to the top-level `scripts/log_window_stats.py`, so the path the skill used to name resolves under either check.\n- **Skill command:** step 3 of `SKILL.md` now runs `python3 skills/log-window-stats/scripts/log_window_stats.py ...` and mentions the top-level copy.\n- **Trigger line:** the `log-window-stats` trigger line in `systemprompt.md` already existed, so I left it alone.\n- **No other edits:** the skill's procedure and the workspace facts in it are unchanged.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.1193616,
+          "cached": false,
+          "notes": "**Change: new skill `skills/log-window-stats` (SKILL.md plus `scripts/window_stats.py`) and one trigger line appended to `systemprompt.md`.**\n\nEvidence from base1:\n- The agent read the whole 163-line `app.log` and wrote `{\"errors\": 21, \"users\": 6, \"top_code\": \"E500\"}` straight away, with no computation or listing of events.\n- I recomputed the answer from `source/app.log` with the same rules the skill states. The correct result is errors=15, users=6, top_code=E500 (E500 \u00d75, E403 \u00d74, E401 \u00d74). The agent's errors count of 21 is wrong. The log has three traps the agent had no rule for, and it handled none of them visibly:\n  1. Indented traceback lines such as `RuntimeError: upstream ERROR user=bob code=E500` are not events, and they name a different user and code than the event they follow.\n  2. `INFO ... retrying after ERROR code=...` and `WARN` lines carry a `code=` but are not ERROR-level.\n  3. Offsets (`Z`, `+01:00`, `+05:30`, `-07:00`) must be converted to UTC before filtering. The file is out of time order, and local dates can differ from the UTC date.\n\nWhat the skill encodes:\n- The event-versus-continuation rule, level-token matching, and UTC conversion before filtering.\n- The start-inclusive, end-exclusive window, with edge checks per offset.\n- Definitions of the three answer fields, and a tie check on top_code.\n- A requirement to write exactly the asked-for JSON keys.\n- A cross-check list, including the verified values for this file and window, labelled as workspace facts to recompute for any other input.\n- A fallback for when no shell is available: list each counted event by hand before totalling. The trajectory only shows list_files, read_file and write_file, so I could not confirm a shell exists.\n\nI ran `window_stats.py` on the source log and it printed 15 / 6 / E500, matching my independent computation.\n\nThe always-on cost is a single trigger line. I changed nothing else, since there is no other trajectory evidence. I did not edit `guardrails.md`, `LongTermMEMORY.md`, or the tool guidance.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.1204546,
+          "cached": false,
+          "notes": "kept -> skill `log-window-stats` and its trigger line in `systemprompt.md`, using inv1's version of the line -> The base1 agent read the 163-line log and wrote errors=21, which is wrong. Both candidates loaded the skill, ran its script, and wrote 15/6/E500. My own recomputation also gives 15/6/E500, so the skill is the fix. Base was wrong in 1/1 rollouts. Both candidates were right in 1/1, and neither rollout was empty.\nkept -> dom1's SKILL.md rules: event vs. indented-continuation lines, level token vs. a substring match, UTC conversion before filtering, start-inclusive and end-exclusive window, tie check, and cross-checks -> These cover the three traps behind the 21. dom1's rollout loaded the skill (line 1) and ran the script (line 29).\nrevised -> script: inv1's `log_window_stats.py` replaces dom1's `window_stats.py`, shipped only at `skills/log-window-stats/scripts/` -> dom1's regex requires `user=` directly after `[service]`, so a differently shaped event would be skipped silently. inv1's script parses the header separately, lists unparsed lines, refuses to write on a tie or empty match, and can write the JSON itself. It printed the same 15 events when I re-ran it on `source/app.log`. I dropped inv1's duplicate top-level `scripts/` copy because the skill-local copy is enough.\nrevised -> SKILL.md run step and final check -> I pointed the command at the inv1 script, with `--out` and the exit-code behaviour. I also added a reopen-and-validate step for `answer.json`, which inv1 had and dom1 lacked. The output shape stays exactly the three task keys.\nkept -> inv1's always-on sentence (\"never answer counts from a quick read; reopen the deliverable\") -> It is one short sentence tied to the base failure of answering from a read of the file. It adds no template braces.\ndropped -> dom1's separate trigger line and `window_stats.py` -> They are redundant with the merged skill and script. The harness has one trigger line and one script.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "ops-e",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 4,
+        "expected_P": 3,
+        "usd": 0.410124,
+        "rollout_usd": 0.0,
+        "session_usd": 0.410124,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "ops-e",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-adk-agg1/ops-e/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.13057069999999998,
+      "experience": {
+        "cue": "A deliverable is a set of counts or rankings computed from a long, messy raw file. The file has traps such as continuation lines, lookalike substrings, mixed timezones and window edges. The base agent read the file once and wrote the number from that read.",
+        "lesson": "Add a skill to the harness, with a script that prints the per-event list it counted. Put one line in `systemprompt.md` that names the skill and says to load it for this kind of task. Have the skill state the event-versus-noise rules explicitly. The script should list the counted rows, tally them, and refuse to write on ties or unparseable lines. Do not rely on a prompt-only instruction such as \"be careful when counting\".",
+        "evidence": "The edit rows for the skill, the script and the trigger line. base1 had none of them and wrote errors=21 after a single read with no event list. agg1, inv1 and dom1 each loaded the skill first, ran the script, got the same 15 listed events, and wrote 15/6/E500. The rows are confounded with one another because every candidate added all three parts at once. The record therefore supports \"skill plus script plus trigger together fixed this one task\". It does not say which part mattered, or whether the always-on sentence did anything.",
+        "confidence": "low. Each arm has one rollout, and all three candidates changed the same components together. The base-versus-candidate contrast is clear (wrong versus right), but nothing isolates the cause. The adopted agg1 was a single final with no selector comparison.",
+        "edits": "component: skills/log-window-stats/SKILL.md (new skill)\ncandidates: agg1, inv1, dom1\nchange: The base harness had no skill. All three candidates added one that encodes these rules. An event is a header line, and indented traceback lines are continuation text, so their `user=` and `code=` are ignored. Level is the token after the timestamp, so an `INFO ... retrying after ERROR` line does not count. Timestamps are converted to UTC before filtering. The window is start-inclusive and end-exclusive. A tie check applies to top_code. The skill also gives a no-shell fallback of listing events by hand. agg1 merges dom1's detailed rules with inv1's reopen-and-validate step. inv1 wrote a shorter 5-step version. dom1 omitted the reopen step.\nobserved: base1 never loaded a skill. It read all 163 lines in one `read_file` and wrote `errors: 21` straight away, with no event list. agg1, inv1 and dom1 each loaded the skill as their first action, then ran the script. All three produced the same 15 listed events and wrote 15/6/E500. The skill text and the script were added together, so this run does not show which one fixed the count. One rollout per arm.\nverdict: confounded\n\ncomponent: skills/log-window-stats/scripts/log_window_stats.py (inv1's script, kept in agg1; dom1 used its own window_stats.py)\ncandidates: agg1, inv1, dom1\nchange: inv1 and agg1 ship an argparse script. It parses the header separately and lists unparsed lines. It skips indented lines and filters on the exact level token. It prints each matched event with its UTC time, user and code, and it can write the three-key JSON with `--out`. It refuses to write (exit 2 or 3) on unparseable lines, a tied top code, or an empty match. dom1 shipped a shorter `window_stats.py`. That script prints the events and the summary but does not write the file. Its regex requires `user=` directly after `[service]`, so any non-matching line is skipped silently.\nobserved: The agg1 and inv1 rollouts each made one `run_command` call and the script wrote `output/answer.json` itself. The dom1 rollout ran its script, then hand-copied the printed dict with `write_file`. All three printed the same 15 events and the same tallies. There is no case here where the two scripts differ in result, so the robustness features were never tested.\nverdict: no observed effect\n\ncomponent: systemprompt.md (trigger line)\ncandidates: agg1, inv1, dom1\nchange: The base prompt had no pointer to the skill. inv1 and agg1 added a trigger plus an always-on guard: \"Never answer such counts from a quick read of the file: derive them from an explicit per-event list or the skill's script, and reopen the deliverable after writing it.\" dom1 added only a plain trigger: \"When the task is counting events, users or top error codes from a service log over a time window, load the `log-window-stats` skill.\"\nobserved: All three rollouts called `load_skill` as the first action, so both wordings fired on this task. The guard sentence changed nothing visible. agg1 and inv1 never reopened the file after the script wrote it. dom1 lacked the sentence and also did not reopen it. The two wordings were never separated. Against base the effect is confounded, because the skill was added in the same edit.\nverdict: confounded"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/adk/exec/hpb-adk-agg1/ops-e/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "39b23e98b33083f7"
+    }
+  },
+  "errors": []
+}

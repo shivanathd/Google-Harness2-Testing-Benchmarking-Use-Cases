@@ -1,0 +1,126 @@
+{
+  "task_id": "arbitration-international-dispute-resolution/identify-arbitration-agreement-issues",
+  "domain": "arbitration-international-dispute-resolution",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "lab-cc-agg1/arbitration-international-dispute-resolution/identify-arbitration-agreement-issues/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/lab-sonnet-imp/exec/lab-cc-agg1/arbitration-international-dispute-resolution/identify-arbitration-agreement-issues/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "arbitration-international-dispute-resolution/identify-arbitration-agreement-issues",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.1306862,
+          "cached": false,
+          "notes": "I changed one file, `systemprompt.md`, and added no skills, scripts or plugins. There was only one rollout (`base1`), so I had no divergence to work from. It produced a sound memo, and I did not re-check its legal analysis. I only added guidance where the trajectory showed a process risk.\n\n1. **Gap between chunked reads.**\n   - The solver read the 57KB supply agreement with `head -c 30000` and then `tail -c +n`, starting at \"ARTICLE 13\". That left Article 12, the confidentiality article, unread.\n   - It caught this only because it ran a late check at roughly line 1787 of the trajectory.\n   - The new rule is to check that chunks abut or overlap, and to treat a gap as unread material rather than as silence.\n\n2. **The `.eml` file and the reader script.**\n   - `read_doc.py` handles only `.docx` and plain text. The `.eml` file is quoted-printable (`=` line breaks), which makes pinpoint quoting awkward.\n   - The inventory rule now says to open `.eml` files directly and read around the `=` breaks.\n\n3. **Summary versus operative text.**\n   - The solver found that the Harmon & Grey (H&G) markup summary, the counterparty cover memo, described several provisions more favourably than the clauses support. It handled this well, with a divergence table in its Section 5.\n   - I wrote the practice down as a source-hierarchy rule: the operative clause controls, and each mismatch gets pinpoint cites. The base run did it unprompted, so this is a guard rather than a fix.\n\n4. **Date basis.**\n   - The solver dated the memo October 19, 2026, from the system clock. The record's timeline runs from July 2025 (comment deadline July 11, signing July 18, effective date August 1).\n   - It handled the mismatch with an assumption line, but only after deciding on its own how to treat it.\n   - The new rule is to fix the date basis from the record and state in the memo how it relates to the date put on it, without silently treating the documents as signed or the deadlines as expired.\n\n5. **Plan, write, reopen.**\n   - The solver built the memo in one heredoc and then re-read it with `read_doc.py`. That worked and is now stated as a procedure.\n   - The reopen step now also checks planned issues, severity labels, defined terms and section numbers against the source, rather than only that the file opens.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.4043907,
+          "cached": false,
+          "notes": "This is a revision of the earlier attempt, made to fix the rejection. I did not re-read the trajectories for this pass, so the notes rest on the rejection feedback and the previous edit.\n\n- **Removed the \"Workspace facts\" block** from `skills/arbitration-clause-review/SKILL.md`. It held facts about this matter's files: the Greenleaf/Pacifica documents, clause numbers, the email-chain priorities and the Harmon & Grey memo points. The feedback said the skill should keep method only.\n- **Generalised two matter-specific phrases in the method text.**\n  - \"(here: US courts via NY Convention / FAA)\" now tells the agent to identify the enforcement jurisdiction from the client emails and the treaty or statute route it implies.\n  - The appeal-right anecdote example is now generic: check what the anecdote actually turned on.\n- **Kept the trigger line** in `systemprompt.md` line 32, which names the skill. I made no other harness changes.\n- A grep of the skill for Greenleaf, Pacifica, Harmon, Whitfield and \"here:\" returns nothing.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.12543830000000003,
+          "cached": false,
+          "notes": "All three rollouts (base1, dom1, inv1) delivered a memo. There was no empty run, so neither edit is marked unsafe. The base set is one rollout, so none of the defects below counts as a repeated base failure.\n\nkept -> dom1 `skills/arbitration-clause-review/SKILL.md` plus its trigger line in `systemprompt.md` -> The dom1 rollout loaded the skill at step 1 and delivered the most developed memo. That memo had 6 Critical issues, DR-IDs, a snapshot of all instruments, both signed/unsigned framings, a statement-by-statement test of the H&G memo, and a 15-item list of unverified authorities. Base delivered 4 Critical issues and inv1 delivered 17 issues with only 2 Critical. The skill is on-demand and method-only, with no matter facts, so it costs nothing in always-on context when unused. The unsupported part is the causal link: this is one rollout, and the evidence is the richer output, not a controlled comparison.\n\nrevised -> dom1 skill section 6 date check -> The original line said \"check dates against today's date\". That sits badly with the record-based date rule taken from inv1. I reworded it to compare the record's dates with the memo date and to state whether the documents are drafts or executed. The record may not say, so the memo must not assume either.\n\nkept (trimmed) -> inv1 chunked-read gap rule -> In the base trajectory the 57KB supply agreement was read with `head -c` and then `tail -c +n` from Article 13, leaving Article 12 (confidentiality) unread until a late check. This is seen in 1 of 1 base rollouts, so it is thin evidence. It is kept as a single always-on bullet because it is cheap and the failure mode is concrete.\n\nkept (trimmed) -> inv1 `.eml` direct-open, operative-text-controls and date-basis bullets -> `read_doc.py` does not convert `.eml`. Base handled the divergence between summary and clause unprompted, so that bullet is only a guard. The date-basis bullet is kept because base dated the memo 19 Oct 2026 against a July 2025 record timeline and decided on its own how to treat that.\n\ndropped -> inv1 \"plan, write, reopen\" paragraph -> It restates the existing base rule to build programmatically and re-read the file with `read_doc.py`, which base already followed. It adds always-on tokens for no observed gain.\n\ndropped -> inv1's longer wording of the inventory and extraction-to-scratch-directory instructions -> It is redundant with the base workspace rules. Its other content is covered by the four short bullets above.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "arbitration-international-dispute-resolution/identify-arbitration-agreement-issues",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 4,
+        "expected_P": 3,
+        "usd": 0.660515,
+        "rollout_usd": 0.0,
+        "session_usd": 0.660515,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "arbitration-international-dispute-resolution/identify-arbitration-agreement-issues",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "lab-cc-agg1/arbitration-international-dispute-resolution/identify-arbitration-agreement-issues/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.1564471,
+      "experience": {
+        "cue": "A review or issue-spotting task over a multi-instrument document suite, including a counterparty summary and client emails, where the record's dates and signing status are unclear. The harness can hold a reusable review method either inline in the system prompt or as an on-demand skill.",
+        "lesson": "Put the review method in a separate on-demand skill file, for example skills/<topic>-review/SKILL.md. It should hold only matter-independent steps: a per-instrument snapshot table, a joint trace of precedence clauses, a clause-by-clause test of every counterparty-summary statement, a client-priority-to-issue map, replacement language with a fallback, and a \"draft versus executed\" check that gives both pre-signing and amendment framing. Add one trigger line to systemprompt.md telling the agent when to load it. Do not copy the method into always-on system prompt text. Keep any always-on reading rules to short bullets. Those rules showed no effect when they were removed.",
+        "evidence": "Skill rows. Both skill runs (dom1 and agg1) loaded the skill as their first action. Both produced about 60KB memos with a snapshot table, a summary-versus-clause test, a client-priority map and dual signed/unsigned framing. The runs without the skill were base1 (about 40KB, no dual framing) and inv1, which put a longer procedure inline (about 31KB, 17 issues, two Critical, no dual framing). The reading-discipline row shows no difference between agg1 and dom1 once the skill was present.",
+        "confidence": "low-medium. It rests on one rollout per arm and on memo structure and length, not on checked legal quality. The inv1 contrast is confounded, because inv1 differs by both removing the skill and adding the inline procedure. The skill-versus-no-skill pattern is consistent across the two skill runs and the two non-skill runs.",
+        "edits": "component: skills/arbitration-clause-review/SKILL.md (new on-demand method skill) plus the one-line trigger at the end of systemprompt.md\ncandidates: dom1, agg1 (adopted; its harness has this skill, and the harness.diff files show dom1 and inv1 against it). inv1 removed it.\nchange: Adds a method-only skill with six parts:\n- Build a snapshot table of every instrument.\n- Trace the precedence clauses of all instruments together.\n- Test each statement in the counterparty memo against the operative clause.\n- Map each client priority to an issue.\n- Draft replacement language, a fallback and negotiating realism.\n- Run end checks, including draft-versus-executed framing and a list of unverified authorities.\nThe system prompt carries a trigger line that tells the agent to load it.\nobserved: Both rollouts with the skill (dom1, agg1) called `Skill arbitration-clause-review` as their first action (line 1 of each trajectory). Neither of the two rollouts without it did.\n- agg1: about 60KB memo with prefixed issue IDs. Critical issues include precedence, forums, joinder and the damages bar.\n- dom1: about 60KB memo with DR-01 to DR-18, six Critical issues, a statement-by-statement test of the Harmon & Grey (H&G) memo (H&G-n and CL-n tables), a client-priority map that flags Heller's walk-away position as not to be disclosed, and a list of unverified authorities.\n- base1: about 40KB, with four Critical issues and no skill.\n- inv1: about 31KB, with 17 issues and two Critical.\nBoth skill runs state that the documents may be drafts or may be signed. Both give pre-signing and amendment framing and add a \"do not quote to counterparty\" handling note. The base and inv1 memos do not give both framings. They either assume drafts (inv1) or treat them as pre-signing.\nverdict: helped. Two independent rollouts with the skill produced the same richer structure and the two without it did not. It is still one rollout per arm, and I judged memo structure, not legal accuracy, so this is tentative.\n\ncomponent: systemprompt.md \"Review reading discipline\" block (four bullets)\ncandidates: agg1 (adopted harness). dom1 deleted the block. inv1 replaced it with a longer \"Review procedure\" block.\nchange: Short always-on rules:\n- Inventory every file and open the `.eml` directly.\n- Make byte-chunk reads abut or overlap.\n- The operative clause controls over a summary, with pinpoint cites for each mismatch.\n- Take the date basis from the record's own timeline and say how it relates to the memo date.\nobserved: Comparing agg1 (block present) with dom1 (block deleted), both runs took the same route. They extracted whole documents to /tmp and read them, and parsed the `.eml` with Python. Both produced a dual-framing date section and a divergence test of the H&G memo. No behavioural difference traces to the block. The gap in chunked reads that motivated it appeared only in base1, which used `head -c 30000` and then `tail -c` from Article 13. The skill runs did not do that, so the bullet was never exercised. Base also handled the summary-versus-clause mismatch unprompted.\nverdict: no observed effect\n\ncomponent: skill section 6 date-check wording (\"compare the record's dates with the memo date\" in agg1, \"check dates against today's date\" in dom1)\ncandidates: agg1 vs dom1\nchange: Two forms of the same instruction. agg1 compares the record's signing and effective dates with the memo date. dom1 checks them against today's date.\nobserved: Both memos give the memo date as 19 Oct 2026 and state that all record dates have passed. Both leave signed or unsigned open and give both framings. Wording made no visible difference.\nverdict: no observed effect\n\ncomponent: systemprompt.md \"Review procedure (matter documents)\" block, replacing the reading-discipline block and the skill trigger\ncandidates: inv1\nchange: The skill was removed. A longer always-on procedure took its place:\n- Extract once to a scratch directory.\n- Classify sources as summary or operative text.\n- Fix the date basis from the record.\n- List planned issues before building, then reopen the file and verify.\nobserved: inv1 produced the shortest memo (about 31KB), with 17 issues and only two Critical. It has a \"Date basis\" paragraph saying the documents are drafts and the dates may have run, but no separate pre-signing and amendment framing section. The issue list is flat, and Medium items such as notice addresses and definitions sit alongside the main ones. Without the skill there is no snapshot table, no per-priority client map and no target-architecture check. I cannot isolate whether the shorter memo came from the missing skill or from the longer always-on procedure.\nverdict: confounded"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/lab-sonnet-imp/exec/lab-cc-agg1/arbitration-international-dispute-resolution/identify-arbitration-agreement-issues/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "93a19ffcdbff3851"
+    }
+  },
+  "errors": []
+}

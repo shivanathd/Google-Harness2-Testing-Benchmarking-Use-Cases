@@ -1,0 +1,8 @@
+CHANGE 1 — context/harness/systemprompt.md: added one always-on paragraph telling the agent to reopen every file written under output/, parse it from disk, and check the task-named fields and rounding before finishing.
+Moment: base1, the step that computes the figure. The script wrote output/answer.json with `open(...).write(...)` and printed the same JSON. The run then ended with its final message quoting that printed value, with no reopen of the file. The file that landed on disk is correct (I recomputed independently: 18691.64, 21 transactions), so this is a latent risk, not a fixed failure. Expect little measurable change in base1. If the merge stage only keeps edits backed by a realised failure, drop this one.
+
+Left unchanged (considered):
+- No Stop hook. The deliverable was produced, so there is no evidence that a skipped deliverable needed blocking, and a hook risks blocking valid completion.
+- No skill or script. One run, no tool errors, and the procedure (preview, read full file, one script with dedupe assertion, write, report assumptions) completed in four tool calls. Nothing repeated enough to package.
+- The workspace CLAUDE.md (172 bytes) appeared in `ls -la` and was never opened. Its content is unknown, and root CLAUDE.md is normally loaded automatically under Claude Code, so I made no edit for it.
+- Guardrails, LongTermMEMORY and tool_guidance remain empty. The run showed no tool-use or memory failure that would justify text in them.

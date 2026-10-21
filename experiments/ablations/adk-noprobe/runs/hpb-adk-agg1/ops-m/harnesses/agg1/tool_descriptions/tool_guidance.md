@@ -1,0 +1,2 @@
+- read_file cannot read .gz files and truncates long files; use `gzip -dc` or the skill's helper script instead.
+- For anything beyond a simple pipe, write the code to a .py file and run it; long quoted one-liners with awk/sed broke on unbalanced quotes. If a command fails with a syntax error, fix it once by moving it to a file; do not resend the same command.

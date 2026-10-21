@@ -1,0 +1,1 @@
+- read_file on a whole log floods context (and shows .gz as binary); compute with a script instead. A missing output file is the worst outcome: write the deliverable as soon as the numbers are computed.

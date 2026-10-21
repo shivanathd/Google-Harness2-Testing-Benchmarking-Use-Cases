@@ -1,0 +1,124 @@
+{
+  "task_id": "swe-e",
+  "domain": "swe",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-cc-agg1/swe-e/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/cc/exec/hpb-cc-agg1/swe-e/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "swe-e",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [
+        "inv1",
+        "dom1",
+        "agg1"
+      ],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.045235000000000004,
+          "cached": false,
+          "notes": "KEEP_BASE. I changed no files.\n\nThe single rollout (base1) went through the right steps:\n- **Read first:** it read `src/durations.py` and the test file before editing.\n- **Fix matched the docstring:** its one edit replaced the regex with a `fullmatch` parser. That covers `s`, case-insensitivity, whitespace, h-m-s order with each unit at most once, and `ValueError` for empty or malformed input.\n- **Checked beyond the existing test:** it ran its own script from a scratch directory with `python3 -I`. The script covered the docstring examples and 12 invalid inputs. It also ran the existing test.\n- **Checked the deliverable:** it created `output/` and copied the file. It confirmed the copy with `cmp`, and `deliverables/base1/output__durations.py.txt` is identical to the fixed `src/durations.py`.\n- **Reported the one judgement call:** `\"1 h\"` raises `ValueError`, and the summary says how to allow it.\n\nI found no tool error, repeated mechanical step, skipped invariant or budget problem that a skill, script or plugin would address. Any added always-on text would cost context on every run for no demonstrated gain. The remaining risks are one-off judgement calls (for example, whether `\\d` should accept non-ASCII digits). I did not turn those into process rules because no run diverged on them.\n\nI did not run the fixed code myself. My conclusion rests on the rollout's own check output and on reading the fixed file in the deliverables.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.0468996,
+          "cached": false,
+          "notes": "KEEP_BASE. I changed no harness files.\n\nI read `task.md`, the source, the harness and the only rollout, `base1`. The harness is empty apart from a one-line system prompt. The `base1` run produced a correct fix without any guidance.\n\n- **Docstring clauses:** The agent enumerated each clause of the docstring: units h/m/s, case-insensitive, whitespace around and between parts, each unit at most once in h-m-s order, and `ValueError` for empty, unknown or malformed input. It replaced the lossy `re.findall` with a `re.fullmatch` pattern that covers all of them.\n- **Verification:** It ran its own check script covering valid inputs, including `\"45s\"` and `\"2h 5m 10s\"`, and 12 invalid inputs. It confirmed the existing test still passed and that `output/durations.py` matches `src/durations.py`.\n- **Judgement call:** It flagged that `\"1 h\"` is rejected. The docstring only allows whitespace between parts, so this is a defensible reading.\n- **Not changed:** The function name and signature are unchanged.\n\nTwo small gaps are visible in the rollout. The agent did not add a regression test to `tests/test_durations.py`. The pattern's `\\d` also accepts non-ASCII digits. Neither is a failure, and with one correct run there is no divergence or repeated error to justify always-on text or a new skill. Adding either would cost context on every run and fix nothing observed.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.0472845,
+          "cached": false,
+          "notes": "kept -> base harness (KEEP_BASE, no files edited) -> base1 fixed the bug correctly with no guidance. It enumerated every docstring clause and replaced the lossy `findall` with a `fullmatch` pattern. It checked the docstring examples plus 12 invalid inputs under `python3 -I`, ran the existing test, and confirmed `output/durations.py` matches `src/durations.py` with `cmp`. I saw no failure, empty run or wasted effort to target. This rests on 1 rollout, so it shows no base-set pattern either way.\ndropped -> inv1 candidate -> `harness.diff` is empty and its decision note says no files were changed. There is nothing to merge. Its rollout also produced a correct fix, but that is the unmodified harness's behaviour.\ndropped -> dom1 candidate -> `harness.diff` is empty and its decision note says no files were changed. There is nothing to merge. The remaining gaps (no regression test added, `\\d` accepting non-ASCII digits) appeared in one run and caused no wrong result. Always-on text for them would cost context on every run and buy nothing observed.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "swe-e",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 3,
+        "expected_P": 3,
+        "usd": 0.139419,
+        "rollout_usd": 0.0,
+        "session_usd": 0.139419,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "swe-e",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-cc-agg1/swe-e/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.0655354,
+      "experience": {},
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/cc/exec/hpb-cc-agg1/swe-e/agg1",
+      "chosen_tree_is_base": true,
+      "harness_fingerprint": "020675403b27bd72"
+    }
+  },
+  "errors": []
+}

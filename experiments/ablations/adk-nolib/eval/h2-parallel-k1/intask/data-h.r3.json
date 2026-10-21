@@ -1,0 +1,21 @@
+{
+ "cond": "h2-parallel-k1/intask",
+ "task": "data-h",
+ "rep": 3,
+ "partial": 0.0,
+ "all_pass": false,
+ "checks": {
+  "net_usd": false,
+  "transactions": false,
+  "chargebacks": false
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/ablations/adk-nolib/runs/hpb-adk-agg1/data-h/harnesses/agg1",
+ "cost_usd": null,
+ "tokens_in": 508493,
+ "tokens_out": 1333,
+ "wall_s": 675.9,
+ "error": "LlmCallsLimitExceededError: Max number of llm calls limit of `40` exceeded",
+ "infra_error": false,
+ "turns": null,
+ "tool_calls": 40
+}

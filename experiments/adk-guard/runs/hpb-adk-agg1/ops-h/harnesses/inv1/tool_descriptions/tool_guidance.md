@@ -1,0 +1,3 @@
+- Logs are large: read_file on a whole log floods the context and re-reading it did not help. Compute with a script via the shell tool instead.
+- read_file cannot read `.gz` (binary). The billing log is `logs/billing.jsonl.gz`; guessing `billing.jsonl` fails with FileNotFoundError, so use the name from list_files.
+- If a command fails with a quoting/syntax error, do not resend it unchanged: put the logic in a small python file.

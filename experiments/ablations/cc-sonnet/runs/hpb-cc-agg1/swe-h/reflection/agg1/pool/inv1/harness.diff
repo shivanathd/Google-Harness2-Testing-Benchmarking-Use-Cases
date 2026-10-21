@@ -1,0 +1,65 @@
+--- current/LongTermMEMORY.md
++++ inv1/LongTermMEMORY.md
+@@ -0,0 +1,4 @@
++Checks to re-derive on every small-repo fix (procedure, not facts about any one repo):
++- Trace the entry point's order of operations (load, dispatch, mutate, save, print). Put validation before the first mutation or save, and return the error status there, so a rejected command leaves files unchanged.
++- For each numeric rule in the issue, decide the boundary explicitly: is exactly zero or exact equality valid, and is a comparison strict or inclusive? Test the value on each side of the boundary.
++- When the issue changes ordering or filtering of one mode, confirm the other modes keep their old order and output format.
+--- current/hooks.json
++++ inv1/hooks.json
+@@ -0,0 +1 @@
++{"hooks": {"Stop": [{"hooks": [{"type": "command", "command": "python3 scripts/check_done.py"}]}]}}
+--- current/scripts/check_done.py
++++ inv1/scripts/check_done.py
+@@ -0,0 +1,37 @@
++#!/usr/bin/env python3
++"""Stop-hook check: output/CHANGES.md exists and is non-empty, sources compile, tests pass.
++
++Usage: python3 scripts/check_done.py   (run from the workspace root)
++Exit 0 when fine; exit 2 with an instruction on stderr otherwise.
++A missing pytest or a test run that times out never blocks.
++"""
++import os
++import subprocess
++import sys
++
++problems = []
++path = os.path.join("output", "CHANGES.md")
++if not os.path.isfile(path) or not open(path, encoding="utf-8", errors="replace").read().strip():
++    problems.append("output/CHANGES.md is missing or empty: write a short summary of what changed, why, and what you ran.")
++
++for root, dirs, files in os.walk("."):
++    dirs[:] = [d for d in dirs if not d.startswith(".") and d not in ("__pycache__", "output")]
++    for name in files:
++        if name.endswith(".py"):
++            p = os.path.join(root, name)
++            try:
++                compile(open(p, "rb").read(), p, "exec")
++            except SyntaxError as exc:
++                problems.append(f"{p} does not compile: {exc}")
++
++if os.path.isdir("tests") and not problems:
++    try:
++        r = subprocess.run([sys.executable, "-m", "pytest", "tests", "-q", "-x"], capture_output=True, text=True, timeout=90)
++        if r.returncode == 1:
++            problems.append("pytest tests fails; fix the code or, if the failure is unrelated, say why in output/CHANGES.md:\n" + r.stdout[-1200:])
++    except (subprocess.TimeoutExpired, OSError):
++        pass
++
++if problems:
++    print("Not done yet:\n- " + "\n- ".join(problems), file=sys.stderr)
++    sys.exit(2)
+--- current/systemprompt.md
++++ inv1/systemprompt.md
+@@ -1,5 +1,8 @@
+ You are an assistant that completes tasks inside a workspace directory. Read the task, do the work, and write the requested deliverables under output/.
+ 
+-Issue-fix tasks (small Python repos): read ISSUE.md, CLAUDE.md if present, the source and the tests in one or two batched calls, then make the fix edits promptly. Treat the issue bullets and existing tests as samples of the spec. Keep public names and signatures, validate before mutating so an error leaves data and files unchanged, and do not change output formats the issue says must stay the same.
+-
+-Write output/CHANGES.md (`mkdir -p output`) in the same step as your first fix edit, and update it later if needed. Never end a turn right after an edit. Then run `python -m pytest tests` (plain python if pytest is missing), add a few regression tests for the issue bullets (error paths, exit status, file unchanged, zero/equality boundaries, strict versus inclusive comparisons) and run them. Finish only when output/CHANGES.md exists and says what changed and which commands you ran.
++Issue-fix workflow (small Python repos):
++1. Read ISSUE.md, CLAUDE.md, any doc the issue cites, the source and the tests in one or two batched calls. The issue and tests are only samples of the spec; list every issue bullet as a checklist item.
++2. Fix the code so every bullet holds. Keep public names and signatures. Validate before mutating, so an error leaves data and files unchanged. Do not alter output formats the issue says must stay the same.
++3. Write output/CHANGES.md (`mkdir -p output`) in the same step as your first fix edit, or immediately after it, before any further verification; update it if the fix changes later. Never end a turn right after an edit.
++4. Verify: run `python -m pytest tests` (plain python if pytest is missing), then exercise each bullet end to end through the real entry point (e.g. `main([...])` with a tmp file): the success path, each error path (message, exit status, file unchanged), and boundary values (missing/empty input, zero, exact equality). Add regression tests to tests/ for each bullet and run them. If a check fails, decide whether the code or your expectation is wrong before changing anything.
++5. Finish only when tests pass (or you state why a failure is unrelated) and output/CHANGES.md says what changed, why, and what you ran. Reread output/CHANGES.md with `cat` once at the end. A Stop hook checks this; if it blocks you, do what it says.

@@ -1,0 +1,102 @@
+--- current/hooks.json
++++ dom1/hooks.json
+@@ -1 +0,0 @@
+-{"hooks": {"Stop": [{"hooks": [{"type": "command", "command": "python3 scripts/check_output.py"}]}]}}
+--- current/scripts/check_output.py
++++ dom1/scripts/check_output.py
+@@ -1,64 +0,0 @@
+-#!/usr/bin/env python3
+-"""Stop hook: block finishing until the source was edited, compiles, tests pass and CHANGES.md exists.
+-
+-Exit 2 (stderr goes to the agent) when a deterministic check fails; exit 0 otherwise.
+-Never blocks on missing pytest or on an unusable environment. Heuristic: a source .py file counts
+-as edited if its mtime is later than ISSUE.md and every test file. The hook blocks at most 3 times.
+-"""
+-import pathlib
+-import py_compile
+-import subprocess
+-import sys
+-
+-root = pathlib.Path.cwd()
+-problems = []
+-
+-counter = root / ".stop_hook_count"
+-try:
+-    n = int(counter.read_text()) if counter.exists() else 0
+-except Exception:
+-    n = 0
+-if n >= 3:
+-    sys.exit(0)
+-
+-changes = root / "output" / "CHANGES.md"
+-if not changes.is_file() or len(changes.read_text(errors="ignore").strip()) < 20:
+-    problems.append("output/CHANGES.md is missing or nearly empty: after fixing and running the code, "
+-                    "write a short summary of the changes you really made.")
+-
+-SKIP = {"output", "tests", ".git", "__pycache__", ".pytest_cache", "node_modules", ".venv", "venv"}
+-src = [p for p in root.rglob("*.py")
+-       if not (set(p.relative_to(root).parts[:-1]) & SKIP) and p.name != "conftest.py"
+-       and not p.name.startswith("test_")]
+-for p in src:
+-    try:
+-        py_compile.compile(str(p), doraise=True, cfile="/dev/null")
+-    except py_compile.PyCompileError as e:
+-        problems.append(f"{p.relative_to(root)} does not compile: {e}")
+-    except Exception:
+-        pass
+-
+-refs = [p for p in [root / "ISSUE.md", *(root / "tests").rglob("*.py")] if p.is_file()]
+-if src and refs:
+-    base = max(p.stat().st_mtime for p in refs)
+-    if not any(p.stat().st_mtime > base + 1 for p in src):
+-        problems.append("No source file looks modified: the code still has the original bugs. Read the "
+-                        "source files (list_files, read_file), then write_file the full corrected file "
+-                        "for each layer the issue names, and run the issue's examples.")
+-
+-if (root / "tests").is_dir():
+-    try:
+-        r = subprocess.run([sys.executable, "-m", "pytest", "-q", "-x", "tests"],
+-                           capture_output=True, text=True, timeout=90)
+-        if r.returncode not in (0, 5) and "ModuleNotFoundError" not in r.stderr and "No module named" not in r.stderr:
+-            problems.append("tests fail:\n" + (r.stdout + r.stderr)[-1500:])
+-    except Exception:
+-        pass
+-
+-if problems:
+-    try:
+-        counter.write_text(str(n + 1))
+-    except Exception:
+-        pass
+-    print("Cannot finish yet:\n" + "\n".join(problems), file=sys.stderr)
+-    sys.exit(2)
+--- current/skills/fix-python-issue/SKILL.md
++++ dom1/skills/fix-python-issue/SKILL.md
+@@ -30,8 +30,5 @@
+ 5. Core functions called directly raise ValueError and the passed dict is unchanged.
+ 6. Existing tests pass, unedited.
+ 
+-# Final pass
+-Re-read ISSUE.md line by line; for every numbered item name the edited function that implements it. A feature item (new flag/option) is code to write, not something to describe. Each distinct failure condition the issue lists needs its own check in the code, not just the easiest one.
+-
+ # CHANGES.md
+-Write it after the code is final. Short: per file, what changed, mapped to the issue items, and which probes you ran with their results. State only what the code does.
++Short: per file, what changed, mapped to the issue items, and which probes you ran with their results. State only what the code does.
+--- current/systemprompt.md
++++ dom1/systemprompt.md
+@@ -1,10 +1,3 @@
+ You are an assistant that completes tasks inside a workspace directory. Read the task, do the work, and write the requested deliverables under output/.
+ 
+-For an issue/bug report on a Python codebase:
+-- Start with list_files ".". Paths are relative to the workspace root (no "workspace/" prefix, no leading "/"). Read ISSUE.md AND every source file and test it touches before editing; ISSUE.md only describes the work, it is not the deliverable (do not copy it into output/).
+-- Load the `fix-python-issue` skill before editing (when resolving an ISSUE.md in a Python package).
+-- Fix the source IN PLACE (write_file replaces the whole file, so send the complete corrected file, with no added header lines), keeping public names and signatures. Implement EVERY numbered item, including new features/flags; before finishing, re-read ISSUE.md and point to the edit for each item. output/ gets only what the task names (here output/CHANGES.md).
+-- Never overwrite existing tests; put new tests in a new file such as tests/test_<name>_extra.py.
+-- Verify by running, not by writing: run the issue's examples and the existing tests (`python3 -m pytest -q tests`, or plain python if pytest is missing), covering every item. If a command fails, read the error and change approach once.
+-- Write output/CHANGES.md LAST, listing only changes you actually made and ran. Never claim edits, tests or results you did not produce.
+-- Never end a turn by only stating what you will do next; make the tool call. A Stop hook blocks finishing while the source is unedited, fails to compile, fails tests, or CHANGES.md is missing; fix what it reports.
++When the task is resolving an ISSUE.md in a Python package, read the issue, source and tests, then load the `fix-python-issue` skill before editing. Fix the source in place; output/ gets only the requested CHANGES.md.
+--- current/tool_descriptions/tool_guidance.md
++++ dom1/tool_descriptions/tool_guidance.md
+@@ -1,2 +0,0 @@
+-- list_files/read_file/write_file paths are relative to the workspace root; "workspace" and "/" are rejected. read_file returns small files whole (start_line 0 is fine).
+-- write_file replaces the whole file: send complete intended content; never use it on existing tests. "wrote N chars" is not verification: run the code afterwards (run_command from the workspace root, if available).

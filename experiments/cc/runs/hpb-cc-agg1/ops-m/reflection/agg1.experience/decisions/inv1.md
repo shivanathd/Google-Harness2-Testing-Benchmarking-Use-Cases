@@ -1,0 +1,7 @@
+KEEP_BASE. I made no edits to `context/harness/`.
+
+**Evidence:** There is one rollout, `base1`, and it answered correctly. It decompressed `app.log.2.gz` into a scratch directory and parsed all three files together. It found the non-request noise before parsing: the `UpstreamError` traceback lines, and the `INFO ... cache warm after ERROR code=E500` lines that have no `req=`. It excluded both. It converted every timestamp to UTC (the logs mix `+02:00`, `-04:00` and `+00:00` offsets). It took each request's last attempt by parsed time, applied the 08:00–12:00 UTC half-open window, and checked for ties. It wrote `output/answer.json` as `{"failed": 19, "users": 8, "top_code": "E401"}`, which matches the requested shape.
+
+**My check:** I re-parsed the three source logs myself, picking each request's last attempt in two ways: by latest UTC time and by highest attempt number. Both gave 19 failed requests, 8 distinct users and E401 as the top code, with counts E401 7, E503 5, E409 4 and E500 3. The two methods never disagree on which attempt is last. The agent's answer is therefore robust and has no tie risk.
+
+**Why no change:** I found no tool error, repeated mechanical step, ignored invariant or divergence between runs. The agent reached the answer in about six calls and the deliverable is valid. Any added always-on text, skill or script would be speculation that adds context cost. The empty harness's single-line system prompt was enough for this run.

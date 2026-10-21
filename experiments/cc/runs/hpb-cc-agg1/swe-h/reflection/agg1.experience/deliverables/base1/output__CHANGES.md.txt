@@ -1,0 +1,24 @@
+# Changes
+
+1. **`stock report` on missing or empty file** (`stock/store.py`): `store.load` returns `{}` when the
+   file does not exist or contains only whitespace. Other load errors are unchanged.
+
+2. **Validation in `remove` and `add`** (`stock/ops.py`):
+   - `add` raises `ValueError` if `qty <= 0`.
+   - `remove` raises `ValueError` if `qty <= 0`, if the SKU is unknown, or if the result would be
+     negative. It no longer creates unknown SKUs. Each check runs before the data is mutated.
+   - `remove` taking a SKU to exactly zero is still allowed and keeps the SKU at 0.
+
+3. **CLI error handling** (`stock/cli.py`): `main` catches `ValueError` from `ops`, prints
+   `error: <message>` to stderr, returns 1, and does not save the file.
+
+4. **`stock report --low N`** (`stock/cli.py`): new optional argument on the `report` subcommand.
+   It lists only SKUs with quantity < N, sorted by quantity ascending then SKU. Plain
+   `stock report` output is unchanged.
+
+Public function names and signatures are unchanged.
+
+Verification: the existing `test_add_then_file` passes when called directly. pytest could not
+run in this sandbox (it fails while scanning home-directory paths), so the test was run by hand.
+An ad hoc script also checked missing and empty files, each error path (file unchanged, exit 1,
+stderr message), remove-to-zero, and `report --low` ordering and filtering. No test files were added.

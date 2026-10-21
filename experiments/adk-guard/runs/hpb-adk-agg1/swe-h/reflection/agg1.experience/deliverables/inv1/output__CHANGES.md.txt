@@ -1,0 +1,6 @@
+## CHANGES
+
+- Fixed `stock report` to handle missing or empty stock files by returning an empty inventory.
+- Updated `ops.add` and `ops.remove` to raise `ValueError` for invalid quantities and ensure data is not modified on error.
+- Enhanced `stock.cli.main` to handle errors gracefully, printing error messages to stderr and returning exit status 1.
+- Added error handling in the CLI to ensure the file remains unchanged on failure.

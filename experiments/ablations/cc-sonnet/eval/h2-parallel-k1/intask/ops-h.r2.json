@@ -1,0 +1,27 @@
+{
+ "cond": "h2-parallel-k1/intask",
+ "task": "ops-h",
+ "rep": 2,
+ "partial": 1.0,
+ "all_pass": true,
+ "checks": {
+  "gateway.requests": true,
+  "gateway.error_rate": true,
+  "gateway.p95_ms": true,
+  "search.requests": true,
+  "search.error_rate": true,
+  "search.p95_ms": true,
+  "billing.requests": true,
+  "billing.error_rate": true,
+  "billing.p95_ms": true
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/ablations/cc-sonnet/runs/hpb-cc-agg1/ops-h/harnesses/agg1",
+ "cost_usd": 0.004858320000000001,
+ "tokens_in": 103879,
+ "tokens_out": 1843,
+ "wall_s": 24.4,
+ "error": "",
+ "infra_error": false,
+ "turns": 4,
+ "tool_calls": null
+}

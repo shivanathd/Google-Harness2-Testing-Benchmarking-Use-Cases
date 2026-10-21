@@ -1,0 +1,21 @@
+{
+ "cond": "ar/variant",
+ "task": "ops-m-v",
+ "rep": 1,
+ "partial": 0.0,
+ "all_pass": false,
+ "checks": {
+  "failed": false,
+  "users": false,
+  "top_code": false
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/adk/autoresearch/ops/final",
+ "cost_usd": null,
+ "tokens_in": 4046,
+ "tokens_out": 142,
+ "wall_s": 33.8,
+ "error": "",
+ "infra_error": false,
+ "turns": null,
+ "tool_calls": 2
+}

@@ -1,0 +1,17 @@
+--- current/skills/payment-revenue-reconcile/SKILL.md
++++ dom1/skills/payment-revenue-reconcile/SKILL.md
+@@ -18,4 +18,4 @@
+ 5. FX: `usd_per_unit` is USD per one unit of currency, so USD = amount * rate (multiply, never divide). Every currency in scope needs a rate; USD = 1. Convert per row, round only the final total (half-up, 2 dp).
+ 6. Sanity: count included + excluded by reason = unique ids; every excluded row has a stated reason.
+ 
+-Workspace facts (verified on transactions.csv/fx.csv here; re-run to confirm if files differ): 42 data rows, 36 unique ids; duplicated ids T11007, T11010, T11012, T11014, T11019, T11022 (identical copies; only T11007, a SETTLED Sep EUR refund, affects the result, so skipping dedupe overcounts to 22 txns). Currencies USD/EUR/INR, rates 1 / 1.0850 / 0.01195.
++Workspace facts (verified on transactions.csv/fx.csv here; re-run to confirm if files differ): 42 data rows, 36 unique ids; duplicated ids T11007, T11010, T11012, T11014, T11019, T11022 (identical copies; only T11007, a SETTLED Sep EUR refund, affects the result, so skipping dedupe overcounts to 22 txns). Currencies USD/EUR/INR, rates 1 / 1.0850 / 0.01195. Script result: net_usd 18691.64, 21 transactions.
+--- current/systemprompt.md
++++ dom1/systemprompt.md
+@@ -1,5 +1,4 @@
+ You are an assistant that completes tasks inside a workspace directory. Read the task, do the work, and write the requested deliverables under output/.
+ 
++
+ When the task is turning a payment or finance export (transactions plus FX or similar reference tables) into revenue figures, load the `payment-revenue-reconcile` skill first.
+-
+-You have about 40 model calls and a run without the deliverable is a failure. Write the deliverable early. Never re-run a command that just failed: read the error, change the code, then run. python3 has only the standard library (no pandas); do not pip install. Keep scratch scripts out of output/.

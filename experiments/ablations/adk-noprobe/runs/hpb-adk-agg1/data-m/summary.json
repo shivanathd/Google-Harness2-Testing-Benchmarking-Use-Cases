@@ -1,0 +1,124 @@
+{
+  "task_id": "data-m",
+  "domain": "data",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-adk-agg1/data-m/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/adk-noprobe/exec/hpb-adk-agg1/data-m/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "data-m",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "Rejected `systemprompt.md` text is now removed. I edited only that file, and I did not run the harness or re-read the rollouts this time.\n\n- **What I removed:** the \"Workspace facts\" block with its specific transaction ids and the zero-rate date. Also the \"Reference result\" line with the net figure and the transaction and refund counts. A grep of the harness for those values finds nothing.\n- **What replaced it:** one generic checklist. It tells the agent to re-derive the following from the inputs instead of being told them:\n  - repeated `txn_id`s, each counted once;\n  - thousands separators inside quoted amounts;\n  - status values;\n  - missing or zero fx rates for dates actually used;\n  - a missing currency column in `refunds.csv`, handled by taking the original transaction's currency.\n  The same checklist covers reporting counts as the task defines them and comparing the script's printed rows with the task wording.\n- **Other edits:** the script command now takes the month from the task (`<YYYY-MM from the task>`) instead of a hardcoded `2026-09`. The description of the script's output now says \"the three requested keys\" instead of listing them.\n- **Left unchanged:** the `scripts/net_revenue.py` and `scripts/check_output.py` scripts and the Stop hook in `hooks.json`. The `net_revenue.py` file still defaults to `2026-09` when run with no arguments.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "I fixed the rejection by removing this task's own data from the harness. I didn't re-read the trajectories this round, since the change only strips instance data.\n\n- **`skills/payment-revenue-reconcile/SKILL.md`:**\n  - I deleted the whole \"Workspace facts\" block: the duplicate txn_ids, the file column lists, the refund date spread and the INR zero-rate date.\n  - The refund-timing sentence named specific months, so I reworded it generically: a refund issued in the month for an earlier sale counts, and a later refund of an in-month sale does not.\n  - I added check 6, which tells the agent to re-derive the input facts itself. That covers column names, distinct statuses and currencies, date formats, exact versus conflicting duplicate ids, refunds pointing to missing or non-SETTLED txns, and zero or missing FX rates on any date used.\n  - The skill is still triggered from `systemprompt.md`, which I did not change.\n- **`scripts/net_revenue.py`:** it defaulted to the month 2026-09, which is this task's time window. I removed the default, so the script now exits with an error asking for the month unless one is passed. The docstring says the same. A syntax check passed, but I did not run the script.\n- **Rest of the harness:** a grep for the removed ids and the month default found nothing left in the harness.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "Merged INV and DOM into one harness. I did not adopt either candidate wholesale. Neither candidate was rolled out, so the evidence is the single base rollout and the candidate diffs.\n\n- kept -> INV `systemprompt.md` rule \"never end a turn with only a plan\" -> base1 read all three CSVs, wrote a three-step plan as its last message, and produced no `output/answer.json`. That is 1/1 base rollouts with no deliverable.\n- kept -> INV/DOM \"stdlib only, no pandas, don't rerun a failed command unchanged\" (compressed to two bullets) -> no base evidence of this failure. The earlier library entry data-e had a pandas retry loop, and the rule is cheap. This is weak support.\n- revised -> script `scripts/net_revenue.py`, taken from DOM's version -> I chose DOM's over INV's because it flags conflicting duplicates and non-SETTLED refunds and carries on, while INV's aborts on a conflicting duplicate. Aborting risks an empty run, and carrying on does not. I added `os.makedirs` for the `output/` directory. I ran it on `context/source` for 2026-09 and it wrote `{\"net_usd\": 24317.47, \"transactions\": 16, \"refunds\": 5}`. It skipped the 3 exact-duplicate txn_ids (S028, S026, S004). It also printed a note that rounding per line would give 24317.48.\n- revised -> script location and CLI -> I put it at `scripts/net_revenue.py` rather than inside a skill. data-e's earlier `scripts/` helper ran in a solver workspace, and no skill trigger or extra load call is needed.\n- dropped -> DOM `skills/payment-revenue-reconcile` SKILL.md -> its rules are already enforced by the script. The remaining checks went into one short paragraph in `systemprompt.md`, so no skill is shipped and no trigger line is needed.\n- dropped -> INV `hooks.json` Stop hook and `scripts/check_output.py` -> `hooks.json` is not in the list of editable components, so it is likely discarded or unsupported. Its message also hard-coded 2026-09, which is task instance data of the kind the earlier decisions had rejected.\n- revised -> removed the `2026-09` default from the invocation -> the month now comes from the task text, and the script requires it, which follows `decisions/inv1.md` and `decisions/dom1.md`.\n- kept -> INV/DOM re-derive checklist (repeated ids, thousands separators, statuses, missing or zero FX, refunds on non-SETTLED txns), merged into one short paragraph. No task-specific ids or values are in the harness. The base rollout showed all of these in the data, but it never got as far as handling them.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "data-m",
+        "k": 1,
+        "R": 2,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 0,
+        "expected_P": 3,
+        "usd": 0.0,
+        "rollout_usd": 0.0,
+        "session_usd": 0.0,
+        "rollouts": [
+          "base1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "data-m",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-adk-agg1/data-m/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.0840142,
+      "experience": {
+        "cue": "A multi-file data-reconciliation task (several CSV exports, date and fx rules, a fixed JSON output). The base solver reads the inputs, writes a plan as its last message, and delivers no output file.",
+        "lesson": "In systemprompt.md, put the exact runnable command for a bundled stdlib script in scripts/ (month and file paths taken from the task, not hard-coded). Say it must be run first, and pair it with a rule that a turn may not end on a plan alone. Keep instance facts such as ids, dates and expected totals out of both the script and the prompt. Make the script write and re-read the output file, and print skipped rows, conflicts and rounding differences, so the run is auditable and a file always exists.",
+        "evidence": "The base1 trajectory ended on a plan with no deliverable. The agg1 trajectory used the combined rows above (systemprompt rule, invocation paragraph, scripts/net_revenue.py) and ran the script as its first action, which produced a valid answer file. The three rows are confounded with one another, and there is one rollout per arm. The record supports \"plan-only failure became a delivered file\" but does not say which of the three pieces did it, nor whether the number is right.",
+        "confidence": "low. This is a single paired rollout, the changes are bundled, and the run gives no correctness check. The plan-only failure in base1 also might not recur on another sample.",
+        "edits": "component: systemprompt.md (rule \"never end a turn with only a plan\", plus stdlib-only / don't-rerun-unchanged)\ncandidates: agg1\nchange: Added working rules: every turn must call a tool or be the final answer after output/ has been re-read. Python is stdlib only. Don't rerun a failed command unchanged.\nobserved: Base1 read the CSVs, then ended on a three-step plan with \"Let's proceed\" and produced no output/answer.json. agg1's first and only action was a tool call, and it wrote the file. The pandas and failed-command rule never fired, because agg1 had no failures. The run did not re-read the file itself, since the script did that. This row is bundled with the invocation paragraph and the script, and only one rollout exists per arm.\nverdict: confounded\n\ncomponent: systemprompt.md (paragraph with the exact `python3 scripts/net_revenue.py ... <YYYY-MM from the task> output/answer.json` command and the post-run checklist)\ncandidates: agg1\nchange: The system prompt tells the solver to run a fixed command first. It describes the script's rules: dedupe, exact SETTLED, settled_on and refunded_on dates at that day's rate, round once. It then lists generic checks: repeated ids, thousands separators, statuses, zero fx, and refunds on non-SETTLED txns.\nobserved: agg1 ran the command verbatim as its first action, with the month taken from the task text. It exited 0 and printed the 3 skipped exact duplicates, a rounding NOTE, and the written JSON. The final message reported these. The checklist produced no visible extra verification: there was no data inspection and no discussion of the thousands-separator, zero-FX or non-SETTLED checks. The result may have come from the script alone. Base1 had no such pointer and never started computing. This is bundled with the script row below.\nverdict: confounded\n\ncomponent: scripts/net_revenue.py (new stdlib script, with scripts/README.md scaffold comment)\ncandidates: agg1\nchange: A deterministic Decimal-based reconciler that dedupes txn_id, flags exact versus conflicting duplicates, and recognises only exactly-SETTLED rows. It applies fx by settled_on and refunded_on, using the original transaction's currency for refunds. It rounds once, writes the three keys, re-reads the file, and exits with an error on a missing or zero fx rate. It handles a month argument, quoted amounts with commas, and several date formats.\nobserved: In agg1 it ran cleanly in one call and produced {\"net_usd\": 24317.47, \"transactions\": 16, \"refunds\": 5}. It also surfaced the rounding sensitivity (24317.48 if rounded per line). The final answer mentioned that note but did not decide between the two roundings. Base1 had no script and produced nothing. The script is plausibly the reason a deliverable exists, but nothing isolates it from the prompt line that invokes it. The answer's correctness cannot be judged from this record.\nverdict: confounded\n\ncomponent: plugin/README.md, skills/README.md\ncandidates: agg1\nchange: Only the template scaffold comments (the hooks.json Stop-hook note and the skills note) appear in the harness tree. The merge decisions say the hook and skill were dropped.\nobserved: Nothing in the rollout touches them.\nverdict: no observed effect"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/ablations/adk-noprobe/exec/hpb-adk-agg1/data-m/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "45afb5a032103dcd"
+    }
+  },
+  "errors": []
+}

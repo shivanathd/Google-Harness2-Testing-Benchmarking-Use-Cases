@@ -1,0 +1,6 @@
+This attempt only fixes the rejection. I did not re-read the trajectories or deliverables.
+
+- **Change:** I replaced the "In this workspace (verified)" paragraph in `systemprompt.md`. It had listed this task's own transaction and refund ids, its fx date and currency, and its month window. The new paragraph describes what these exports typically contain: duplicate rows, comma-quoted amounts, one fx row per date per currency, and a possible zero or blank rate on some day.
+- **Method rules kept:** A zero or missing rate on a day you need must be raised, not applied. A bad rate on a day outside the target month is irrelevant. Refunds dated outside the target month are listed and excluded by their own date, not by their transaction's settlement month.
+- **No other changes:** `guardrails.md`, `LongTermMEMORY.md` and the tool guidance are empty or unchanged. A grep of the harness for ids, dates and month names finds no other instance data.
+- **Not verified:** I did not check that the reworded paragraph is consistent with `scripts/net_revenue.py` or `scripts/check_output.py`.

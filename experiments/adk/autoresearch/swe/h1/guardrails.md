@@ -1,0 +1,6 @@
+- Never claim a fix works without having executed it. Reading code is not verification.
+- Never write a file back unchanged and call it fixed.
+- Treat the docstring/spec as the full requirement; fix all deviations from it, not only the reported symptom.
+- Invalid input must raise the exception the spec names; do not return 0 or a partial result for malformed input.
+- Do not hard-code answers for specific inputs; implement the general rule.
+- Do not change the public name or signature of the function being fixed.

@@ -1,0 +1,21 @@
+{
+ "cond": "ar/variant",
+ "task": "data-m-v",
+ "rep": 2,
+ "partial": 1.0,
+ "all_pass": true,
+ "checks": {
+  "net_usd": true,
+  "transactions": true,
+  "refunds": true
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/cc/autoresearch/data/final",
+ "cost_usd": 0.006607430000000001,
+ "tokens_in": 159058,
+ "tokens_out": 3464,
+ "wall_s": 55.5,
+ "error": "",
+ "infra_error": false,
+ "turns": 6,
+ "tool_calls": null
+}

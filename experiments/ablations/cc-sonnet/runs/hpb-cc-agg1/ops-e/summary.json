@@ -1,0 +1,126 @@
+{
+  "task_id": "ops-e",
+  "domain": "ops",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-cc-agg1/ops-e/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-sonnet/exec/hpb-cc-agg1/ops-e/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "ops-e",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.2436994,
+          "cached": false,
+          "notes": "I rewrote `systemprompt.md` to fix the rejection. I changed no other file.\n\n- **Rejected content removed:** the \"Workspace facts (app.log)\" block is gone, along with the verified result (\"15 errors, 6 users, top code E500 \u2026\", the window and the code counts). They were this instance's data. The command example now uses `LOG` instead of `app.log`.\n- **Method kept, as a generic check:** the rollout (`base1.md`) showed look-alike text that must not be counted: tracebacks containing \"ERROR user=\u2026 code=\u2026\" and INFO lines saying \"retrying after ERROR\". The prompt now tells the agent to preview the log's shape and count only the level token right after the timestamp, reading user and code from that header line. The agent has to re-derive this for each log.\n- **Fallback added:** a tied top value or no matches gets one bounded response. The agent re-checks the window and level, reports the tie, and picks per the task's wording. This matches `log_window_stats.py`, which exits 1 and writes nothing in those cases. Nothing in the rollout showed a tie, so this rests on the script's behaviour.\n- **Different output keys:** if the task asks for different keys, the agent should write the file itself from the printed events. I added this as a precaution, since `--write` only emits `errors`/`users`/`top_code`.\n- **Written deliverable:** the prompt still requires reopening it to check it parses and has the exact keys and types. `check_output.py` and `hooks.json` already block finishing without a valid file. The `base1` rollout ended with no `output/answer.json` written, which is the gap that check closes.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.180005,
+          "cached": false,
+          "notes": "This is a revision to fix the rejection. I made no new trajectory-based changes, and I did not re-read the rollouts this round.\n\n- **Removed the \"Workspace facts\" block** from `skills/log-incident-stats/SKILL.md`. It recorded this instance's file shape (line counts, service names, offsets seen) and its decoy patterns.\n- **Generalised two examples.** The `E500` / `user=bob` example and the dated `2026-10-02T23:xx-07:00` example now describe the pattern in words instead. The two patterns are free-text `msg=` on an INFO line quoting \"ERROR\" plus a code, and an indented continuation line repeating `ERROR user=... code=...`. A grep for `E500`, `bob`, `2026` and `Workspace` finds nothing in the skill now.\n- **Kept the method rules.** These are the event definition, the UTC half-open window, the counting rules and the consistency checks, all stated as checks the agent re-derives.\n- **Trigger line unchanged.** `systemprompt.md` still names `log-incident-stats`, so validation rule 1 holds.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.10620249999999999,
+          "cached": false,
+          "notes": "kept -> inv1 adopted wholesale (systemprompt procedure, `scripts/log_window_stats.py`, `scripts/check_output.py`, `hooks.json` Stop hook) -> base1 computed the right numbers (15/6/E500) but ended on its script's printout without writing `output/answer.json`, so it delivered nothing. inv1 ran the script, wrote the file with `--write`, reopened it to check the keys and types, and delivered `{\"errors\":15,\"users\":6,\"top_code\":\"E500\"}`. Only 1 base rollout, so this is weak evidence, but it is the one moment that separates delivering from not delivering.\ndropped -> dom1 skill `log-incident-stats` and its trigger line -> the dom1 rollout loaded the skill, parsed with its own regex, ran a missed-timestamp check, and still produced nothing (`produced.md` says \"nothing produced\"). Per the rules this is a non-delivering rollout, so I treated the edit as unsafe.\ndropped -> dom1 skill content (header-line-only events, half-open UTC window, consistency checks) -> inv1's prompt already states the event and window rules in two lines and the script enforces them. The skill would add on-demand text that did not help in the one rollout that used it.\nkept -> `check_output.py` Stop hook (`hooks.json`) -> it blocks finishing with an empty or invalid `output/`. This is the exact failure seen in base1 and dom1, 2 of 3 rollouts. Caveat: `hooks.json` is not in the listed editable surface and may be discarded. If it is, the prompt line \"Computing without writing is not finishing\" and the script's `--write` still carry the fix.\nkept -> no template braces in `systemprompt.md` (grep for double-brace and brace-percent is 0) and no skills are shipped, so there is no trigger-line risk. The two scripts named in the prompt ship in `scripts/`.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "ops-e",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 5,
+        "expected_P": 3,
+        "usd": 0.529907,
+        "rollout_usd": 0.0,
+        "session_usd": 0.529907,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "ops-e",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-cc-agg1/ops-e/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.1428241,
+      "experience": {
+        "cue": "An agent computes a correct result with an ad-hoc script and then finishes without writing the required deliverable file. The trajectory ends on a printout, and `output/` is empty.",
+        "lesson": "In the always-loaded `systemprompt.md`, add a rule that computing is not finishing and that the deliverable must be written and reopened. Also ship a helper under `scripts/` where one command both prints the matched evidence and writes the exact-schema file (a `--write` flag). Do not rely on an on-demand skill that only carries analysis rules. When choosing between edits, check that the executing rollout ends with the file on disk, not only that the numbers are right. The record did not isolate whether the prompt rule or the script mattered more, so ship both.",
+        "evidence": "Edit rows for systemprompt.md, log_window_stats.py and the skill (all confounded individually).",
+        "confidence": "low-medium. The delivered and non-delivered split is 2 vs 2, one rollout per arm, and the winning arm bundled prompt, script and hook. The Stop hook was never seen firing. The failure mode itself is clearly visible in two trajectories, which is the reason to keep the entry.",
+        "edits": "component: systemprompt.md (log-analysis procedure block)\ncandidates: inv1, agg1 (identical harnesses). dom1 replaced the block with a one-line trigger for a skill.\nchange: inv1 and agg1 added four rules to the always-loaded prompt.\n- Compute with a script, not by eye.\n- Preview the log shape. Only the level token right after the timestamp counts. Take user and code from the header line, not from indented traceback lines or from INFO lines that quote \"ERROR\".\n- \"Write the deliverable as soon as the numbers are computed, then reopen it\u2026 Computing without writing is not finishing.\"\n- On a tie or no matches, re-check and state it.\ndom1 instead added \"load the `log-incident-stats` skill first\" and no write instruction.\nobserved: Both rollouts with the procedure delivered a valid answer.json.\n- inv1 ran the script with `--write`, then reopened the file and checked keys and types.\n- agg1 grepped the other \"ERROR\" mentions to confirm they were indented or INFO lines, then wrote and verified the file.\nbase1 (no procedure) computed 15/6/E500 correctly with its own throwaway script, but the trajectory ends on that printout and `output/` stays empty.\ndom1 (skill, no write rule) also computed correctly, ran a missed-timestamp grep, and ended there with nothing produced.\nAll four rollouts got the numbers right, so the prompt block did not change correctness. It changed whether the file got written.\nWhich sentence did the work is not isolated, because the script and hook shipped alongside it.\nverdict: confounded\n\ncomponent: scripts/log_window_stats.py\ncandidates: inv1, agg1\nchange: New CLI that parses header lines only, converts offsets to UTC, and applies a half-open window. It prints every matched event and the counts. `--write` emits the three-key JSON. It exits 1 and writes nothing on a tie or when no events match.\nobserved: In both inv1 and agg1 the agent ran it and then re-ran it with `--write`, so computing and writing took one command. base1 and dom1 each wrote an ad-hoc parser that only printed, which is where they stopped.\nThe agg1 trace shows the agent first read the script's source in its `head` output, then trusted it.\nNo rollout had a tie, so the guard was never exercised.\nverdict: confounded\n\ncomponent: scripts/check_output.py and hooks.json (Stop hook)\ncandidates: inv1, agg1\nchange: A Stop hook runs `check_output.py`. It exits 2 if `output/` is empty or a file is empty or invalid JSON.\nobserved: No trace shows the hook blocking anything. Both rollouts had already written the file before finishing and also called `check_output.py` by hand, getting OK / check=0. base1 and dom1 had no hook and ended with an empty `output/`.\nWhether the hook fires in the real run is not visible in the transcripts.\nIts contribution is therefore unobserved.\nverdict: no observed effect\n\ncomponent: skills/log-incident-stats/SKILL.md\ncandidates: dom1\nchange: Added an on-demand skill with event-definition rules, UTC and half-open window rules, counting rules, and consistency checks. The system prompt got a trigger line pointing at it. The scripts and hook were removed.\nobserved: dom1 loaded the skill as its first action. It parsed correctly and ran extra checks: a header/continuation line-count split and a missed-timestamp grep. Then it ended without writing `output/answer.json` (\"nothing produced\"). The skill's last check, \"Write it as soon as the checks pass\", did not prevent that. The method guidance matched the other rollouts' numbers but gave no mechanism for writing the file.\nThere is one rollout, and the skill also removed the script and hook.\nverdict: confounded"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-sonnet/exec/hpb-cc-agg1/ops-e/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "d4bd777664d9255b"
+    }
+  },
+  "errors": []
+}

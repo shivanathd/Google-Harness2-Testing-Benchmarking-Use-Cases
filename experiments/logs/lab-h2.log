@@ -1,0 +1,10 @@
+  [arbitration-international-dispute-resolution] 1/4 ok           arbitration-international-dispute-resolution/draft-markup-of-arbitration-agreement
+  [arbitration-international-dispute-resolution] 2/4 ok           arbitration-international-dispute-resolution/draft-markup-of-procedural-order
+  [arbitration-international-dispute-resolution] 3/4 partial      arbitration-international-dispute-resolution/draft-markup-of-proposed-interim-order  :: agg: selection failed: no candidate produced an artifact (finals-only pool has no base fallback)
+  [arbitration-international-dispute-resolution] 4/4 partial      arbitration-international-dispute-resolution/identify-arbitration-agreement-issues  :: agg: selection failed: no candidate produced an artifact (finals-only pool has no base fallback)
+2 2 improver_usd 2.7373
+  [arbitration-international-dispute-resolution] 1/4 skipped      arbitration-international-dispute-resolution/draft-markup-of-arbitration-agreement
+  [arbitration-international-dispute-resolution] 2/4 skipped      arbitration-international-dispute-resolution/draft-markup-of-procedural-order
+  [arbitration-international-dispute-resolution] 3/4 ok           arbitration-international-dispute-resolution/draft-markup-of-proposed-interim-order
+  [arbitration-international-dispute-resolution] 4/4 ok           arbitration-international-dispute-resolution/identify-arbitration-agreement-issues
+4 0 improver_usd 1.3943

@@ -1,0 +1,8 @@
+{
+  "chosen_label": "c1",
+  "candidate_ids": {
+    "A": "c1",
+    "B": "c2"
+  },
+  "reason": "Candidates A and B are byte-for-byte identical: `{\"net_usd\": 5072.12, \"transactions\": 9, \"chargebacks\": 3}`. Both follow the requested shape, so no criterion separates them. I didn't recompute the figure from the source. Either pick has the same correctness risk."
+}

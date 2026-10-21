@@ -1,0 +1,20 @@
+# Changes for #142: invoice totals for discounted EU invoices
+
+## What changed
+- `invoicing/tax.py`: `rate_for` normalises region codes to upper case, so "eu" works. Unknown regions raise `ValueError` (previously `KeyError`).
+- `invoicing/totals.py`: all money is computed with `decimal.Decimal` and rounded half-up to cents, per docs/ROUNDING.md:
+  - line gross = qty x unit_price, rounded to cents
+  - line discount = line gross x discount_pct / 100, rounded to cents
+  - subtotal and discount are sums of the line values
+  - tax = (subtotal - discount) x rate, rounded to cents (tax is now charged on the discounted amount)
+  - total = subtotal - discount + tax
+  - every returned value is a two-decimal string
+- Public names and signatures (`line_total`, `compute_totals`, `rate_for`) are unchanged.
+
+## Why
+- The KeyError came from the case-sensitive region lookup.
+- Tax was computed on the undiscounted subtotal.
+- Float rounding produced cent errors (e.g. 0.125 unit price).
+
+## Verification
+- Ran `python -m pytest tests` (see test run output in the session) and added regression tests in `tests/test_totals.py` covering: lower-case region, unknown region, discounted EU tax base, half-up on a 0.125 unit price, and per-line discount rounding.

@@ -1,0 +1,8 @@
+RATES = {"US": "0.00", "EU": "0.20", "UK": "0.20", "IN": "0.18"}
+
+
+def rate_for(region):
+    try:
+        return RATES[region.upper()]
+    except (KeyError, AttributeError):
+        raise ValueError(f"unknown region {region!r}") from None

@@ -1,0 +1,123 @@
+{
+  "task_id": "data-e",
+  "domain": "data",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-cc-agg1/data-e/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/cc/exec/hpb-cc-agg1/data-e/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "data-e",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [
+        "inv1",
+        "agg1"
+      ],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.0458866,
+          "cached": false,
+          "notes": "KEEP_BASE. I changed no files.\n\nThe only rollout, base1, was procedurally sound and finished.\n- **Inspection:** It read both CSVs before computing.\n- **Parsing:** It spotted every mess in the data: mixed date formats (`2026-09-15` and `Sep 15, 2026`), quoted thousands separators, parenthesised negatives, and 6 exact-duplicate rows. It handled all of them in a script.\n- **Dedupe check:** It checked that duplicate `txn_id`s did not conflict before deduping.\n- **Filter and rounding:** It filtered to SETTLED rows in September 2026 and rounded to 2 decimals using Decimal arithmetic.\n- **Cross-check:** It compared the script's included count of 21 against a manual count.\n- **Deliverable:** It wrote `output/answer.json` in the requested shape, `{\"net_usd\": 18691.64, \"transactions\": 21}`. The converted deliverable text matches.\n\nI found no tool error, repeated mechanical step, skipped invariant or incomplete deliverable to fix, so I changed nothing. I did not recompute the figure myself. An always-on rule would only restate what the run already did, and one clean run is no evidence for a skill, script or plugin. Adding any of those would cost context and change nothing.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.0838594,
+          "cached": false,
+          "notes": "- The single base run (base1) wrote `{\"net_usd\": 18691.64, \"transactions\": 21}`. I recomputed the figure independently from `source/` and got the same result (18691.6368, 21 transactions). The run handled every trap in the data: mixed date formats, quoted comma amounts, parenthesised negatives, 6 byte-identical duplicate rows, out-of-period SETTLED rows, and non-SETTLED statuses. I found nothing to fix.\n- I still added one on-demand skill, `skills/revenue-reconciliation/SKILL.md`, because the base harness has no domain knowledge at all, and the run's success rested on the solver's own judgment. A trigger line in `systemprompt.md` makes the skill loadable. The run does not show it is needed.\n- The skill adds these practitioner checks, none of which the run had been told to do:\n  - Collapse duplicates by txn_id before summing or counting, and compare duplicate copies field by field. The run did compare its duplicates, and they were identical. If copies conflict, the choice must be stated, not hidden.\n  - Check that every currency has an FX rate, and that the rate column's direction (`usd_per_unit`) means multiply.\n  - Use Decimal and round once at the end.\n  - Cross-check the total and count by a second route.\n  - Report exclusions by reason.\n- I labelled the workspace facts as instance-specific. They are the 42 rows, 36 distinct ids, the formats seen, and the excluded settled rows (T11006, T11027, T11032 and T11022). The result is 21 transactions and 18691.64 USD. I verified all of these against the source. The skill does not change the deliverable shape: `answer.json` keeps exactly the two requested keys.\n- No always-on prose was added beyond the one trigger line.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.0553412,
+          "cached": false,
+          "notes": "kept -> KEEP_BASE (no files changed) -> The only base rollout (base1) delivered `output/answer.json` as `{\"net_usd\": 18691.64, \"transactions\": 21}`. It handled every trap I could see in the data. It dealt with mixed date formats, quoted thousands separators, parenthesised negatives and the 6 identical duplicate rows. It checked that the duplicates did not conflict before deduping. It excluded the August rows and the 2026-10-26 settled row. It used Decimal arithmetic and cross-checked the count. A defect in 0/1 base rollouts is no basis for an edit.\ndropped -> dom1 `revenue-reconciliation` skill plus its trigger line in `systemprompt.md` -> The dom1 rollout produced the same answer as base (18691.64, 21), so the skill showed no improvement. Its own notes say \"the run does not show it is needed\". It also bakes in instance-specific answers (the excluded ids and the 18691.64 / 21 result). If this entered the library, those would mislead later tasks with different exports. The generic checks it lists (dedupe, Decimal, FX direction, round once) are already done by the base agent unprompted.\ndropped -> inv1 (no-op candidate) -> inv1 changed no files, so there is nothing to merge. Its observation that base1 was clean matches my reading of the trajectory.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "data-e",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 3,
+        "expected_P": 3,
+        "usd": 0.185087,
+        "rollout_usd": 0.0,
+        "session_usd": 0.185087,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "data-e",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-cc-agg1/data-e/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.0567817,
+      "experience": {},
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/cc/exec/hpb-cc-agg1/data-e/agg1",
+      "chosen_tree_is_base": true,
+      "harness_fingerprint": "020675403b27bd72"
+    }
+  },
+  "errors": []
+}

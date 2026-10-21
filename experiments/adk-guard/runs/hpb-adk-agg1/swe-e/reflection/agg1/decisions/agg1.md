@@ -1,0 +1,16 @@
+Evidence caveat: no rollout, base or candidate, actually fixed the bug. All three left the regex `([hm])` unchanged. Only inv1 produced an output file, and that file held the buggy source. The dom1 rollout produced nothing: it loaded the skill and then stopped mid-debugging. The merge below is therefore built from the observed failure mechanisms, not from any run that succeeded. I have not run it.
+
+kept -> inv1 Stop hook (`hooks.json` plus `scripts/check_output.py`) -> In the base1 rollout, the run ended with no `output/durations.py`. In inv1, the hook blocked finishing twice with "output/ has no .py deliverable", and the agent then ran `cp`. The hook fires inside the tool loop, so it can't be skipped. inv1 is the only rollout that delivered an output file. The hook passes silently on a buggy file, so inv1's delivery is not evidence of a fix.
+
+revised -> Stop hook gets a one-time final self-check message, keyed by a marker file in TMPDIR -> In inv1, the final turn ended after `cp` with the bug untouched, and the hook passed because it checks only file existence, a diff and tests. The hook can't know the reported example, so the message tells the agent to re-run it, check each docstring clause, and confirm `src/` changed. A stale marker from an earlier run in the same directory would only skip the message. The hook still blocks at most 3 times, so it can't trap the agent.
+
+kept -> `tool_guidance.md` from inv1: `write_file` overwrites the whole file, never use it on tests, "wrote N chars" is not verification -> In base1, `write_file` clobbered `tests/test_durations.py` three times. In base1, inv1 and dom1, the first `write_file` re-wrote `src/durations.py` with identical buggy content.
+
+revised -> `systemprompt.md`: inv1's five-step workflow condensed into a few always-on rules, plus a trigger line for the skill -> The base prompt was one line and three of three runs went wrong. In base1, the agent ran `python3 tests/test_durations.py` directly, got `ModuleNotFoundError`, and then overwrote the tests and added `src/__init__.py`. The new text carries three rules, each tied to an observed moment:
+- Run pytest from the workspace root, because conftest sets the path.
+- Never end a turn on a statement of intent. Both inv1 and dom1 ended turns with "Let's update the regex…" and no tool call.
+- Use `PYTHONPATH=src python3 -c`. inv1 repeated `python3 -c "from durations import …"` about eight times with the same `ModuleNotFoundError`, because its guidance said only "sys.path set to src".
+
+revised -> dom1 `fix-python-bug` skill, kept on demand and trimmed -> dom1 loaded it, and the skill's docstring-clause list and parser probes (anchored/fullmatch rather than `findall`) are the only content pushing toward a full fix. I changed step 4 from "use Edit, not a full rewrite" to "send the complete corrected source via `write_file`". The rollouts show no Edit tool, only `write_file`. The trigger line is in `systemprompt.md`. dom1's rollout produced nothing, so I am not treating its outcome as support. The skill's content is generic, and the dom1 rollout shows no failure caused by it.
+
+dropped -> inv1's long step-by-step prompt text and the `systemprompt.md` duplication with the skill -> The always-on text costs budget in every run, and the details now live in the skill.

@@ -1,0 +1,5 @@
+iter	score	kept	notes
+0	0.000	True	baseline
+1	1.000	True	oted CSV, never write placeholder zeros, and not repeat identical commands. The baseline looped on the same broken awk command until it hit the 40-call limit and scored 0. On the sample data the scrip
+2	1.000	False	tes. I also added a step 6 to `systemprompt.md`: reconcile every raw row, resolve any WARNING or DUP-DIFFERENT lines, and adapt a copy of the script when the task's rules differ from its defaults. The
+3	1.000	False	 differ from the defaults, and to check `answer.json` against the schema at the end. The script still gives the same answer on the sample data (net 18691.64, 21 transactions). The score was already 1.

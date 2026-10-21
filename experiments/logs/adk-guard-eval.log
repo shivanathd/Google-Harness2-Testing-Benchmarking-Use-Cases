@@ -1,0 +1,57 @@
+adk h2-parallel-k1/intask  ops-m    r3 partial=1.00 err=
+adk h2-parallel-k1/intask  ops-m    r1 partial=1.00 err=
+adk h2-parallel-k1/intask  ops-m    r2 partial=1.00 err=
+adk h2-parallel-k1/variant ops-m-v  r1 partial=1.00 err=
+adk h2-parallel-k1/variant ops-m-v  r2 partial=1.00 err=
+adk h2-parallel-k1/intask  data-h   r2 partial=1.00 err=
+adk h2-parallel-k1/intask  swe-e    r2 partial=0.20 err=
+adk h2-parallel-k1/variant data-h-v r2 partial=1.00 err=
+adk h2-parallel-k1/variant data-h-v r1 partial=1.00 err=
+adk h2-parallel-k1/intask  data-h   r3 partial=1.00 err=
+adk h2-parallel-k1/intask  ops-e    r1 partial=1.00 err=
+adk h2-parallel-k1/intask  swe-e    r3 partial=0.20 err=
+adk h2-parallel-k1/intask  ops-e    r2 partial=1.00 err=
+adk h2-parallel-k1/intask  ops-e    r3 partial=1.00 err=
+adk h2-parallel-k1/variant ops-e-v  r1 partial=1.00 err=
+adk h2-parallel-k1/variant ops-e-v  r2 partial=1.00 err=
+adk h2-parallel-k1/intask  swe-e    r1 partial=0.20 err=
+adk h2-parallel-k1/intask  data-m   r1 partial=1.00 err=
+adk h2-parallel-k1/intask  data-m   r2 partial=1.00 err=
+adk h2-parallel-k1/intask  data-m   r3 partial=1.00 err=
+adk h2-parallel-k1/variant data-m-v r1 partial=1.00 err=
+adk h2-parallel-k1/intask  swe-m    r2 partial=0.40 err=
+adk h2-parallel-k1/intask  swe-h    r2 partial=0.57 err=
+adk h2-parallel-k1/variant data-m-v r2 partial=1.00 err=
+adk h2-parallel-k1/intask  swe-h    r1 partial=0.50 err=
+adk h2-parallel-k1/intask  ops-h    r1 partial=1.00 err=
+adk h2-parallel-k1/intask  ops-h    r2 partial=1.00 err=
+adk h2-parallel-k1/intask  swe-h    r3 partial=0.79 err=
+adk h2-parallel-k1/variant ops-h-v  r1 partial=1.00 err=
+adk h2-parallel-k1/intask  ops-h    r3 partial=1.00 err=
+adk h2-parallel-k1/intask  data-e   r2 partial=1.00 err=
+adk h2-parallel-k1/intask  data-h   r1 partial=1.00 err=
+adk h2-parallel-k1/intask  data-e   r1 partial=1.00 err=
+adk h2-parallel-k1/variant ops-h-v  r2 partial=1.00 err=
+adk h2-parallel-k1/variant data-e-v r1 partial=1.00 err=
+adk h2-parallel-k1/variant data-e-v r2 partial=1.00 err=
+adk h2-parallel-k1/intask  swe-m    r3 partial=0.00 err=LlmCallsLimitExceededError: Max number of llm call
+adk h2-parallel-k1/intask  swe-m    r1 partial=0.00 err=LlmCallsLimitExceededError: Max number of llm call
+adk h2-parallel-k1/transfer data-m   r3 partial=0.00 err=
+adk h2-parallel-k1/intask  data-e   r3 partial=1.00 err=
+adk h2-parallel-k1/transfer ops-m    r1 partial=0.00 err=
+adk h2-parallel-k1/transfer ops-m    r3 partial=0.00 err=
+adk h2-parallel-k1/transfer data-m   r1 partial=0.00 err=
+adk h2-parallel-k1/transfer data-m   r2 partial=0.00 err=LlmCallsLimitExceededError: Max number of llm call
+adk h2-parallel-k1/transfer data-h   r2 partial=0.00 err=LlmCallsLimitExceededError: Max number of llm call
+adk h2-parallel-k1/transfer data-h   r3 partial=0.00 err=LlmCallsLimitExceededError: Max number of llm call
+adk h2-parallel-k1/transfer ops-h    r2 partial=0.00 err=
+adk h2-parallel-k1/transfer data-h   r1 partial=0.00 err=LlmCallsLimitExceededError: Max number of llm call
+adk h2-parallel-k1/transfer ops-m    r2 partial=0.00 err=
+adk h2-parallel-k1/transfer ops-h    r1 partial=0.00 err=
+adk h2-parallel-k1/transfer ops-h    r3 partial=0.00 err=
+adk h2-parallel-k1/transfer swe-m    r1 partial=0.00 err=LlmCallsLimitExceededError: Max number of llm call
+adk h2-parallel-k1/transfer swe-h    r2 partial=0.29 err=LlmCallsLimitExceededError: Max number of llm call
+adk h2-parallel-k1/transfer swe-h    r3 partial=0.21 err=LlmCallsLimitExceededError: Max number of llm call
+adk h2-parallel-k1/transfer swe-m    r2 partial=0.00 err=LlmCallsLimitExceededError: Max number of llm call
+adk h2-parallel-k1/transfer swe-h    r1 partial=0.29 err=LlmCallsLimitExceededError: Max number of llm call
+adk h2-parallel-k1/transfer swe-m    r3 partial=0.00 err=LlmCallsLimitExceededError: Max number of llm call

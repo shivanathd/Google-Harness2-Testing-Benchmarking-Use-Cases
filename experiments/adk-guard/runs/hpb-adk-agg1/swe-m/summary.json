@@ -1,0 +1,126 @@
+{
+  "task_id": "swe-m",
+  "domain": "swe",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-adk-agg1/swe-m/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/adk-guard/exec/hpb-adk-agg1/swe-m/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "swe-m",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.2570367,
+          "cached": false,
+          "notes": "**Change made.** I replaced the \"Workspace facts\" block in `LongTermMEMORY.md` with a short list of checks the agent has to re-derive on every bug-fix task. The reviewer said that block described this instance's files, so I removed it.\n\n**What was removed.**\n- The package layout (`totals.py`, `tax.py`, `models.py`).\n- The `RATES` dict and its string keys.\n- The `LineItem` field types.\n- The statement that the existing code returns floats.\n- The specific rounding and region rules.\n\nAll of that is read from the source and `docs/ROUNDING.md` within the first few tool calls.\n\n**What was kept.** Procedure only:\n- Turn each bullet of the cited spec into one probe. This covers return types and format, rounding mode, case handling and error type.\n- Compare the code's return types with the spec's, not just the reported symptoms. The issue in `base1` lists three symptoms. The spec also requires two-decimal strings, so the symptom list covers only part of what the spec requires.\n- Run the issue's own example before and after the edit.\n- Fix the source in place, keep public names and signatures, and write the file the task names.\n\n**Evidence from `base1`.** It read the issue, the spec and the tests correctly. It then ended with \"Let's start by implementing the fix\" and made no edit, no `output/CHANGES.md` and no verification. The `systemprompt.md` already says \"Never end a turn by only saying what you will do next\", and `hooks.json` plus `scripts/check_output.py` already block finishing before the fix and deliverable exist. A single trajectory shows no new gap in those components, so I left `systemprompt.md`, `guardrails.md`, `tool_guidance.md`, `hooks.json` and the script unchanged. I did not check whether the Stop hook actually fired in `base1`.\n\nI did not add any skills or plugins, so the trigger-line, template-brace and script-existence rules don't apply to this edit.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.203442,
+          "cached": false,
+          "notes": "I removed the \"Workspace facts\" block from `skills/fix-python-bug/SKILL.md`. It held facts about this instance's files: the invoicing issue #142 bug locations and the hand-computed expected values. I did not re-read the trajectories this round, and the block's content is unchanged from the earlier attempt.\n\nI replaced the block with a short \"Before finishing\" checklist of checks the agent re-derives itself:\n- Hand-compute one example from the spec, including a half-cent case, and confirm the output matches.\n- Confirm differently-cased or spaced inputs give identical results, and that bad input raises the spec's exception.\n- Confirm any test that failed before the change now passes without editing that test.\n\nI did not change the rest of the skill, which is general procedure and the money/rounding checklist. I also left `systemprompt.md` alone. Its existing trigger line for `fix-python-bug` still names the skill, so it passes the trigger-line rule.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.22323470000000004,
+          "cached": false,
+          "notes": "Evidence caveat: all three rollouts failed to deliver. None fixed the bug or wrote output/CHANGES.md: base1, dom1 and inv1. Every edit below rests on weak evidence, and the merged harness has not been run.\n\nkept -> inv1 systemprompt.md rules (never end a turn on intent, read-then-edit-then-verify order, protect tests) -> base1 ended on \"Let's start by implementing the fix\" with no edit and no CHANGES.md. The library lesson also says prose alone has little effect, so this is only a cheap supplement to the hook.\n\nkept -> inv1 path guidance in systemprompt.md and tool_descriptions/tool_guidance.md (root-relative paths, start with list_files \".\") -> base1 spent 2 calls on \"workspace\" and \"/\" errors. dom1 never recovered: it called list_files three times on an absolute path and produced nothing. inv1 had the guidance and went straight to list_files \".\" and read the files.\n\nkept -> inv1 hooks.json and scripts/check_output.py (Stop hook gating on CHANGES.md, compilation, a modified source file and passing tests) -> in inv1 the hook blocked finishing three times, with the failing-test output shown. The library entry swe-e shows a hook-enforced deliverable appearing where prompt-only runs produced nothing. This is the only deterministic lever on delivery. The hook did not cause a fix in inv1.\n\nrevised -> check_output.py: added a source-digest check that blocks when the source is byte-identical to the previous stop attempt -> inv1 wrote the identical buggy invoicing/totals.py three times (449 chars each). The mtime heuristic passes on a no-op write. The library's swe-e rollouts show the same no-op rewrite. The check is deterministic and not a free-text reminder. It is untested in a run. I only checked that the script compiles.\n\nkept -> inv1 LongTermMEMORY.md (re-derive spec-clause probes, compare return types with the spec) -> short and generic. In inv1 and base1 the agent never noticed that the test expects strings while the code returns floats. Weak support.\n\nkept -> dom1 skills/fix-python-bug/SKILL.md, loaded on demand -> it was dom1's first action and cost one call. dom1 never got to use it, because it stalled on paths, so there is no behavioural evidence. It is the only component that carries Decimal, ROUND_HALF_UP and spec-clause knowledge, which is what inv1's no-op rewrites lacked. It costs nothing until loaded. I added its trigger line to systemprompt.md, placed after reading the files so it does not replace the first listing call.\n\nrevised -> systemprompt.md: added one line saying that rewriting the same content is not an edit, with no instance-specific example -> inv1 repeated the no-op write. The library says \"make a real edit\" text did not help, so this is low-confidence support for the hook check.\n\ndropped -> dom1's \"load the skill first\" line in systemprompt.md and its \"never end on intent\" sentence -> inv1's prompt already covers both. Loading the skill first would put it ahead of the list_files \".\" call.\n\ndropped -> guardrails.md edits -> no candidate changed it and no trajectory moment points to it.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "swe-m",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 5,
+        "expected_P": 3,
+        "usd": 0.683713,
+        "rollout_usd": 0.0,
+        "session_usd": 0.683713,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "swe-m",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-adk-agg1/swe-m/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.1713678,
+      "experience": {
+        "cue": "A bug-fix harness where the issue lists a few symptoms and a spec document gives the full contract. The agent reaches \"the existing test passes\" and finishes, even though the spec has several other violations that no test or hook measures.",
+        "lesson": "Don't count a skill or LongTermMEMORY.md checklist as a fix for the agent stopping early, because loading it did not change behavior in the one run that loaded it (agg1). If the harness should prevent a partial fix, make the check mechanical. The Stop hook in `scripts/check_output.py` could run probes derived from the spec clauses, such as an exact-output case, a half-cent case, a tax-on-discounted-amount case, and an unknown-region exception. It would block finishing until they pass, and the probes would have to come from the task's own spec or be generated from it. A hook that only checks that CHANGES.md exists, the code compiles, and the visible tests pass is satisfied by a partial fix.",
+        "evidence": "The skills row and the hooks row. In agg1 the skill listed Decimal, ROUND_HALF_UP, net-of-discount tax and ValueError, yet the final totals.py still used float `round()` and taxed the undiscounted subtotal. The hook let it finish once the single visible test passed, and its CHANGES.md overclaimed. In inv1 the hook blocked on a failing test three times but did not move the agent off the identical rewrite. So a blocking message alone is not enough, and it takes a check that the fix can actually fail.",
+        "confidence": "low. This rests on one agg1 rollout, and no run tested spec-derived probes in a hook, so the proposed remedy is untested. The finding that skill text was ignored after it was loaded is observed. The finding that the hook is too weak is observed. The remedy is inferred.",
+        "edits": "component: systemprompt.md (\"Rules for every run\": never end on intent, read\u2192edit\u2192verify\u2192CHANGES order, protect tests, root-relative paths, \"wrote N chars proves nothing\")\ncandidates: inv1, agg1 (dom1 added only a shorter \"load skill first / never end on intent\" line)\nchange: Added a block of workflow rules and path guidance to the base prompt. agg1 added two lines: a trigger to load `fix-python-bug` after reading, and \"writing the same content is not an edit\".\nobserved: base1 first called list_files on \"workspace\" and \"/\", which both errored. It then ended its turn on \"Let's start by implementing the fix\" with no edit and no CHANGES.md. inv1 and agg1 began with list_files \".\" and read the issue, spec and source. Both then made edits and kept calling tools. dom1 had only the short line and no path guidance. It looped on an absolute path and never recovered. inv1's rules did not stop it writing byte-identical code ten times. agg1's \"same content is not an edit\" line was not what fixed that, because agg1 never entered that loop.\nverdict: confounded (the path and tool-use gains appear in two runs that also carry the tool_guidance and hook changes. One rollout per arm, and no run isolates the prompt text.)\n\ncomponent: tool_descriptions/tool_guidance.md\ncandidates: inv1, agg1\nchange: Added three lines: paths are root-relative, write_file replaces the whole file, use run_command from the root.\nobserved: Same contrast as the prompt row. base1 wasted two calls on \"workspace\" and \"/\", dom1 never found the root, and inv1 and agg1 listed \".\" first. The text was added together with the systemprompt path lines.\nverdict: confounded\n\ncomponent: hooks.json + scripts/check_output.py (Stop hook)\ncandidates: inv1, agg1\nchange: A Stop hook gates finishing on CHANGES.md existing, source compiling, a modified source file, and passing tests. agg1 added a source-digest check that blocks when the source is identical to the previous stop attempt.\nobserved: In inv1 the hook blocked three times. Each block showed the failing test, but the agent still rewrote the identical 449-char buggy file. The hook created no fix and the run ended with no CHANGES.md. In agg1 the hook never blocked, because the run reached passing tests, a modified file and CHANGES.md. The digest check was never triggered in any run. It is untested.\nverdict: no observed effect (it blocked but did not change what inv1 did. In agg1 the checks were satisfied by a partial fix.)\n\ncomponent: skills/fix-python-bug/SKILL.md\ncandidates: dom1, agg1 (inv1 and base1 had no skill)\nchange: Added a spec-reconciliation checklist covering Decimal from strings, ROUND_HALF_UP, tax net of discount, two-decimal string output, ValueError for an unknown region, and protected tests. agg1 added a trigger line in systemprompt.md.\nobserved: dom1 loaded it first and then stalled on paths. agg1 loaded it after reading ISSUE.md. agg1 still wrote float `round()` code and made tax.py `.upper()` only, with no ValueError. The tax base is still undiscounted and rounding is still float, and none of this was probed against the skill's rules. agg1 only reformatted outputs with `:.2f` until the existing test passed. Its CHANGES.md claims discounted-tax and half-up rounding that the code does not implement. Loading the skill did not change what agg1 did.\nverdict: no observed effect\n\ncomponent: LongTermMEMORY.md (re-derive one probe per spec clause; compare return types with the spec)\ncandidates: inv1, agg1\nchange: Added four generic bullets about turning spec bullets into probes and running the issue example before and after.\nobserved: No run's trajectory shows the agent probing spec clauses. agg1 did run the issue's example before and after, but only for the KeyError. Nothing in the record points to this text.\nverdict: no observed effect\n\ncomponent: guardrails.md\ncandidates: none\nchange: Not edited by any candidate.\nobserved: n/a\nverdict: no observed effect"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/adk-guard/exec/hpb-adk-agg1/swe-m/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "518ac2a6a533b545"
+    }
+  },
+  "errors": []
+}

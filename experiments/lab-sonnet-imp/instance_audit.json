@@ -1,0 +1,107 @@
+{
+ "arbitration-international-dispute-resolution/draft-markup-of-proposed-interim-order": {
+  "tree_is_base": false,
+  "own": [
+   "1.20",
+   "100,000",
+   "36.8",
+   "4,200",
+   "47.5",
+   "50,000",
+   "54,000",
+   "65,000,000",
+   "879.63",
+   "Andino",
+   "Arbitraje",
+   "Bogot\u00e1",
+   "Colombia",
+   "EBITDA",
+   "Grupo",
+   "IAA",
+   "KEH",
+   "NIS",
+   "PetroChem",
+   "Redline",
+   "SIAA",
+   "SOA",
+   "ULSD",
+   "Worldwide"
+  ],
+  "other": [
+   "150"
+  ],
+  "chars": 33836,
+  "leakguard": {
+   "skills/interim-measures-order-review/SKILL.md": {
+    "datum": [
+     "1.2",
+     "100000",
+     "14.2",
+     "14.3",
+     "14.4",
+     "14.5",
+     "36.8",
+     "4200",
+     "47.5",
+     "50000",
+     "54000",
+     "65000000",
+     "879.63"
+    ],
+    "entity": [
+     "Arbitraje",
+     "Bogot",
+     "Colombia",
+     "Findings",
+     "Petro",
+     "Sections",
+     "Singapore"
+    ],
+    "verbatim": [
+     "court or regulatory authority of the party's home",
+     "or regulatory authority of the party's home jurisdiction",
+     "any court or regulatory authority of the party's"
+    ]
+   }
+  }
+ },
+ "arbitration-international-dispute-resolution/identify-arbitration-agreement-issues": {
+  "tree_is_base": false,
+  "own": [],
+  "other": [],
+  "chars": 8708,
+  "leakguard": {}
+ },
+ "arbitration-international-dispute-resolution/draft-markup-of-arbitration-agreement": {
+  "tree_is_base": false,
+  "own": [
+   "AAA",
+   "CIA",
+   "JAMS",
+   "Recommended",
+   "Required"
+  ],
+  "other": [
+   "150",
+   "Comments",
+   "Counterparty",
+   "Dates",
+   "Insertions",
+   "Redline"
+  ],
+  "chars": 28907,
+  "leakguard": {}
+ },
+ "arbitration-international-dispute-resolution/draft-markup-of-procedural-order": {
+  "tree_is_base": false,
+  "own": [
+   "150",
+   "Responding"
+  ],
+  "other": [
+   "Redline"
+  ],
+  "chars": 27451,
+  "leakguard": {}
+ }
+}

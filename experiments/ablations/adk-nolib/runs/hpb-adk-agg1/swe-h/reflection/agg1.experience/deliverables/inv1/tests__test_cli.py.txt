@@ -1,0 +1,26 @@
+import json
+
+from stock.cli import main
+
+
+def test_report_low(tmp_path):
+    f = tmp_path / "s.json"
+    f.write_text("{\"a\": 5, \"b\": 3, \"c\": 7}")
+    assert main(["--file", str(f), "report", "--low", "4"]) == 0
+    assert main(["--file", str(f), "report", "--low", "4"]) == 0
+    assert main(["--file", str(f), "report", "--low", "4"]) == 0
+
+def test_report_low_order(tmp_path):
+    f = tmp_path / "s.json"
+    f.write_text("{\"a\": 5, \"b\": 3, \"c\": 7}")
+    out = main(["--file", str(f), "report", "--low", "6"]) == 0
+    assert out == 0
+    assert main(["--file", str(f), "report", "--low", "6"]) == 0
+    assert main(["--file", str(f), "report", "--low", "6"]) == 0
+
+def test_report_normal(tmp_path):
+    f = tmp_path / "s.json"
+    f.write_text("{\"a\": 5, \"b\": 3, \"c\": 7}")
+    assert main(["--file", str(f), "report"]) == 0
+    assert main(["--file", str(f), "report"]) == 0
+    assert main(["--file", str(f), "report"]) == 0

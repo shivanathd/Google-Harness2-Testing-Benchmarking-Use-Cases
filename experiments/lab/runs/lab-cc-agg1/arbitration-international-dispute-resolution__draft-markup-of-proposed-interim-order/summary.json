@@ -1,0 +1,128 @@
+{
+  "task_id": "arbitration-international-dispute-resolution/draft-markup-of-proposed-interim-order",
+  "domain": "arbitration-international-dispute-resolution",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "lab-cc-agg1/arbitration-international-dispute-resolution/draft-markup-of-proposed-interim-order/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/lab/exec/lab-cc-agg1/arbitration-international-dispute-resolution/draft-markup-of-proposed-interim-order/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "arbitration-international-dispute-resolution/draft-markup-of-proposed-interim-order",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [
+        "inv1"
+      ],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": true,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.25545281000000003,
+          "cached": false,
+          "notes": "",
+          "error": "the always-on prompt must say .docx files are read with `python3 scripts/read_doc.py <path>`"
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.03467299,
+          "cached": false,
+          "notes": "Scope: rewrote `skills/interim-order-redline/SKILL.md` to remove all instance facts. The trigger line in `systemprompt.md` is unchanged and still names the skill. `systemprompt.md`, `guardrails.md`, `LongTermMEMORY.md`, `tool_guidance.md`, and the READMEs are unchanged (KEEP). I added no script or plugin: no run hand-rolled a failing helper, and the one in-loop defect (internal comments) is handled by a rule.\n\nRemoved (rejection fix): all figures, party and forum names, addresses, dates, PO1 paragraph numbers, quoted SOA and memo passages, and \"In this workspace\" labels. Each rule is now a general check the agent applies to the files it is given.\n\nChanges, each tied to a base1 moment (single rollout, no skill loaded, so these are baseline defects, not a measured candidate effect):\n\n1. **\u00a78 and \u00a79: no internal or privileged comments in the filed file.** base1 put 16 comments tagged \"INTERNAL \u2013 delete before filing\" into the .docx. Its final message then asks the lawyer to remove them, so the file needs repair before filing. The rule now says such comments must be zero in the filed file.\n\n2. **\u00a74: a concession the client instruction supplies must be named.** base1's \u00b64.1 follows the memo's wording, \"provisionally satisfied\u2026 prima facie case\u2026 failed to deliver\", which concedes breach while the respondent denies it. The final message does not list this as a decision. The rule now requires the least concessive wording and a named concession.\n\n3. **\u00a73: re-check each measure after replacing a finding.** base1's accepted text has \u00b64.3 (no real dissipation risk) and \u00b64.4 (element not established for the asset order), yet \u00b65 keeps a freeze with a \"limited\" scope. The final message only says the \"no asset measure\" choice is the lawyer's call. The rule now says a kept measure whose basis the same redline negates is a conflict to strike, narrow, or name.\n\n4. **\u00a73: check the accepted text for duplicated phrases.** base1 found \"is provisionally satisfied\" repeated in \u00b64 and \u00b64.1 only after reading the accepted text (rollout ~l.1815\u20131819). The rule now makes this a standard check.\n\n5. **\u00a74: test absence claims against the application.** base1 found the memo's \"no justification whatsoever\" wrong, since the application (\u00b659 per base1) gives an interest and costs reason for the uplift. The rule now requires a search before a comment says a party gave no reasons.\n\n6. **\u00a79: a plain-text read may drop comments and deletions.** The base1 converted deliverable (`deliverables/base1/\u2026txt`) shows accepted text only, with no comments and no deleted text. The grounds for each change must also appear in the final message, which the \u00a79 final-message order carries.\n\n7. **\u00a79 final message (a): add provisions beyond the client's instructions.** base1 flagged several added provisions (\u00b65A, \u00b65B, \u00b614 review period, and others) as beyond the memo, and this should be a lawyer decision.\n\n8. **\u00a76: section numbers differ across sources.** The memo, application and draft cite different section numbers for the force majeure provision. The rule is to use the instrument's numbering and name the discrepancy.\n\nKept from the prior version: the measure-by-measure test, forum-limit and specific-words checks, rule-text discipline, privilege handling, deadline comparison, and the final-message order. base1 did these reasonably, so I did not expand them.\n\nNot verified: none of the new rules has been tested in a candidate run. The defects are visible in base1 only.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.16996729000000002,
+          "cached": false,
+          "notes": "revised -> guardrails.md: one new standing line, that a file filed with or sent to a tribunal or counterparty carries no internal, privileged or strategy-memo content and no comment to delete before it goes out, with such points moved to the final message -> base1 moved memo references into \"INTERNAL\" notes inside the filed file (rollout L1818); its audit counted 16 such comments (L1912); its final message asks the lawyer to delete them before filing (L1965). inv1, on the identical harness, has no INTERNAL tags and writes tribunal-facing comments. That is 1 of 2 base-harness draws, so the evidence is a single moment. Kept anyway because the defect leaves the filed file needing repair and the line costs one sentence of always-on text.\n\ndropped -> skills/interim-order-redline/SKILL.md plus its trigger line in systemprompt.md (dom1) -> NON-DELIVERING: the dom1 rollout produced nothing; its only content is \"(unavailable: 'str' object has no attribute 'get')\". Per the rule this edit is UNSAFE. The record does not show whether the skill or the rig caused the error, and the two delivering base-harness draws do not overwhelm that risk. Its content is not merged. Its rules (concessions, forum type, cross-references, privilege) target defects seen in base1 only.\n\ndropped -> inv1 (INV dimension) -> no edit to adopt: harness.diff is empty and every inv1 harness file is byte-identical to base. decisions/inv1.md describes a line the base systemprompt already contains. The inv1 rollout delivered output/marked-up-interim-order.docx (52 comments, LibreOffice render check), so it counts as a second draw from the base harness, not an edit test.\n\nkept -> systemprompt.md, LongTermMEMORY.md, tool_guidance.md, skills/, scripts/, plugin/ (all unchanged) -> both base-harness draws delivered the named file, read all sources including SOA 14.4 and PO1 para 15, reproduced the original on reject-all, and inspected the artifact (base1 via pandoc and XML checks; inv1 via LibreOffice render). Nothing in the delivering runs shows a failure that a further always-on line would fix beyond the revised guardrail.\n\ndropped -> final-message flag for the para 4.1 concession -> base1 para 4.1 concedes that the Respondent failed to deliver, following the memo, and its \"decisions to confirm\" list omits it (final message); inv1 flagged the same concession (\"\u00b64.1 concedes a provisional prima facie case, as the memo instructed\"). That is 1 of 2 draws. The wording was the lawyer's own instruction, so the lawyer can decide it and the always-on text is not extended.\n\ndropped -> rule for a kept measure whose basis the same redline negates -> base1 para 4.4 records element (c) as not established for the asset order while para 5 keeps a USD 47.5m freeze (deliverable text); its final message leaves this as \"your call\". inv1 avoided the explicit negation (\"satisfied on each element only to the extent of the measures\") and kept the freeze without flagging it. That is 1 explicit case in 2 draws, and a fix of this kind belongs in a skill, which the only candidate that carries it did not deliver.\n\ndropped -> rule on citing rule text not in the file (Art. 28(1)) -> inv1 flagged its \"appropriate security\" wording as drawn from memory. Art. 28(1) is cited in the record (Application para 53; PO1 para 15), so no record content is fabricated and no edit is warranted.\n\nLimit: the inv1 edit-spec tool input is cut at about 1,515 characters in the trajectory, so inv1's comment text is judged from produced.md and its final message only. This is a render limit, not solver behaviour.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "arbitration-international-dispute-resolution/draft-markup-of-proposed-interim-order",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 3,
+        "expected_P": 3,
+        "usd": 0.460093,
+        "rollout_usd": 0.0,
+        "session_usd": 0.460093,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "arbitration-international-dispute-resolution/draft-markup-of-proposed-interim-order",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "lab-cc-agg1/arbitration-international-dispute-resolution/draft-markup-of-proposed-interim-order/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.08013254,
+      "experience": {
+        "cue": "An agent drafts a file that will go outside the firm, to a tribunal or counterparty, from a source set that includes privileged or internal material. Partway through the build it finds content that must stay out of that file. The harness rule on what the outward file may contain either says nothing or states only the content prohibition.",
+        "lesson": "In guardrails.md, state the outward-file rule as a prohibition on comments that would have to be removed before sending, and name the final message as the only destination for internal points. The rule must close the \"tag it for later deletion\" route, not only prohibit privileged content.",
+        "evidence": "guardrails.md (agg1 form), a confounded row. The execution contrast: base1, with no rule, found memo references in filing-facing comments and tagged 16 comments \"INTERNAL \u2013 delete before filing\", so the file needed repair (rollout L1818, L1912, L1965). agg1, with the bullet, used no tags and moved those points into the final message (L1756\u20131819). inv1, on the same base, wrote no tags, so the defect appears in 1 of 2 base draws.",
+        "confidence": "low. The record has one run with the line, one base run with the defect and one clean base run. The line is the only guardrail change in agg1, but agg1 also differs from base1 in judgment calls the line does not reach, so the attribution is not isolated. The escape route itself is observed directly in base1, and the entry is limited to that.",
+        "edits": "component: guardrails.md\ncandidates: agg1 (adopted)\nchange: The base guardrails.md is empty. agg1 adds one bullet: a file filed with or sent to a tribunal or counterparty carries no internal, privileged or strategy-memo content and no comment that must be deleted before it goes out; such points go in the final message.\nobserved: base1 (no such line) moved memo references into filing-facing comments, then tagged 16 comments \"INTERNAL \u2013 delete before filing\" (build at rollout L1618; decision at L1818; audit at L1912 reports 16 internal). Its final message asks the lawyer to delete them (L1965). agg1 ran a self-scan of its comments for memo-derived or internal content (L1756\u20131767), recorded only legitimate uses of \"privileged\" and \"internal instructions\", used no INTERNAL tags, and moved the memo's figures and its \u00a714.4 reading into the final message (L1800\u20131819). inv1 (base) wrote no INTERNAL tags, and its final message states the comments contain no privileged memo content (L1544). The agg1 accepted text has no memo references. Comment bodies are only partly visible because action inputs are truncated at roughly 1,200\u20131,500 characters, so the clean comment set is not fully verified.\nverdict: confounded\n\ncomponent: guardrails.md\ncandidates: dom1\nchange: A different form of the same file. dom1 adds one bullet: do not state what a rule, statute or case says, or omits, unless its text is in the file; mark it for verification and list it in the final message. Relative to base, dom1 adds this and no privilege line.\nobserved: There is no dom1 trajectory (rollouts/dom1.md: \"AttributeError: 'str' object has no attribute 'get'\"), so there is no execution trace. A deliverable does exist (deliverables/dom1, 21,050 chars). That contradicts decisions/agg1.md, which records dom1 as non-delivering. The accepted text has no memo or INTERNAL text. It brackets disputed recital facts ([21 April 2025], [14 March 2025], [1 January 2022], the Respondent's address) and has no \"[rule text to be verified]\" marks. Comments are not in the text conversion, so internal tags cannot be checked. This line cannot be separated from the skill and the trigger line.\nverdict: confounded\n\ncomponent: skills/interim-order-redline/SKILL.md (new file)\ncandidates: dom1\nchange: A new 78-line skill covering controlling sources, the measure-by-measure test, findings-to-orders consistency, concessions in replacement wording, forum limits, cross-references, rule-text discipline, privilege in the filed file, and the final-message order. Its content is instance-free.\nobserved: No run in the record calls the Skill tool, so whether dom1 loaded it is unobserved. Artifact differences are not attributable. dom1 \u00b64.1 reads \"makes no finding at this stage as to breach\", with no \"provisionally satisfied\" or \"failed to deliver\" wording. base1 has \"failed to deliver\" in \u00b64.1; agg1 and inv1 have \"provisionally satisfied\u2026 prima facie case\". The base draws already differ on this (base1 vs inv1), so the difference may be draw variance rather than the skill. dom1 keeps the USD 47.5m freeze (\u00b65) under a conditional \u00b64.4 with no finding that a dissipation risk is established, so the \u00a73 measure-versus-finding check is not visibly met.\nverdict: confounded\n\ncomponent: systemprompt.md\ncandidates: dom1\nchange: One bullet added: when the assignment is to review, redline or comment on a proposed interim order, load the interim-order-redline skill.\nobserved: No trajectory. No run in the record invokes the Skill tool, so the trigger's effect is unobserved.\nverdict: confounded\n\ncomponent: plugin/README.md, scripts/README.md, skills/README.md (new in the harness tree; absent from base_harness)\ncandidates: agg1, dom1, inv1\nchange: Three HTML-comment README files. plugin/README.md describes a Stop-event hooks.json pointing at a check script. The scripts and skills READMEs describe how to add a helper or a skill. There is no executable content.\nobserved: No rollout created a hooks.json, a skill, a plugin or a helper beyond the task's read_doc.py. The agg1 workspace listing (rollouts/agg1.md L1\u201338) shows only CLAUDE.md, documents, output and scripts/read_doc.py. No Stop-hook block occurs in any trajectory, and no run calls the Skill tool.\nverdict: no observed effect"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/lab/exec/lab-cc-agg1/arbitration-international-dispute-resolution/draft-markup-of-proposed-interim-order/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "95e024aff819c71c"
+    }
+  },
+  "errors": []
+}

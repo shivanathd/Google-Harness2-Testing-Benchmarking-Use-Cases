@@ -1,0 +1,13 @@
+kept -> inv1 skill `payment-revenue-reconcile` + `scripts/net_revenue.py` + trigger line in systemprompt.md (adopted essentially wholesale) -> base1 (1/1, so weak evidence) read all five files and then wrote placeholder `{"net_usd": 123456.78, ...}` with backslash-escaped quotes and no computation. inv1's rollout loaded the skill, ran the script once, and wrote valid JSON `{"net_usd": 5072.12, "transactions": 9, "chargebacks": 3}`. I checked its audit against POLICY.md and it matches the policy: UTC month, JPY in whole yen, C09 and C10 excluded including cb_5, cb_2 booked as a reversal plus fee only, and 3 September chargebacks. The script also writes and re-reads the file, which fixes the escaped-quote failure by construction. Library entry data-e shows the same pattern: a tested script beat an ad hoc approach.
+
+kept -> always-on completion rules (no placeholder numbers, real JSON, re-read once, about 40 calls, don't re-run a failed command) -> they trace to the base1 fabricated, invalid file. The retry and call-budget lines are insurance only: no rollout showed that failure on this task, and the library notes the same for the equivalent line. They are short, so I left them in.
+
+revised -> removed the stored answer figures ("net_usd 5072.12, transactions 9, chargebacks 3") from the SKILL.md workspace facts -> the library experience (data-e) found that removing the stored answer from the skill changed nothing observable, and a stored answer can anchor the agent on a different dataset. The edge-row facts stay, labelled "re-check if they differ".
+
+dropped -> dom1 skill `revenue-reconciliation` (prose per-row procedure) -> its rollout wrote the correct 5072.12 / 9 / 3 by hand-computing in the agent's head, with no script or second check. The result is right, but it relies on arithmetic done unaided and costs more tokens. The skill's rules duplicate what the script implements. Merging both would add a second skill with overlapping triggers, so I did not.
+
+dropped -> dom1's decoy-charge heuristic and "verify a second way" check -> the script already skips test customers, so these add nothing that matters here. Both rollouts that delivered (inv1 and dom1) agree on the figures, so there is no contradiction to resolve.
+
+dropped -> the empty placeholder `skills/README.md` and `scripts/README.md` -> they held only comments, and the real components now exist.
+
+Caveat: each arm has one rollout, and all of the evidence is on this one workspace. No rollout tied to an adopted edit produced nothing.

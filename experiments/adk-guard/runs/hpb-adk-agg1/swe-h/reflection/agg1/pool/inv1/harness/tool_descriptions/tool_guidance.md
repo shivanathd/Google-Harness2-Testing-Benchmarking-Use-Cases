@@ -1,0 +1,2 @@
+- list_files/read_file/write_file paths are relative to the workspace root; "workspace" and "/" are rejected. read_file returns small files whole (start_line 0 is fine).
+- write_file replaces the whole file: send complete intended content; never use it on existing tests. "wrote N chars" is not verification: run the code afterwards (run_command from the workspace root, if available).

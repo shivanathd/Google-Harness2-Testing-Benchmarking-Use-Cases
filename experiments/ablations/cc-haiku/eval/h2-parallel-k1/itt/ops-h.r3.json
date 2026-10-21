@@ -1,0 +1,27 @@
+{
+ "cond": "h2-parallel-k1/itt",
+ "task": "ops-h",
+ "rep": 3,
+ "partial": 0.0,
+ "all_pass": false,
+ "checks": {
+  "gateway.requests": false,
+  "gateway.error_rate": false,
+  "gateway.p95_ms": false,
+  "search.requests": false,
+  "search.error_rate": false,
+  "search.p95_ms": false,
+  "billing.requests": false,
+  "billing.error_rate": false,
+  "billing.p95_ms": false
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/ablations/cc-haiku/runs/hpb-cc-agg1/ops-h/harnesses/agg1",
+ "cost_usd": 0.0045971499999999995,
+ "tokens_in": 98877,
+ "tokens_out": 2042,
+ "wall_s": 54.8,
+ "error": "error_max_turns",
+ "infra_error": false,
+ "turns": 5,
+ "tool_calls": null
+}

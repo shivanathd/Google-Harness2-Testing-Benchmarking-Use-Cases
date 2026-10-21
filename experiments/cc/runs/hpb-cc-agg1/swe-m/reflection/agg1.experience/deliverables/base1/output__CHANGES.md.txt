@@ -1,0 +1,26 @@
+# Changes: #142 Invoice totals wrong for discounted EU invoices
+
+## invoicing/totals.py
+- All arithmetic uses `decimal.Decimal`; no floats.
+- Each rounding step quantizes to cents with ROUND_HALF_UP (per docs/ROUNDING.md):
+  line gross, line discount, tax.
+- Tax is now charged on `subtotal - discount` (was undiscounted subtotal).
+- Returned amounts are strings with exactly two decimals.
+- `line_total` keeps its name and signature and now returns a `Decimal`.
+
+## invoicing/tax.py
+- `rate_for` normalizes the region to upper case, so `"eu"` works.
+- Unknown regions raise `ValueError` instead of `KeyError`.
+
+## tests/test_totals.py
+- Added tests for: case-insensitive region, unknown region raising ValueError,
+  tax on discounted amount, the issue's example invoice, and half-cent rounding (0.125 -> 0.13).
+
+## Verification
+- The six tests pass when run directly with Python (test functions called in turn).
+- `python -m pytest tests` could not run in this sandbox: pytest fails at collection with
+  `PermissionError` while scanning parent directories. This is an environment restriction, not a test failure.
+
+## Issue example
+`compute_totals([LineItem("widget", 3, "19.99", 10)], "eu")` returns
+`{'subtotal': '59.97', 'discount': '6.00', 'tax': '10.79', 'total': '64.76'}`.

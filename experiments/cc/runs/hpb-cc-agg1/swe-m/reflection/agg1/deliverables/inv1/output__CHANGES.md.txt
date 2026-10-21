@@ -1,0 +1,31 @@
+# Changes: fix invoice totals for discounted EU invoices (#142)
+
+Brought `invoicing.totals.compute_totals` in line with `docs/ROUNDING.md`.
+
+## Code
+
+- `invoicing/tax.py`: `rate_for` upper-cases the region before lookup, so "eu" works. An unknown region now raises `ValueError` instead of `KeyError`.
+- `invoicing/totals.py`:
+  - All arithmetic uses `Decimal`; no floats.
+  - Line gross = qty x unit price, rounded half-up to cents (`line_total`).
+  - Line discount = line gross x discount_pct / 100, rounded half-up to cents, then summed.
+  - Tax = (subtotal - discount) x rate, rounded half-up to cents. Tax is now charged on the discounted amount.
+  - total = subtotal - discount + tax.
+  - Every returned amount is a two-decimal string (previously floats).
+
+Public names and signatures are unchanged: `line_total(item)`, `compute_totals(items, region)`, `rate_for(region)`.
+
+## Tests
+
+`tests/test_totals.py` gained four tests:
+- The issue's example (`widget`, 3 x 19.99, 10% off, "eu") returns subtotal 59.97, discount 6.00, tax 10.79, total 64.76.
+- Tax is charged on the discounted amount (UK, 100.00 with 50% off gives tax 10.00).
+- A 0.125 unit price rounds half-up to 0.13.
+- An unknown region raises `ValueError`.
+
+The existing `test_simple_us` was failing at baseline, because it got a float `20.0` where it expected `"20.00"`. It now passes.
+
+## Results
+
+- Baseline (`python3 scripts/run_tests.py`, before edits): 1 failed (`test_simple_us`).
+- After edits: `python3 -m pytest tests` gives 5 passed. `python3 scripts/run_tests.py` gives 5 passed, 0 SKIP. The runner used pytest directly; the fallback path was not needed.

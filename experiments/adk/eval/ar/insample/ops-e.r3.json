@@ -1,0 +1,21 @@
+{
+ "cond": "ar/insample",
+ "task": "ops-e",
+ "rep": 3,
+ "partial": 1.0,
+ "all_pass": true,
+ "checks": {
+  "errors": true,
+  "users": true,
+  "top_code": true
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/adk/autoresearch/ops/final",
+ "cost_usd": null,
+ "tokens_in": 3929,
+ "tokens_out": 143,
+ "wall_s": 34.2,
+ "error": "",
+ "infra_error": false,
+ "turns": null,
+ "tool_calls": 2
+}

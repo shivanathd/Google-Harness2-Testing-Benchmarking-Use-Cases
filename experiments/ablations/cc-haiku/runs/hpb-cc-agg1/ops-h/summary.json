@@ -1,0 +1,121 @@
+{
+  "task_id": "ops-h",
+  "domain": "ops",
+  "k": 1,
+  "seed": null,
+  "status": "partial",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-cc-agg1/ops-h/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-haiku/exec/hpb-cc-agg1/ops-h/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "ops-h",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.018565455,
+          "cached": false,
+          "notes": "Single rollout (base1); no candidate to compare against. Edits target the procedure, not the subject matter.\n\n1. **`systemprompt.md`: write-first and final-check rule.** Trajectory base1: after the first report script (step 4), the agent already had all three figures, and I confirmed them independently (gateway 96/13/0.1354/334, search 119/18/0.1513/192, billing 124/20/0.1613/393). It then spent its remaining steps on a billing latency-key cross-tab, and the run ended with `deliverables/base1.md` = \"(no deliverable produced)\" and `output/` empty. The old prompt already said to write deliverables under `output/` and was skipped anyway. The new text says to write the file as soon as the figures exist, treat a check that only confirms a figure as no reason to delay, and re-open the file and run `scripts/check_output.py` before finishing. It contains no braces, so it passes the Jinja rule.\n\n2. **`scripts/check_output.py` (new): deterministic shape check.** Same base1 moment. It takes service names from `logs/*.jsonl` and `logs/*.jsonl.gz` and checks that `output/answer.json` has exactly those keys, each with exactly `requests` (int), `error_rate` (number rounded to 4 dp), and `p95_ms` (int). It exits 2 with an instruction on stderr for a missing file, bad JSON, or a wrong shape, and exits 0 with OK otherwise. I tested it in a scratch workspace: missing file, bad JSON, non-integer requests, missing service, unrounded rate, and a valid file all gave the expected result. It checks shape only, not values, so it does not add any domain rule.\n\n3. **`hooks.json` (new): Stop hook running `python3 scripts/check_output.py`.** Same base1 moment: the run exited with no output file. This is the invariant case the mission names (no exit before the deliverable exists). The evidence is one run, so this is the weakest part of the proposal. I used the hook because the prose rule in change 1 was already present in the base and was not enough by itself. The hook passes any valid file and is capped by the runtime at 3 blocks.\n\nConsidered and not changed:\n- `LongTermMEMORY.md`, `guardrails.md`, and `tool_guidance.md` are empty. I added no workspace facts or domain rules, since a parallel candidate owns those.\n- No skill was added, because nothing in base1 called for a multi-step procedure.\n- The agent never opened `CLAUDE.md` in the workspace root (listed at step 1). I could not see its contents, and Claude Code typically loads it automatically, so I added no rule for it.\n- The first report's billing `latency_s` to ms conversion and the 09:00 UTC key switch are confirmed in the logs (last `latency_ms` at 08:53:49Z, first `latency_s` at 09:03:51Z). That is domain content and I left it out.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.028586280000000006,
+          "cached": false,
+          "notes": "Change: removed the \"Workspace facts (this task's logs\u2026)\" block from `skills/traffic-report/SKILL.md`. It recorded this instance's file names, line counts, malformed-line counts, probe spelling, offset mix, and the billing switch record counts. That is what the rejection flagged. The remaining skill text is generic: the definitions, the unit-switch and malformed-line procedures, the artifact contract, and the four checks, all of which the agent re-derives from the files and the runbook. I grepped the harness afterwards for \"2026\", \"healthz\", \"gateway\", \"billing\", \"260\" and \"{{\"; nothing matched, and the frontmatter is intact.\n\nTrajectory moment: base1 (rollouts/base1.md, lines ~48 and ~124) inspected the logs, then cross-tabbed billing latency keys by UTC hour. It reproduced the 09:00 UTC switch and the malformed-line handling from scratch, so the removed facts duplicated work the agent already does. No other edits: `systemprompt.md`, `guardrails.md`, `LongTermMEMORY.md`, and `tool_guidance.md` are unchanged.\n\nNot changed, for your awareness: base1 never invoked the `traffic-report` skill and stopped mid-investigation, with no `output/answer.json` written (deliverables/base1.md is empty). That is a single-rollout observation and a separate issue from the rejection, so I did not act on it here.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.030081630000000005,
+          "cached": false,
+          "notes": "revised -> systemprompt.md: added one always-on paragraph merging inv1's write-first rule with dom1's \"terminal output is not delivery\" line; the output-file write is bundled into the same run that computes the figures -> 0/3 rollouts delivered (base1, inv1, dom1 each left output/ empty; produced.md reads \"(nothing produced)\" for all three). All three computed the same correct figures and ended at the same moment: base1 had the figures at call 3 and spent call 4 on a billing cross-tab; inv1 and dom1 printed the JSON to the terminal at call 4 without writing it. inv1's write-first rule was already in its CLAUDE.md and dom1's terminal line was in its systemprompt, so prose alone did not deliver in either run. Bundling the write into the computing script is the one change that lands the file at the call where the figures first exist. Always-on cost rose from one line to one short paragraph (no braces; checked, 0 matches for doubled-brace or brace-percent in always-on files).\n\nrevised -> hooks.json (new Stop hook running scripts/check_output.py) -> untested in any rollout: all three trajectories end after exactly 4 tool calls with no final assistant message, so no run reached a finish and the hook never fired. Kept because \"no exit before the deliverable exists\" is what a Stop hook enforces, and the revised checker passes any valid deliverable, so the downside is bounded. This is the least-evidenced part of the composition.\n\nrevised -> scripts/check_output.py (inv1's version rewritten to be task-agnostic) -> inv1's version hard-coded this task's three field names and the service list from logs/, which would block a later task in this area that asks for a different shape. Revised version checks only that output/ holds a non-empty non-hidden file and that any .json file parses. Tested in scratch workspaces: no output dir (exit 2), empty output (exit 2), truncated JSON (exit 2 with instruction), valid JSON (exit 0), CSV only (exit 0), hidden file only (exit 2).\n\ndropped -> skills/traffic-report/SKILL.md and its trigger line (dom1) -> dom1 invoked the skill at call 1 and still ended at call 4 with no file (1/1 no delivery). Figures were identical across 3/3 rollouts, including base1 and inv1 which had no skill and independently applied the same UTC window, /healthz exclusion, >=500 error rule, latency_s-to-ms switch and nearest-rank p95 (my independent recompute from source logs matches: gateway 96/0.1354/334, search 119/0.1513/192, billing 124/0.1613/393). The skill's domain content showed no marginal effect and its load costs a call plus always-on trigger text.\n\ndropped -> inv1's always-on instruction to re-open the output and run check_output.py before finishing -> replaced by the Stop hook, which enforces the same check without spending calls. Under the observed 4-call ending, an extra verify step in prose competes directly with the write.\n\ndropped -> a compute-and-write script for the traffic statistics (considered, not added) -> all three runs hand-rolled the same computation correctly in 2-3 calls, so the script trigger (runs got it wrong or did it slowly) is not met; the script would also embed this task's runbook rules and window.\n\nkept -> LongTermMEMORY.md, guardrails.md, tool_descriptions/tool_guidance.md (empty, unchanged) -> no rollout failed on a missing workspace fact; all three applied the runbook rules correctly without added text.\n\nkept -> whole composition (merged write-first systemprompt + generic Stop hook; dom1 skill dropped) -> NON-DELIVERY, STATED EXPLICITLY: none of the three rollouts (base1, inv1, dom1) produced a deliverable, so both candidate edits come from non-delivering rollouts and are unsafe on the evidence. I merged them anyway because the non-delivery is shared by the base (3/3 rollouts with the same shape: 4 tool calls, no final message, no output file), so the candidates did not cause it; the systemprompt paragraph and hook add no tool calls before the first write; and the merged text is a bounded change. The failure is not isolated to one rollout, but it is three single samples, and the trajectories cannot distinguish a run cap or reasoning-budget cutoff from a voluntary stop. This composition has not been validated by any delivering run and should be re-rolled before adoption.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "ops-h",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 4,
+        "expected_P": 3,
+        "usd": 0.077233,
+        "rollout_usd": 0.0,
+        "session_usd": 0.077233,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "ops-h",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "",
+      "chosen_label": "",
+      "chosen_run_id": "",
+      "chosen_is_base": false,
+      "why": "",
+      "id_map": {},
+      "dropped": [
+        "agg1"
+      ],
+      "n_candidates": 0,
+      "ok": false,
+      "fallback": false,
+      "error": "no candidate produced an artifact (finals-only pool has no base fallback)",
+      "usd": 0.0,
+      "experience": {},
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "",
+      "chosen_tree_is_base": true
+    }
+  },
+  "errors": [
+    "agg: selection failed: no candidate produced an artifact (finals-only pool has no base fallback)"
+  ]
+}

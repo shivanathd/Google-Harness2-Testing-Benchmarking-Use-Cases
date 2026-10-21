@@ -1,0 +1,9 @@
+# Changes: #142 invoice totals for discounted EU invoices
+
+- `invoicing/tax.py`: `rate_for` now normalises region codes to upper case, so "eu" works; unknown regions raise `ValueError` instead of `KeyError`. Still returns the rate as a string.
+- `invoicing/totals.py`: computation uses `decimal.Decimal` with half-up rounding to cents, per `docs/ROUNDING.md`:
+  - line gross and line discount are each rounded to cents;
+  - tax is charged on (subtotal - discount), not the undiscounted subtotal;
+  - all returned amounts are strings with two decimals.
+  - `line_total` and `compute_totals` keep their names and signatures. `line_total` now returns a `Decimal`.
+- `tests/test_totals.py`: added cases for the issue example (expects subtotal 59.97, discount 6.00, tax 10.79, total 64.76), half-up rounding of 0.125, and unknown regions.

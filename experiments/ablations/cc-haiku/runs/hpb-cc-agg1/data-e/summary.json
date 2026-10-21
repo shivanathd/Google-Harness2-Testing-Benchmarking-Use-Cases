@@ -1,0 +1,122 @@
+{
+  "task_id": "data-e",
+  "domain": "data",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-cc-agg1/data-e/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-haiku/exec/hpb-cc-agg1/data-e/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "data-e",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [
+        "agg1"
+      ],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.013826520000000002,
+          "cached": false,
+          "notes": "CHANGE 1 \u2014 context/harness/systemprompt.md: added one always-on paragraph telling the agent to reopen every file written under output/, parse it from disk, and check the task-named fields and rounding before finishing.\nMoment: base1, the step that computes the figure. The script wrote output/answer.json with `open(...).write(...)` and printed the same JSON. The run then ended with its final message quoting that printed value, with no reopen of the file. The file that landed on disk is correct (I recomputed independently: 18691.64, 21 transactions), so this is a latent risk, not a fixed failure. Expect little measurable change in base1. If the merge stage only keeps edits backed by a realised failure, drop this one.\n\nLeft unchanged (considered):\n- No Stop hook. The deliverable was produced, so there is no evidence that a skipped deliverable needed blocking, and a hook risks blocking valid completion.\n- No skill or script. One run, no tool errors, and the procedure (preview, read full file, one script with dedupe assertion, write, report assumptions) completed in four tool calls. Nothing repeated enough to package.\n- The workspace CLAUDE.md (172 bytes) appeared in `ls -la` and was never opened. Its content is unknown, and root CLAUDE.md is normally loaded automatically under Claude Code, so I made no edit for it.\n- Guardrails, LongTermMEMORY and tool_guidance remain empty. The run showed no tool-use or memory failure that would justify text in them.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.01478274,
+          "cached": false,
+          "notes": "**Evidence reviewed:** one rollout (base1), its deliverable `output/answer.json` = `{\"net_usd\": 18691.64, \"transactions\": 21}`, the two source CSVs, and the base harness. I recomputed the total independently from `context/source/`: 21 distinct SETTLED September rows, 18,691.6368 before rounding, 18,691.64 after. The rollout's answer is correct. There is only one run, so there is no divergence to compare.\n\n**Changes**\n\n1. **`skills/settled-revenue-reconciliation/SKILL.md` (new), with a trigger line in `systemprompt.md`.**\n   - *Moment:* base1 lines 81\u201382 chose duplicate-collapsing and parenthesis-as-negative on its own judgment. Its final message (lines 118\u2013121) then flagged the parenthesis convention as unresolved: \"If the processor means something else by parentheses, the total changes.\" The total depends on that convention, so it is a decision the run had to improvise.\n   - *What the skill encodes:* the settled-status and period rules; identifier identity (count once, and report a conflict rather than pick a copy silently); parse completeness; amount notation (parentheses and leading minus are negative unless the export documents otherwise, and the convention must be stated); per-unit FX multiplication; rounding once at the end; and consistency checks. It also covers what the final message must report.\n   - *Why this form:* it is a recognisable trigger (a processor export becoming a revenue figure), so it is on demand and costs nothing until invoked. The always-on cost is one trigger line.\n   - *What I deliberately left out:* the FX rates, transaction IDs, counts, and the answer. These are matter facts, and the mission says not to store them as durable anchors. The skill says where to read them.\n   - No scripts are named, and there are no template braces (checked).\n\n**No change:** `LongTermMEMORY.md`, `guardrails.md`, and `tool_guidance.md` remain empty; the READMEs under `plugin/`, `scripts/`, and `skills/` are untouched. I did not add a hook or a plugin, because the single run showed no repeated failure that a tool-loop check would catch.\n\n**Limits:** the workspace `CLAUDE.md` appears in the rollout's directory listing, but its contents are not in `context/`, so I could not account for it. The change rests on one trajectory. It is a risk-based addition, not a fix for an observed failure, and a later comparison should weigh it accordingly.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.01385936,
+          "cached": false,
+          "notes": "kept -> whole harness (no edits; systemprompt.md one-liner, empty guardrails.md, LongTermMEMORY.md, tool_guidance.md) -> KEEP_BASE. base1 delivered the correct answer (output/answer.json net_usd 18691.64, transactions 21). I recomputed from context/source/ and got 18691.6368 across 21 included rows, which rounds to 18691.64. Both candidates were judged against this base, and neither produced a measurable gain over it.\n\ndropped -> inv1: always-on paragraph telling the agent to reopen and validate every file written under output/ -> No failure in the base set (0/1). base1 wrote output/answer.json with a plain open().write() and the file was correct; the only gap was that its final message quoted the printed value rather than a reopened file. inv1 delivered the same correct answer and spent one extra tool call re-reading the file, so the edit buys nothing measurable and costs always-on budget. Confound: inv1's agent said the workspace CLAUDE.md \"requires\" the reopen step, and that file is not in context/ (its size differs by run: 172, 314 and 436 bytes), so inv1's reopen may have come from the workspace rather than from this edit.\n\ndropped -> dom1: new skills/settled-revenue-reconciliation/SKILL.md plus its trigger line in systemprompt.md -> NON-DELIVERING. dom1's produced.md reads \"(nothing produced)\". Its trajectory loads the skill, runs inspection and a print-only analysis script, and ends with no write to output/ and no final message. The edit is therefore UNSAFE. The rest of the evidence is not overwhelming: base1 and inv1 reached the same figure without the skill, so there is no observed benefit to set against the empty run. The skill also never tells the agent to write output/answer.json, and its Report section directs the conventions to the final message. That may have contributed, but I cannot establish it from one truncated trajectory.\n\nkept -> no edit for dedupe and parenthesis conventions -> All three rollouts (base1, inv1, dom1 analysis) collapsed identical duplicate txn_ids, read parenthesised amounts as negative, and parsed both date formats. No run diverged on these, and base1 stated the parenthesis convention in its final message. No trajectory shows a wrong total from these choices, so no rule was added.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "data-e",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 3,
+        "expected_P": 3,
+        "usd": 0.042469,
+        "rollout_usd": 0.0,
+        "session_usd": 0.042469,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "data-e",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-cc-agg1/data-e/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.02500665,
+      "experience": {},
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-haiku/exec/hpb-cc-agg1/data-e/agg1",
+      "chosen_tree_is_base": true,
+      "harness_fingerprint": "f4ac612e934c8767"
+    }
+  },
+  "errors": []
+}

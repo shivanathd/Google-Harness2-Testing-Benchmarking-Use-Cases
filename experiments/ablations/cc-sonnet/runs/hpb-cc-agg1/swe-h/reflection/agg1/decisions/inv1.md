@@ -1,0 +1,5 @@
+I changed one file, `LongTermMEMORY.md`, to address the rejection. I did not re-open the trajectory this turn.
+
+- **Removed:** the "Workspace facts" block. It described this instance's files: the `stock/` package layout, the original `cli.main` flow, the zero-quantity `remove` rule, and the `report --low` sort order.
+- **Replaced with:** three short procedural checks the agent re-derives on every small-repo fix. They cover the entry point's order of operations (validate before the first mutation or save), explicit boundary decisions (zero, equality, strict versus inclusive), and keeping the other modes' ordering and output unchanged.
+- **Left alone:** `systemprompt.md`, `guardrails.md`, `tool_descriptions/tool_guidance.md`, `scripts/check_done.py`, `hooks.json` and the README files are inherited unchanged. There are no skills, so no trigger lines were needed.

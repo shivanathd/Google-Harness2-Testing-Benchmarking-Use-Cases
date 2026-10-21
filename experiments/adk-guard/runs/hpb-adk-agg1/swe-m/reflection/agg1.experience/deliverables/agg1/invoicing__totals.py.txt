@@ -1,0 +1,13 @@
+from .tax import rate_for
+
+
+def line_total(item):
+    return round(item.qty * float(item.unit_price), 2)
+
+
+def compute_totals(items, region):
+    subtotal = sum(line_total(i) for i in items)
+    tax = round(subtotal * float(rate_for(region)), 2)
+    discount = round(sum(line_total(i) * i.discount_pct / 100 for i in items), 2)
+    total = subtotal + tax - discount
+    return {"subtotal": f"{subtotal:.2f}", "discount": f"{discount:.2f}", "tax": f"{tax:.2f}", "total": f"{total:.2f}"}

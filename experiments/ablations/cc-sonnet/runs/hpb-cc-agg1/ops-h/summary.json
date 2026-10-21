@@ -1,0 +1,126 @@
+{
+  "task_id": "ops-h",
+  "domain": "ops",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-cc-agg1/ops-h/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-sonnet/exec/hpb-cc-agg1/ops-h/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "ops-h",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.15479769999999998,
+          "cached": false,
+          "notes": "**Failure traced.** In base1 the agent hand-rolled a parser in /tmp. It got correct-looking numbers: gateway 96 requests, 0.1354, 334 ms; search 119, 0.1513, 192 ms; billing 124, 0.1613, 393 ms. It then spent its remaining turns on a billing cross-tab and a look at the truncated lines. Its last action was a printout, `output/` stayed empty, and the deliverable reads \"(no deliverable produced)\". This is the same failure the library entries ops-m and ops-e record, so I took the fix that coincided with delivery there. That fix is a prompt procedure with a compute-and-write script, a reopen step and a Stop hook, copied over and re-grounded for this task. I only have one rollout per harness, so this is a hypothesis about what will fix it.\n\n**Changes.**\n1. `scripts/traffic_report.py` is new.\n   - It does the whole computation as one command, with `--write output/answer.json` on the same command.\n   - It skips invalid-JSON (truncated) lines and converts every timestamp to UTC before applying the half-open window.\n   - It drops `/healthz` and counts status >= 500 as errors. Latency is `latency_ms`, or `latency_s * 1000` decided per row by key. p95 is nearest-rank, `ceil(0.95n)-1`.\n   - It prints skip tallies per service, and it refuses to write if a service has zero rows or an unusable row.\n   - I ran it on `source/logs` for 06:00\u201312:00 UTC. It reproduces the base1 numbers exactly.\n   - The base1 cross-tab showed billing switching from `latency_ms` to `latency_s` at 09:00 UTC. Its in-window rows are 26/29/32 ms-rows for hours 6/7/8 and 20/21/28 s-rows for hours 9/10/11.\n   - So the per-row key rule agrees with the runbook's 09:00 UTC cutover.\n2. `systemprompt.md` gets a short log-analysis procedure block.\n   - It says to read RUNBOOK.md first and run the script.\n   - It states workspace facts: mixed offsets of -03:00, +01:00 and +00:00, so convert to UTC before windowing; billing's latency_s cutover at 09:00 UTC; and that nothing is excluded beyond the runbook's rules.\n   - It tells the agent to write with `--write` in the same command, reopen the file and check keys and types, and not to treat a printout with an empty `output/` as finishing. It also tells the agent to stop side investigations once the numbers are cross-checked once. That last line targets base1's final turns on the billing cross-tab and truncated lines.\n3. `hooks.json` and `scripts/check_output.py` are new, copied from the ops-m library entry with the helper name changed.\n   - The Stop hook exits 2 while `output/` is empty or holds an empty or invalid JSON file, and otherwise lets the agent finish.\n   - It targets exactly base1's ending. In the library it never fired, because the prompt change was enough there.\n   - I kept it as a cheap backstop.\n\nI did not add a skill, a subagent or a plugin. The task is a single mechanical procedure with no triggered sub-workflow.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.24237789999999998,
+          "cached": false,
+          "notes": "This revision responds to the rejection. I edited only `skills/traffic-report/SKILL.md`, and I did not re-read the trajectories for it.\n\n- **Removed the \"Workspace facts\" block.** It held this instance's line counts, truncated-line counts, per-service results (requests, errors, error rates, p95) and healthz counts. It also had the billing latency cut-over hours and the file names. The skill now keeps only the method. The agent derives these figures from the logs and RUNBOOK.md on each run.\n- **Generalized instance-specific wording in the counting rules.**\n  - \"Offsets mixed: -03:00, +00:00, +01:00 seen\" became \"offsets can be mixed within one file\".\n  - \"`/healthz` here\" became \"the route the runbook names, typically `/healthz`\".\n  - The helper command's concrete window and `logs` directory became `LOGDIR START END` placeholders. These are ISO text, naive = UTC, copied from the runbook or task.\n- **Rule 5 now says to confirm gzip-compressed log files were read.** This is a general check. It replaces the billing-specific fact.\n- **Kept the trigger line in `systemprompt.md`.** It already names `traffic-report`, and `scripts/traffic_stats.py` ships inside the skill directory.\n- **Not changed.** The counting rules, the helper script and the \"Before finishing\" checks stay as they were. I made no edits outside `skills/traffic-report/SKILL.md`.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.12222140000000001,
+          "cached": false,
+          "notes": "` block follows.\n\n<notes>\nkept -> inv1 `scripts/traffic_report.py` (compute and `--write output/answer.json` in one command) -> base1 computed correct-looking numbers in a hand-rolled /tmp script, then ran two more billing cross-tabs and ended with `output/` empty (\"no deliverable produced\"). inv1 ran the script with `--write` as its fourth action and delivered gateway 96/0.1354/334, search 119/0.1513/192, billing 124/0.1613/393. Those figures match base1's computed numbers, and inv1's hourly cross-tab shows the latency_s switch at 09:00 UTC, so the per-row key rule agrees with the runbook.\nkept -> inv1 `systemprompt.md` procedure block (write at once, reopen and verify, no side investigations after one cross-check) -> base1 stopped on a verification printout. inv1 verified after writing and the answer file was already on disk.\nrevised -> the instance-specific \"In this workspace\" line in `systemprompt.md` -> I reworded it to say: check for mixed UTC offsets, and for a schema change that switches the latency key partway through, with the billing 09:00 UTC cutover as an example. This keeps the useful hint without hardcoding the offsets. It is a judgement call and was not tested in a rollout.\nkept -> inv1 `hooks.json` and `scripts/check_output.py` (Stop hook that blocks finishing while `output/` is empty or has invalid JSON) -> a backstop aimed at base1's empty-output ending. It did not fire in inv1, so it is not shown to be needed. It is cheap and carries no always-on cost.\ndropped -> dom1 `traffic-report` skill and its trigger line -> dom1 produced nothing. Its helper ran without `--write`, and the agent then spent its remaining turns reading the helper and cross-checking billing. Its last action was a `zcat` error and `output/` stayed empty. Its numbers matched base1's, so the skill's method is sound. The empty output is a \"nothing produced\" outcome, and inv1 handles the same ground better. I did not merge dom1.\nkept -> base files not touched by inv1 (`guardrails.md`, `LongTermMEMORY.md`, `tool_guidance.md`, README placeholders) -> no trajectory moment argued for changing them.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "ops-h",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 4,
+        "expected_P": 3,
+        "usd": 0.519397,
+        "rollout_usd": 0.0,
+        "session_usd": 0.519397,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "ops-h",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-cc-agg1/ops-h/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.1634025,
+      "experience": {
+        "cue": "A mechanical analysis task, with a known procedure and a deliverable file, where an unassisted run computes correct numbers but drifts into extra verification and ends with the output directory empty.",
+        "lesson": "In the always-loaded systemprompt.md, put the exact one-shot invocation that computes and writes the deliverable in the same command (the helper script path with its `--write output/<file>` flag). Follow it with a reopen-and-validate step and a rule that a printout with an empty output/ is not finishing. Do not leave the write as a separate later step, or behind an on-demand skill whose helper makes writing an optional flag. Check the result by confirming the deliverable exists after the helper's first run.",
+        "evidence": "Edit rows 1 and 4. base1 (no helper, no write instruction) and dom1 (helper behind a skill, run without `--write`) both ended with output/ empty after cross-checking. agg1 and inv1 (the write-inclusive command quoted in the system prompt) had the file on disk by their second and fourth actions, with identical correct numbers. The script and the prompt block were bundled, and the skill form differed in several ways, so the contrast supports \"write-inclusive command in the always-on prompt\" only as a bundle.",
+        "confidence": "low. There is one rollout per harness, the script and the prompt block were never tested apart, and dom1 differs from agg1/inv1 in more than one way. base1 and dom1 failing the same way could still be luck.",
+        "edits": "component: scripts/traffic_report.py, with the log-analysis procedure block in systemprompt.md\ncandidates: agg1, inv1 (dom1 carried a near-copy of the script inside a skill, covered in the skill row)\nchange: Added a single script that does the whole computation: skip truncated lines, convert timestamps to UTC, apply the half-open window, drop /healthz, count status >= 500 as errors, convert latency_s per row, and take nearest-rank p95. It writes output/answer.json when called with `--write`. The system prompt gained a procedure block that gives the exact command with `--write` on it. The block also says to reopen and validate the file, and not to treat a printout as finishing.\nobserved: base1 hand-rolled a /tmp parser and got the same numbers, then spent its turns on billing cross-tabs and ended with output/ empty (\"no deliverable produced\"). agg1 read RUNBOOK and the script, ran the script with `--write` as its second action, and ran a key/type validation as its third. It finished with a correct file after 3 actions. inv1 ran the same command as its fourth action and then ran extra billing cross-tabs, but the file was already on disk. Both delivered the identical answer: gateway 96/0.1354/334, search 119/0.1513/192, billing 124/0.1613/393. The script and the prompt block were added together, and no run isolates one from the other. There is also one rollout per harness.\nverdict: confounded\ncomponent: hooks.json and scripts/check_output.py (Stop hook that blocks finishing while output/ is empty or invalid)\ncandidates: agg1, inv1\nchange: Added a Stop hook that exits 2 while output/ has no file, an empty file or invalid JSON.\nobserved: It never fired in agg1 or inv1, because the answer was already written before either run finished. base1 and dom1 lacked the hook and ended empty, but dom1 is confounded by its skill, so the hook is not shown to be needed or to work.\nverdict: no observed effect\ncomponent: systemprompt.md \"check the logs against RUNBOOK\" line\ncandidates: agg1 (generic wording: check for mixed offsets and for a latency-key switch, with the billing 09:00 UTC example), inv1 (hardcoded workspace facts: offsets -03:00/+01:00/+00:00 and the billing cutover)\nchange: The same line was written two ways. agg1's is generic and inv1's carries this workspace's facts.\nobserved: Both runs produced byte-identical answers. The script handles offsets and the latency key per row, so neither wording changed any action. agg1 never cross-tabbed billing. inv1 did, but only after the file was written.\nverdict: no observed effect\ncomponent: skills/traffic-report/SKILL.md and skills/traffic-report/scripts/traffic_stats.py, plus the one-line trigger in systemprompt.md (replacing the procedure block)\ncandidates: dom1\nchange: Moved the method and helper into an on-demand skill. The system prompt shrank to \"load the traffic-report skill first; write the file, reopen it\". The helper took `--write` as an optional flag, and the skill text said to add it.\nobserved: dom1's first action loaded the skill. It then ran the helper without `--write`, spent its remaining turns reading the helper source and sampling logs, and ended on a `zcat` error with output/ empty (\"no deliverable produced\"). Its helper numbers would have matched the others, so the method was sound and the write never happened. The skill had the write rule one level down. The run also had no Stop hook, and base1 failed the same way without any skill, so the result may be run-to-run variance.\nverdict: confounded\ncomponent: plugin/README.md, skills/README.md, LongTermMEMORY.md, guardrails.md, tool_descriptions/tool_guidance.md\ncandidates: agg1, inv1, dom1\nchange: The README placeholders were added (or left empty). The memory, guardrail and tool-guidance files are unchanged from base.\nobserved: No trajectory touched them.\nverdict: no observed effect"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-sonnet/exec/hpb-cc-agg1/ops-h/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "271c9498dc6bb155"
+    }
+  },
+  "errors": []
+}

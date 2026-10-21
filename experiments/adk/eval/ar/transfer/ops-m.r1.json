@@ -1,0 +1,21 @@
+{
+ "cond": "ar/transfer",
+ "task": "ops-m",
+ "rep": 1,
+ "partial": 0.3333333333333333,
+ "all_pass": false,
+ "checks": {
+  "failed": false,
+  "users": false,
+  "top_code": true
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/adk/autoresearch/ops/final",
+ "cost_usd": null,
+ "tokens_in": 11780,
+ "tokens_out": 390,
+ "wall_s": 61.9,
+ "error": "",
+ "infra_error": false,
+ "turns": null,
+ "tool_calls": 6
+}

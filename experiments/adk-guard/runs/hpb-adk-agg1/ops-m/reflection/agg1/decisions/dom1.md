@@ -1,0 +1,6 @@
+The previous proposal was rejected because `skills/request-failure-stats/SKILL.md` recorded this task's own results. I fixed that by editing the file in place.
+
+- **Removed the "Workspace facts" block.** It held this instance's cross-check values (the failed-request, user and top-code counts), its file and request counts, and its look-alike wrong answers. The skill now teaches only the method: group by `req=`, classify by the last attempt in UTC, treat the window as start-inclusive and end-exclusive, and skip continuation lines.
+- **Generalized the script invocation.** The command now takes `START_UTC END_UTC FILE [FILE ...]` with a placeholder date format. It no longer names this instance's date or log files.
+- **Added one method check to "Before writing".** The agent compares its answer with a naive count of every ERROR line in the window. It should be able to explain the difference: retries, recovered requests, continuation lines. This replaces the removed hard-coded look-alike value with a check the agent can re-derive.
+- **Left unchanged:** the trigger line in `systemprompt.md` and the script `skills/request-failure-stats/scripts/request_failures.py`. A grep of `SKILL.md` and the script for the removed instance-specific values (the counts, the error code, the date) found no hits. I did not re-read the script's logic or run it.

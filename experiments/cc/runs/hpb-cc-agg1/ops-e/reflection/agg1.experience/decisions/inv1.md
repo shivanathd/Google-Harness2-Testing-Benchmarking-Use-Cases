@@ -1,0 +1,8 @@
+KEEP_BASE. I changed nothing in the harness.
+
+- **The base run was correct and efficient.** In base1, the agent read the whole 163-line `app.log` and then ran one parser. The parser converted each timestamp from its own UTC offset before applying the half-open window `[09:00, 12:00)`.
+- **It handled the log's traps without being told.** It counted only lines whose level field is `ERROR`, skipped the `INFO` lines that say "retrying after ERROR", and attached indented traceback lines to their parent event. It did not count the `RuntimeError: upstream ERROR user=… code=…` text inside tracebacks. It also printed per-event output to check the boundaries, and reported no unparsed lines.
+- **I checked the result independently.** My own regex over `source/app.log`, applying the same window and offset conversion, gives errors=15, users=6, top code E500 (5 hits, ahead of E403 and E401 at 4 each). That matches `output/answer.json`, which is valid JSON with exactly the three requested keys.
+- **The only hiccups were harmless.** `cat -A` failed on macOS, and the agent switched to the Read tool. A `ls` call hit a permission error on the parent directory and did not matter.
+- **There is no divergence to fix.** I have a single rollout, with no failure to repeat and no sign that clear prose was skipped. A skill, script or plugin would add always-on text or a named component for a problem I cannot trace to any moment in the trajectory.
+- **One risk I saw but did not act on.** The agent did not re-read `answer.json` after writing it. The tool confirmed the write and the content was trivially correct, so adding a re-read rule would be speculation.

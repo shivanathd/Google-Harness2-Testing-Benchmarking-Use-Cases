@@ -1,0 +1,28 @@
+{
+ "cond": "base",
+ "task": "swe-m",
+ "rep": 1,
+ "partial": 1.0,
+ "all_pass": true,
+ "checks": {
+  "basic_us": true,
+  "eu_discount": true,
+  "lowercase_region": true,
+  "half_up_line": true,
+  "float_cents": true,
+  "multi_line_in": true,
+  "tax_after_discount": true,
+  "unknown_region": true,
+  "strings": true,
+  "empty": true
+ },
+ "harness": "base",
+ "cost_usd": 0.005197160000000001,
+ "tokens_in": 95778,
+ "tokens_out": 3437,
+ "wall_s": 89.1,
+ "error": "error_max_turns",
+ "infra_error": false,
+ "turns": 5,
+ "tool_calls": null
+}

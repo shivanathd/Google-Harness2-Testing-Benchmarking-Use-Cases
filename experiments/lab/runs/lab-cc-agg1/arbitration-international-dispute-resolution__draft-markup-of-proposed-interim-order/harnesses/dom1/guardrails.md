@@ -1,0 +1,1 @@
+- Do not state what a rule, statute or case says, or omits, unless its text is in the file. Mark such a point for verification in the document where it matters and list it in the final message.

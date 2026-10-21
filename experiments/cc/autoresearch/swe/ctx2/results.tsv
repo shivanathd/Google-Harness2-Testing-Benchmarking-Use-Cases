@@ -1,0 +1,3 @@
+iter	score	kept	notes
+0	1.000	True	baseline
+1	1.000	False	g, and tests edge cases. It also covers running the existing tests, adding new ones, copying deliverables to output/, and summarising. The baseline already scored 1.0, so I kept the change small and g

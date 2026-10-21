@@ -1,0 +1,21 @@
+{
+ "cond": "h2-parallel-k1/variant",
+ "task": "ops-e-v",
+ "rep": 1,
+ "partial": 1.0,
+ "all_pass": true,
+ "checks": {
+  "errors": true,
+  "users": true,
+  "top_code": true
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/cc/runs/hpb-cc-agg1/ops-e/harnesses/agg1",
+ "cost_usd": 0.0088734,
+ "tokens_in": 268368,
+ "tokens_out": 5567,
+ "wall_s": 57.1,
+ "error": "",
+ "infra_error": false,
+ "turns": 11,
+ "tool_calls": null
+}

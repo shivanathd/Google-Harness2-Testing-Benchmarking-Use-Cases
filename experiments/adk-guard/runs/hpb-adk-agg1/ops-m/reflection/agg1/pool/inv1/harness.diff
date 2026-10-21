@@ -1,0 +1,210 @@
+--- current/hooks.json
++++ inv1/hooks.json
+@@ -0,0 +1 @@
++{"hooks": {"Stop": [{"hooks": [{"type": "command", "command": "python3 scripts/check_output.py"}]}]}}
+--- current/scripts/check_output.py
++++ inv1/scripts/check_output.py
+@@ -0,0 +1,14 @@
++#!/usr/bin/env python3
++"""Stop hook: block finishing until output/ holds a non-empty file and every .json parses."""
++import glob, json, os, sys
++files = [f for f in glob.glob("output/**/*", recursive=True) if os.path.isfile(f)]
++if not files or any(os.path.getsize(f) == 0 for f in files):
++    sys.stderr.write("No usable deliverable under output/. Compute the answer (use the loaded skill's script) and write the file the task names before finishing.\n")
++    sys.exit(2)
++for f in files:
++    if f.endswith(".json"):
++        try:
++            json.load(open(f))
++        except ValueError as e:
++            sys.stderr.write("%s is not valid JSON (%s); rewrite it.\n" % (f, e))
++            sys.exit(2)
+--- current/skills/request-failure-stats/SKILL.md
++++ inv1/skills/request-failure-stats/SKILL.md
+@@ -1,29 +1,18 @@
+ ---
+ name: request-failure-stats
+-description: Failed-request count, distinct affected users and top error code from rotated multi-timezone service logs where requests are retried (req= / attempt=), restricted to a UTC window. Incident and traffic statistics.
++description: Count failed requests, distinct affected users and the top error code from rotated, mixed-offset, partly gzip-compressed service logs where requests are retried (req= / attempt=) and the window is in UTC.
+ ---
+ 
+-# Failed-request statistics from retried-request logs
++# Failed-request statistics from rotated logs
+ 
+-## Analytic move
+-Classify each REQUEST (not each log line) by its last attempt, then count requests, distinct users and codes among the requests that failed inside the window. Result: the exact JSON the task names, with plain integer/string values.
++Run the script; do not count by eye and do not try to read `.gz` with read_file (it returns binary garbage).
+ 
+-## Rules
+-- Unit = `req=` id. Group every attempt line of a request across ALL files (app.log, app.log.N, and the .gz ones) before judging it. Attempts of one request can be in different files and in mixed UTC offsets.
+-- Last attempt = latest instant after converting each line's own offset to UTC (check it agrees with the highest `attempt=`; if not, flag it). File order and local clock digits are not chronological order.
+-- FAILED = the last attempt is an ERROR line. A request that errored earlier but ended in INFO status=200 is a recovered request, not a failure. A request whose last attempt is an ERROR is failed even if its first attempt succeeded.
+-- Window: judge membership by the LAST attempt's UTC time only (start inclusive, end exclusive). Earlier attempts inside the window do not make a request count if its last attempt is outside it, and vice versa.
+-- user and code come from that last-attempt line's own `user=` and `code=`.
+-- Not request attempts, though they contain the text "ERROR": indented `Traceback` / `UpstreamError: ERROR code=... user=...` continuation lines (they name other users/codes than their parent) and INFO lines without `req=` such as "cache warm after ERROR code=E500". Never count or grep these.
+-- Compressed rotations: `read_file` on a .gz shows binary; decompress it (gzip module / zcat) before analysing, otherwise the oldest hours are silently missing.
+-- Tie for top code: re-check the filter; if the tie is real apply the task's rule, else state the tie in the reply.
+-
+-## Do it with the script
+-`python3 -I skills/request-failure-stats/scripts/request_failures.py START_UTC END_UTC FILE [FILE ...]`
+-(START/END ISO with offset, e.g. YYYY-MM-DDTHH:MM+00:00; pass every log file in the directory, including .gz, by listing the directory first). It prints failed / users / code counts / top_code and each failed request with its last-attempt UTC time and source line. Spot-check 2-3 near the window edges by hand-converting the offset.
+-
+-## Before writing
+-- users <= failed; code counts sum to failed; JSON keys exactly as the task names them, ints as ints.
+-- Every log file in the directory was passed to the script (count them against `ls`).
+-
+-- Sanity-check the answer against a naive count of every ERROR line in the window: the two should differ, and you should be able to say why (retries, recovered requests, continuation lines).
++1. `python3 -I skills/request-failure-stats/scripts/request_failures.py logs --start <ISO+offset> --end <ISO+offset>`
++   (a directory argument reads every file in it, gzip auto-detected; START inclusive, END exclusive; form `YYYY-MM-DDTHH:MM:SS+00:00`, converting the task's window to UTC). Add `--out output/answer.json` once the numbers look right; it writes exactly `{"failed", "users", "top_code"}`.
++2. Definitions the script applies (check the task text still matches before trusting it):
++   - A request is every line group sharing `req=`, pooled across ALL rotated files (attempts of one request are split across files and lines are not in time order; do not judge per file or per line).
++   - Last attempt = highest `attempt=` number. FAILED = that last attempt is an ERROR line AND its own UTC time is in the window. Earlier ERRORs that were retried successfully are not failures; a request whose last attempt is INFO/200 is not failed even if earlier attempts failed.
++   - `users` = distinct `user=` and `top_code` = most frequent `code=`, both taken from the failed requests' LAST attempts only (earlier attempts may carry different codes).
++   - Ignored non-attempts: indented traceback lines (they name other users/codes), and req-less lines such as an INFO message that merely mentions "ERROR code=..." in its text.
++3. Heed script warnings (tie for top code, duplicate attempt numbers, missing user/code). On a tie apply the task's tie rule; if none, say so in the final reply. If the script exits 1, fix the input (path, timestamp with offset) and rerun once; do not loop.
++4. Read `output/answer.json` back and confirm the keys, int types, and users <= failed.
+--- current/skills/request-failure-stats/scripts/request_failures.py
++++ inv1/skills/request-failure-stats/scripts/request_failures.py
+@@ -1,66 +1,77 @@
+ #!/usr/bin/env python3
+-"""Failed-request statistics from rotated, multi-timezone service logs.
+-usage: request_failures.py START_UTC END_UTC LOGFILE [LOGFILE ...]
+-START/END: ISO timestamps, naive = UTC (start inclusive, end exclusive).
+-Reads plain and .gz files (detected by magic bytes). A request (req=) FAILED if its
+-last attempt (latest UTC timestamp; ties by highest attempt=) is an ERROR line and that
+-attempt falls in the window. Prints failed / users / top_code plus audit detail."""
+-import collections, gzip, re, sys
+-from datetime import datetime, timezone
++"""Failed-request statistics from rotated, mixed-offset service logs.
++usage: request_failures.py LOG_DIR_OR_FILES... --start ISO --end ISO [--out output/answer.json]
++START/END are ISO timestamps with offset, form YYYY-MM-DDTHH:MM:SS+00:00 (start inclusive, end exclusive).
++Reads every file given (a directory means every file in it; *.gz is decompressed). Requests are
++grouped by req= ACROSS all files; the last attempt is the highest attempt= number (ties: latest UTC time).
++A request FAILED if that last attempt is an ERROR header line and its UTC time is inside the window.
++Only lines starting at column 0 with a timestamp and a level carrying req= and attempt= are attempts;
++indented traceback lines and req-less lines (e.g. 'cache warm after ERROR') are ignored.
++Exit 1 with a message on bad input; exit 0 otherwise. Writes JSON only when --out is given."""
++import argparse, collections, glob, gzip, json, os, re, sys
++from datetime import datetime
+ 
+-def utc(s):
++ap = argparse.ArgumentParser()
++ap.add_argument("paths", nargs="+")
++ap.add_argument("--start", required=True)
++ap.add_argument("--end", required=True)
++ap.add_argument("--out")
++a = ap.parse_args()
++
++def ts(s):
+     d = datetime.fromisoformat(s.replace("Z", "+00:00"))
+-    return d.replace(tzinfo=timezone.utc) if d.tzinfo is None else d.astimezone(timezone.utc)
++    if d.tzinfo is None:
++        sys.exit("timestamp without offset: " + s)
++    return d
++lo, hi = ts(a.start), ts(a.end)
+ 
+-def lines(path):
+-    raw = open(path, "rb").read()
+-    if raw[:2] == b"\x1f\x8b":
+-        raw = gzip.decompress(raw)
+-    return raw.decode("utf-8", "replace").splitlines()
+-
+-HEAD = re.compile(r"^(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?(?:Z|[+-]\d\d:?\d\d))\s+(\w+)\s+(.*)$")
+-lo, hi = utc(sys.argv[1]), utc(sys.argv[2])
+-reqs = collections.defaultdict(list)
+-seen, dups, noreq, odd = set(), 0, 0, []
+-for path in sys.argv[3:]:
+-    for n, line in enumerate(lines(path), 1):
+-        m = HEAD.match(line)          # events start at column 0; indented lines are continuations
++files = []
++for p in a.paths:
++    files += sorted(glob.glob(os.path.join(p, "*"))) if os.path.isdir(p) else [p]
++HEAD = re.compile(r"^(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?(?:Z|[+-]\d\d:?\d\d))\s+([A-Z]+)\s+(.*)$")
++attempts = collections.defaultdict(list)
++ignored = 0
++for f in files:
++    try:
++        op = gzip.open if open(f, "rb").read(2) == b"\x1f\x8b" else open
++        with op(f, "rt") as fh:
++            lines = fh.read().splitlines()
++    except OSError as e:
++        sys.exit("cannot read %s: %s" % (f, e))
++    for line in lines:
++        m = HEAD.match(line)
+         if not m:
++            ignored += 1
+             continue
+-        ts, lvl, rest = m.groups()
+-        r = re.search(r"\breq=(\S+)", rest)
+-        if not r:
+-            noreq += 1                # e.g. INFO lines that merely quote an error; not request attempts
++        t, lvl, rest = m.groups()
++        req, att = re.search(r"\breq=(\S+)", rest), re.search(r"\battempt=(\d+)", rest)
++        if not (req and att):
++            ignored += 1
+             continue
+-        key = line.strip()
+-        if key in seen:
+-            dups += 1
+-            continue
+-        seen.add(key)
+-        a = re.search(r"\battempt=(\d+)", rest)
+-        u = re.search(r"\buser=(\S+)", rest)
+-        c = re.search(r"\bcode=(\S+)", rest)
+-        if lvl == "ERROR" and not (a and u and c):
+-            odd.append((path, n, line))
+-        reqs[r[1]].append((utc(ts), int(a[1]) if a else 0, lvl, u and u[1], c and c[1], path, n))
++        user, code = re.search(r"\buser=(\S+)", rest), re.search(r"\bcode=(\S+)", rest)
++        attempts[req[1]].append((int(att[1]), ts(t), lvl, user and user[1], code and code[1], f))
+ 
+ failed = []
+-for r, v in reqs.items():
+-    last = max(v, key=lambda x: (x[0], x[1]))
+-    if last[1] != max(x[1] for x in v):
+-        print("NOTE: latest-timestamp attempt != highest attempt number for", r)
+-    if last[2] == "ERROR" and lo <= last[0] < hi:
+-        failed.append((r, last))
+-codes = collections.Counter(b[4] for r, b in failed)
+-users = {b[3] for r, b in failed}
++for req, rows in attempts.items():
++    last = max(rows, key=lambda r: (r[0], r[1]))
++    if last[2] == "ERROR" and lo <= last[1] < hi:
++        failed.append((req, last))
++codes = collections.Counter(r[1][4] for r in failed)
++users = {r[1][3] for r in failed}
+ top = codes.most_common()
+-print("failed:", len(failed))
+-print("users:", len(users), sorted(users))
+-print("code counts (last attempts):", top)
++print("files:", [os.path.basename(f) for f in files], "| requests seen:", len(attempts), "| non-attempt lines ignored:", ignored)
++print("failed:", len(failed), "| users:", len(users), sorted(u for u in users if u))
++print("code counts:", top)
+ if len(top) > 1 and top[0][1] == top[1][1]:
+-    print("WARNING: tie for top code")
+-print("top_code:", top[0][0] if top else None)
+-print("requests seen:", len(reqs), "| lines without req= ignored:", noreq, "| duplicate lines skipped:", dups)
+-print("ERROR lines missing user/code/attempt:", odd)
+-for r, b in sorted(failed, key=lambda x: x[1][0]):
+-    print(r, b[0].isoformat(), "user=%s code=%s attempt=%d" % (b[3], b[4], b[1]), "%s:%d" % (b[5], b[6]))
++    print("WARNING: tie for top code; apply the task's tie rule")
++dup = [r for r, rows in attempts.items() if len({x[0] for x in rows}) != len(rows)]
++if dup:
++    print("WARNING: duplicate attempt numbers for", dup)
++if any(r[1][3] is None or r[1][4] is None for r in failed):
++    print("WARNING: a failed last attempt lacks user= or code=")
++for req, l in sorted(failed):
++    print(" ", req, "attempt", l[0], l[1].astimezone(lo.tzinfo).isoformat(), l[3], l[4], os.path.basename(l[5]))
++if a.out and top:
++    os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
++    json.dump({"failed": len(failed), "users": len(users), "top_code": top[0][0]}, open(a.out, "w"))
++    print("wrote", a.out, open(a.out).read())
+--- current/systemprompt.md
++++ inv1/systemprompt.md
+@@ -1,5 +1,5 @@
+ You are an assistant that completes tasks inside a workspace directory. Read the task, do the work, and write the requested deliverables under output/.
+ 
+-When asked for failed-request counts, affected users or top error codes from service logs (retried requests, rotated or .gz files, mixed UTC offsets, a UTC time window), load the `request-failure-stats` skill and compute with its script rather than grepping or counting by eye.
++When asked for failed/error counts, distinct users or top error codes from service logs (retried requests, UTC window, rotated or .gz files), load the `request-failure-stats` skill and compute with its script rather than counting by eye.
+ 
+-Write the deliverable as soon as the computed numbers are in hand; a missing output file is the worst outcome. Never answer from partial reading.
++Write the deliverable as soon as the computed numbers are in hand; a missing output file is the worst outcome. Never answer from partial reading, and read the file back after writing.

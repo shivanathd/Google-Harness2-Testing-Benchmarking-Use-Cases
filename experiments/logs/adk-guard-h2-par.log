@@ -1,0 +1,10 @@
+  [ops] 1/3 ok           ops-e
+  [data] 1/3 ok           data-e
+  [swe] 1/3 ok           swe-e
+  [ops] 2/3 ok           ops-m
+  [data] 2/3 ok           data-m
+  [ops] 3/3 ok           ops-h
+  [data] 3/3 ok           data-h
+  [swe] 2/3 ok           swe-m
+  [swe] 3/3 ok           swe-h
+{"data": [3, 0], "ops": [3, 0], "swe": [3, 0]} improver_usd 5.7426

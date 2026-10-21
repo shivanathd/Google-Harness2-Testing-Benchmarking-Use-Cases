@@ -1,0 +1,122 @@
+{
+  "task_id": "arbitration-international-dispute-resolution/draft-markup-of-arbitration-agreement",
+  "domain": "arbitration-international-dispute-resolution",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "lab-cc-agg1/arbitration-international-dispute-resolution/draft-markup-of-arbitration-agreement/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/lab/exec/lab-cc-agg1/arbitration-international-dispute-resolution/draft-markup-of-arbitration-agreement/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "arbitration-international-dispute-resolution/draft-markup-of-arbitration-agreement",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [
+        "agg1"
+      ],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.17914598,
+          "cached": false,
+          "notes": "Edits are confined to `context/harness/skills/redline-docx/`. Nothing else changed; the always-on trigger line (`systemprompt.md:31`) already names `redline-docx`, so the skill stays reachable.\n\n1. **`SKILL.md` \u00a72 \u2014 removed the \"Verified in this workspace with pandoc 3.12.1\" label and the run-history anecdote, kept the method.** The span forms remain, now with a test-first step: check the syntax on a two-word file in scratch and read the `w:del`/`w:ins` XML. Moment: base1 (lines ~1047\u20131080) tested pandoc spans on its own, then wrote spans without `author=` and had to patch them afterwards (`sed -i` on stdin failed, then a `python3 -I` pass added the author to 71 spans). The rule \"put `author=` on every span when you write it\" is kept, with the reason stated as method.\n\n2. **`SKILL.md` \u00a73 \u2014 replaced the \"an earlier run did that\" anecdote with the reason the path rule exists.** A relative `./output` resolves against the current directory. Moment: base1's final build (line ~1076 and the `ls` at ~1114) ran `cd /tmp/markup-scratch && OUT=./output && pandoc \u2026 -o $OUT/\u2026`. The INDEX lists both files under `output/`, so this run's placement is not shown to have failed. The absolute-path rule is kept as the guard against that pattern.\n\n3. **`skills/redline-docx/scripts/check_docx.py` \u2014 replaced the hard-coded `Co-Investment Agreement|CIA` with a generic \"of/in/under the <Name> Agreement|Contract|Instrument\" pattern.** This is the same matter-fact problem as the rejected block, now in the helper. This edit comes from the rejection, not from a trajectory moment. I tested it on a generated sample: a reference to another instrument is skipped, a same-document `Section 6.1 of this Agreement` resolves, and a dangling `Section 9.9` still WARNs. Exit code 0 on that sample.\n\nNot changed, and why:\n- **No plugin/hook.** base1 produced both named files, so there is no repeated missed-deliverable evidence.\n- **No `tool_guidance.md` change.** base1 hit the `=====` shell error and the BSD `sed -i` error, and both are already covered there.\n- **No `systemprompt.md` change.** The trigger line is present.\n\nCaveat: base1 ran without this skill (the workspace has no `skills/` directory), and there is no candidate rollout. The skill's effect on runs is untested. Its changes target failures the base run actually had: no author on spans, no accepted/rejected view check, and a relative output path.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.11013325000000002,
+          "cached": false,
+          "notes": "**Fixed the rejection.** `skills/arbitration-agreement-review/SKILL.md`: deleted the whole \"Workspace facts (Vantage / Cascadian co-investment, January 2025)\" block. It held matter facts (playbook tier labels by section, equity arithmetic, the missing CIA, email addresses, deadlines). The skill now keeps only method. A grep for party names, dollar figures, section numbers and dates in the skill returns nothing.\n\n**One method edit, traced to the trajectory.** Decision rule \"Dates\" now says to collect deadlines from forwarded and direct internal emails of the supervising lawyer and client, and to list each with its sender and date before working to the earliest.\n- Moment: in `rollouts/base1.md`, the agent read `whitmore-internal-instructions.eml`, which asks for the draft by Saturday, January 11 COB. The cover memo's Timing item (`deliverables/base1/output__markup-cover-memo.docx.txt`, around line 83) lists only the January 12 and January 13 deadlines. The earliest deadline is missing from the memo.\n- The rule was already present (\"work to the earliest\"). The edit only widens its scope to the internal emails the run skipped.\n\n**Considered and not changed.**\n- Always-on `systemprompt.md`: the trigger line for the skill is intact. The base run shows no Skill invocation, but the trajectory does not show whether the skill was offered to that run, so there is no evidence to justify changing the trigger.\n- No scripts, plugins, or sub-agents were added. The evidence is one trajectory, and it does not show a deterministic operation hand-rolled and got wrong.\n- The remaining skill checks (defined-term sweep, cross-references, derived figures, tiers) were left alone. The base memo did flag the tier mismatch, the non-reconciling equity figures, and the unverified CIA, so the trajectory does not show those checks failing.\n\n**Limit on evidence.** Only one rollout (base1) exists, so none of these edits has a divergence to test against.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": true,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.4208348,
+          "cached": false,
+          "notes": "",
+          "error": "[agg1.a1] claude_cli/claude-haiku-5-5: CLI auth failure: <notes>\nkept -> whole on-disk harness unchanged (KEEP_BASE for this composition)"
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "arbitration-international-dispute-resolution/draft-markup-of-arbitration-agreement",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 6,
+        "expected_P": 3,
+        "usd": 0.710114,
+        "rollout_usd": 0.0,
+        "session_usd": 0.710114,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "arbitration-international-dispute-resolution/draft-markup-of-arbitration-agreement",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "lab-cc-agg1/arbitration-international-dispute-resolution/draft-markup-of-arbitration-agreement/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.42252393999999993,
+      "experience": {},
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/lab/exec/lab-cc-agg1/arbitration-international-dispute-resolution/draft-markup-of-arbitration-agreement/agg1",
+      "chosen_tree_is_base": true,
+      "harness_fingerprint": "6c992a16fd20d010"
+    }
+  },
+  "errors": []
+}

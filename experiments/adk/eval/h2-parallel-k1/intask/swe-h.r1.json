@@ -1,0 +1,32 @@
+{
+ "cond": "h2-parallel-k1/intask",
+ "task": "swe-h",
+ "rep": 1,
+ "partial": 0.5714285714285714,
+ "all_pass": false,
+ "checks": {
+  "load_missing": true,
+  "load_empty": true,
+  "add_accumulates": true,
+  "add_nonpositive": true,
+  "remove_ok": true,
+  "remove_too_many": true,
+  "remove_unknown": true,
+  "remove_keeps_data": true,
+  "report_format": false,
+  "report_missing_file": false,
+  "cli_remove_error": false,
+  "cli_add_bad": false,
+  "report_low": false,
+  "add_then_report": false
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/adk/runs/hpb-adk-agg1/swe-h/harnesses/agg1",
+ "cost_usd": null,
+ "tokens_in": 61619,
+ "tokens_out": 1526,
+ "wall_s": 225.2,
+ "error": "",
+ "infra_error": false,
+ "turns": null,
+ "tool_calls": 16
+}

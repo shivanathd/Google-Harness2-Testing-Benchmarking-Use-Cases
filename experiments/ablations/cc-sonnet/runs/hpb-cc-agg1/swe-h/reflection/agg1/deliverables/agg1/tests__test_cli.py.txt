@@ -1,0 +1,110 @@
+import json
+
+from stock.cli import main
+
+
+import pytest
+
+from stock import ops, store
+from stock.cli import main
+
+
+def test_add_then_file(tmp_path):
+    f = tmp_path / "s.json"
+    f.write_text("{}")
+    assert main(["--file", str(f), "add", "bolt", "3"]) == 0
+    assert json.loads(f.read_text()) == {"bolt": 3}
+
+
+def test_report_missing_file(tmp_path, capsys):
+    f = tmp_path / "missing.json"
+    assert main(["--file", str(f), "report"]) == 0
+    assert capsys.readouterr().out == ""
+    assert not f.exists()
+
+
+def test_report_empty_file(tmp_path, capsys):
+    f = tmp_path / "empty.json"
+    f.write_text("")
+    assert main(["--file", str(f), "report"]) == 0
+    assert capsys.readouterr().out == ""
+
+
+def test_load_empty_file_is_empty_inventory(tmp_path):
+    f = tmp_path / "empty.json"
+    f.write_text("  \n")
+    assert store.load(str(f)) == {}
+
+
+def test_add_non_positive_quantity_raises():
+    data = {"bolt": 1}
+    for qty in (0, -2):
+        with pytest.raises(ValueError):
+            ops.add(data, "bolt", qty)
+    assert data == {"bolt": 1}
+
+
+def test_remove_below_zero_raises_and_keeps_data():
+    data = {"bolt": 2}
+    with pytest.raises(ValueError):
+        ops.remove(data, "bolt", 3)
+    assert data == {"bolt": 2}
+
+
+def test_remove_unknown_sku_raises_and_keeps_data():
+    data = {"bolt": 2}
+    with pytest.raises(ValueError):
+        ops.remove(data, "nut", 1)
+    assert data == {"bolt": 2}
+
+
+def test_remove_to_exactly_zero_is_allowed():
+    assert ops.remove({"bolt": 2}, "bolt", 2) == {"bolt": 0}
+
+
+def test_remove_non_positive_quantity_raises():
+    data = {"bolt": 2}
+    for qty in (0, -1):
+        with pytest.raises(ValueError):
+            ops.remove(data, "bolt", qty)
+    assert data == {"bolt": 2}
+
+
+def test_cli_remove_error_exits_1_and_file_unchanged(tmp_path, capsys):
+    f = tmp_path / "s.json"
+    f.write_text('{"bolt": 2}')
+    before = f.read_text()
+    assert main(["--file", str(f), "remove", "bolt", "5"]) == 1
+    assert capsys.readouterr().err == (
+        "error: cannot remove 5 of bolt: only 2 in stock\n"
+    )
+    assert f.read_text() == before
+
+
+def test_cli_remove_unknown_sku_does_not_create_file_entry(tmp_path):
+    f = tmp_path / "s.json"
+    f.write_text('{"bolt": 2}')
+    assert main(["--file", str(f), "remove", "nut", "1"]) == 1
+    assert json.loads(f.read_text()) == {"bolt": 2}
+
+
+def test_cli_add_non_positive_exits_1(tmp_path, capsys):
+    f = tmp_path / "s.json"
+    f.write_text('{"bolt": 2}')
+    assert main(["--file", str(f), "add", "bolt", "0"]) == 1
+    assert "error: quantity must be positive" in capsys.readouterr().err
+    assert json.loads(f.read_text()) == {"bolt": 2}
+
+
+def test_report_plain_output_unchanged(tmp_path, capsys):
+    f = tmp_path / "s.json"
+    f.write_text('{"nut": 9, "bolt": 1, "axle": 4}')
+    assert main(["--file", str(f), "report"]) == 0
+    assert capsys.readouterr().out == "axle\t4\nbolt\t1\nnut\t9\n"
+
+
+def test_report_low_is_strict_and_sorted_by_qty_then_sku(tmp_path, capsys):
+    f = tmp_path / "s.json"
+    f.write_text('{"nut": 3, "bolt": 1, "axle": 3, "cog": 5, "pin": 0}')
+    assert main(["--file", str(f), "report", "--low", "3"]) == 0
+    assert capsys.readouterr().out == "pin\t0\nbolt\t1\n"

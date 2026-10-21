@@ -1,0 +1,1 @@
+Resolve the issue described in ISSUE.md. Keep existing public function names and signatures. tests/ holds the existing tests (run them with `python -m pytest tests` if pytest is available, or plain python). When you are done, write a short summary of your changes to output/CHANGES.md.

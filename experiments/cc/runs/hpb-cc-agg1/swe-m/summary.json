@@ -1,0 +1,123 @@
+{
+  "task_id": "swe-m",
+  "domain": "swe",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-cc-agg1/swe-m/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/cc/exec/hpb-cc-agg1/swe-m/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "swe-m",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [
+        "dom1",
+        "agg1"
+      ],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.13182069999999999,
+          "cached": false,
+          "notes": "Evidence: one rollout (base1). The fix itself was correct. The only procedural friction was test running.\n\n1. **`scripts/run_tests.py` (new) and `tool_descriptions/tool_guidance.md` (was empty).**\n   - Moment: `python -m pytest tests` failed at collection with `PermissionError` on a parent directory, and again on `~/.aws`. The agent then ran a hand-written plain-Python runner with `python -I`, which failed with `ModuleNotFoundError: pygments`. It needed a third attempt without `-I`.\n   - The script tries pytest first. If pytest hits a PermissionError or interrupts at collection, it runs `test_*` functions and `Test*` methods directly. Tests that need fixtures are reported as SKIP, never PASS. It exits 0, 1 or 2.\n   - I checked it by hand. The pytest path works. The fallback path ran and reported a failing test as FAIL. I only exercised the fallback with a fake `pytest` module that raises PermissionError.\n   - Guidance (3 lines, always-on):\n     - Run the script once before editing for a baseline, and again after the last edit.\n     - Don't use `python -I` for anything that imports pytest or project code.\n     - On a PermissionError or ModuleNotFoundError, change the invocation once, then use the fallback and say so, instead of retrying variants.\n   - The agent already reported honestly in CHANGES.md that pytest couldn't run. The guidance keeps that and adds naming which runner ran and any SKIPs.\n\n2. **Reread `output/CHANGES.md` before finishing (one line in tool guidance).**\n   - Moment: the agent wrote `CHANGES.md` and finished without reopening it. This is a low-cost check that the summary matches the final code. The run showed no actual mismatch.\n\nI made no prompt, skill or plugin changes. The run's issue-fixing sequence (read the issue, read the docs, edit, test, summarise) was already sound, and no subject-matter facts were added.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.0734861,
+          "cached": false,
+          "notes": "KEEP_BASE. I changed no files in `context/harness/`.\n\n- **Evidence:** The only rollout, base1, resolved issue #142 correctly.\n  - It read `ISSUE.md` and `docs/ROUNDING.md` before editing.\n  - It switched `compute_totals` to `Decimal` with half-up rounding at each step: line gross, line discount and tax.\n  - It charged tax on `subtotal - discount`.\n  - It made `rate_for` case-insensitive, with unknown regions raising `ValueError`.\n  - It kept the public names and signatures, and `line_total` now returns a `Decimal`.\n  - It added tests for each reported symptom, and the issue's example returned `{'subtotal': '59.97', 'discount': '6.00', 'tax': '10.79', 'total': '64.76'}`, matching the rules in `ROUNDING.md`.\n  - It wrote `output/CHANGES.md`.\n- **Only friction:** pytest failed with a sandbox `PermissionError`, so the agent fell back to calling the test functions directly. That is a procedure and environment problem, which another candidate owns. It is not missing domain knowledge.\n- **Why no skill:** There was no divergence between runs, no repeated failure, and no visible risk I could trace to a trajectory moment. A skill on money and rounding would be speculative, and it would also need an always-on trigger line.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.0792918,
+          "cached": false,
+          "notes": "dropped -> inv1 `scripts/run_tests.py` and `tool_guidance.md` (3 always-on lines) -> The only friction was in base1. pytest hit a sandbox `PermissionError` at collection, then the agent's `python -I` fallback failed with `ModuleNotFoundError`. A plain `python` retry then passed all 6 tests, and CHANGES.md honestly said pytest could not run. That is about two wasted calls in 1 of 1 base rollouts, with no wrong result, and the sandbox may not recur. The inv1 rollout's own record shows no delivery gain. The fallback script was only checked by hand against a fake pytest. Adding always-on text for one sample's environment quirk is not justified.\ndropped -> inv1 \"reread output/CHANGES.md before finishing\" line -> base1 showed no mismatch between CHANGES.md and the final code. The inv1 notes say as much, so the line costs context and fixes nothing observed.\ndropped -> dom1 (no change) -> dom1 is itself KEEP_BASE and edited no files. Base1 already produced a correct fix. It read ISSUE.md and docs/ROUNDING.md, used Decimal with half-up rounding at each step, charged tax on the discounted amount, made `rate_for` case-insensitive with `ValueError` for unknown regions, kept the public signatures, and its issue example returned 64.76. There was no domain gap to fill.\nkept -> base harness unchanged (KEEP_BASE) -> base1 delivered a correct, complete fix plus CHANGES.md. No repeated failure exists to act on, and none of the three rollouts, including both candidates', produced nothing.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "swe-m",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 3,
+        "expected_P": 3,
+        "usd": 0.284599,
+        "rollout_usd": 0.0,
+        "session_usd": 0.284599,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "swe-m",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-cc-agg1/swe-m/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.0953,
+      "experience": {},
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/cc/exec/hpb-cc-agg1/swe-m/agg1",
+      "chosen_tree_is_base": true,
+      "harness_fingerprint": "020675403b27bd72"
+    }
+  },
+  "errors": []
+}

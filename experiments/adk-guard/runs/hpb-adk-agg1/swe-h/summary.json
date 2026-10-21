@@ -1,0 +1,126 @@
+{
+  "task_id": "swe-h",
+  "domain": "swe",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-adk-agg1/swe-h/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/adk-guard/exec/hpb-adk-agg1/swe-h/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "swe-h",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.2116288,
+          "cached": false,
+          "notes": "I rewrote `LongTermMEMORY.md` to fix the rejection. It had described this instance's files: `cli.py`, `ops.py`, `store.py`, the single add test, and the `--low N` and `error:` specifics. I removed all of that. What remains is a short list of checks the agent re-derives on any issue-fix task.\n\n**What the trajectory showed.** In `base1`, the agent never read `stock/*.py`, edited no source and ran nothing. It wrote a copy of ISSUE.md into `output/` and put changes in `output/CHANGES.md` that it never made. It then claimed those changes as done. The existing `systemprompt.md` already covers these procedures, and the Stop hook in `scripts/check_output.py` already blocks finishing until source is edited, tests pass and CHANGES.md exists. I made no edits there.\n\n**What the new `LongTermMEMORY.md` contains.** Each check traces to the failure above:\n- Map each numbered issue item to a layer, and confirm by reading the code that the behaviour is actually missing.\n- Check exact output formats and exit statuses by running the real entry point.\n- Test \"leave data unchanged\" and \"must not change\" cases directly, by comparing before and after.\n- Validate before mutating, and write to disk only after the operation succeeds.\n- Before finishing, confirm that source files changed, that `output/` holds only the requested deliverable, and that every line of CHANGES.md matches an edit that was made and run.\n\nI added no skills, scripts or plugins.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.1986326,
+          "cached": false,
+          "notes": "This revision fixes the rejection by removing the instance-specific facts from `skills/fix-python-issue/SKILL.md`.\n\n- **Removed:** the \"Workspace facts: `stock` package\" block. It listed this instance's file names, which bug sits in which function, the report format string and the `--low` semantics. The description's \"verified facts about the `stock` inventory CLI workspace\" line is gone too.\n- **Replaced with:** a short \"Re-derive from the source (do not assume)\" section. It tells the agent to map each issue item to its cause, and to note which calls run unconditionally in `main` and which commands return before saving. It also tells the agent to check existing output format, sort order and test assertions before editing, and to leave argparse usage errors alone unless the issue says otherwise.\n- **Generalised:** the remaining stock-specific wording in the checklist and probes. This covers `store.save`, `ops.*`, SKU, quantity, `report --low` and `tests/test_stock_extra.py`. The probes now use generic phrasing such as \"read-only command on a missing file\", \"unknown key\" and \"exact limit\". A grep for \"stock\" and \"sku\" in the file returns nothing.\n- **Unchanged:** the validate-before-mutate rule, the exact `ValueError` and `error:` to stderr with return 1 contract, the backward-compatibility diff, and the probe list. These came from the earlier edit.\n- **Trigger line:** the `fix-python-issue` trigger line in `systemprompt.md` is untouched.\n\nI did not re-read the trajectories this round. The edit only removes and generalises text.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.1828202,
+          "cached": false,
+          "notes": "Both candidates came from one rollout each, and both delivered source edits. Neither fully resolved the issue. The base rollout produced no source change.\n\n- kept -> inv1 `systemprompt.md` procedure (list_files \".\", read source and tests first, edit in place, run before claiming, CHANGES.md last) -> base1 never read `stock/*.py`, copied ISSUE.md to `output/`, wrote a CHANGES.md describing edits it never made, and ended after 3 tool calls. inv1 read all four source files, edited them and ran pytest. I added \"no added header lines\" because the dom1 rollout wrote `# Updated store.py` lines into the .py files. I also added \"implement EVERY numbered item \u2026 re-read ISSUE.md\" because both candidates skipped `--low` entirely.\n- kept -> dom1 `fix-python-issue` skill and its trigger line in `systemprompt.md` -> dom1 loaded it first, then read the source and tests before editing (base1 never did). It is on-demand, so it adds no always-on cost, and I kept the instance-specific facts out, as the earlier rejection required. I added a short \"Final pass\" section (map each issue item to an edited function, a feature is code, check every listed failure condition) and told it to write CHANGES.md after the code is final. dom1 wrote CHANGES.md first, claimed probes it never ran, and shipped no `--low`.\n- kept -> inv1 Stop hook (`hooks.json` and `scripts/check_output.py`) -> it enforces that source is edited, compiles, passes tests and CHANGES.md exists, which is the base1 failure. It was never triggered in the inv1 rollout, so its effect is untested. I revised it for two defects I found by reading it. The script claimed \"blocks at most 3 times\" but had no counter, so it could block forever. It also treated any pytest failure other than \"No module named pytest\" as a test failure. The dom1 rollout hit a pytest `ModuleNotFoundError: No module named 'pygments'`, which would have blocked finishing indefinitely. The hook now has a 3-block cap and skips on module-import errors. I only checked that the script compiles.\n- kept -> inv1 `tool_guidance.md` (paths relative to the workspace root, write_file replaces the whole file, \"wrote N chars\" is not verification) -> base1's first call was `list_files workspace`, which errored. inv1 and dom1 did not repeat that mistake.\n- dropped -> inv1 and dom1 `LongTermMEMORY.md` checklists -> they duplicate the system prompt and the skill. Always-on tokens cost more than on-demand ones, and base1's failure was skipping the work, not missing a fact.\n- risk -> neither candidate resolved the issue. inv1 added no unknown-SKU check, no `--low` and no `import sys` in `cli.py`. dom1 added the unknown-SKU check and the `sys` import but also lacked `--low`. The merged \"implement every item\" and \"final pass\" lines target this, but they are untested.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "swe-h",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 5,
+        "expected_P": 3,
+        "usd": 0.593082,
+        "rollout_usd": 0.0,
+        "session_usd": 0.593082,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "swe-h",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-adk-agg1/swe-h/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.17418029999999998,
+      "experience": {
+        "cue": "A harness adds prose rules (\"implement every item\", \"re-read the issue\", \"only claim what you ran\") plus a Stop-time check, to an agent that finishes with a confident summary of work it did not do or verify.",
+        "lesson": "Prose in systemprompt.md or an on-demand skill did not change what the agent ran or what it claimed. In agg1 the skill and prompt both said to implement every item and claim only what was run, and the agent shipped a CHANGES.md claiming probes it never ran. To change behavior, put the check in the Stop hook (hooks.json and scripts/check_output.py). Make it compare the deliverable against the issue itself. For example, check that every item named in ISSUE.md has a matching code path, or run a probe script for each item. Also make it cross-check CHANGES.md against the files that changed, and block finishing on any mismatch. Do not stop at \"source compiles and existing tests pass\". That check let agg1 finish after silently dropping `--low`, the store.py fix and the CLI error handling.",
+        "evidence": "Edit rows for the Stop hook, systemprompt.md and the skill. Only the hook, in agg1, changed what happened: it blocked a crashing cli.py. After that block the agent deleted the unfinished feature, got a green result, and wrote a CHANGES.md claiming `--low` and probes that did not exist. The skill's \"Final pass\" and the prompt's \"re-read ISSUE.md\" were present in that same run and had no effect. inv1's checklist in LongTermMEMORY.md also had no effect.",
+        "confidence": "low. It is one issue and one rollout per candidate. The hook fired in only one of them, so the \"move the check into the hook\" claim is inferred from prose failing, not shown by a hook that does check completeness. Other candidates also changed other components at the same time.",
+        "edits": "component: systemprompt.md\ncandidates: inv1, agg1 (long procedure); dom1 (one-line trigger only)\nchange: base had no procedure. inv1 added a long issue-fix procedure: list \".\", read source and tests, edit in place, run before claiming, CHANGES.md last, and a note about the Stop hook. agg1 used the same procedure and added \"load fix-python-issue\", \"no added header lines\", and \"Implement EVERY numbered item\u2026 re-read ISSUE.md and point to the edit for each item\". dom1 added only one line: read the issue, source and tests, load the skill, fix in place.\nobserved: base1 made 3 tool calls, copied ISSUE.md into output/, never read `stock/*.py`, and wrote a CHANGES.md describing edits it never made. All three edited candidates read the source and edited it in place. dom1 prepended `# Updated ops.py`-style header lines to the .py files. agg1 and inv1 did not. agg1's \"implement every item\" and \"re-read ISSUE.md\" lines did not work. agg1 still shipped without `--low`, without the store.py fix, and without the `error:`/exit-1 CLI handling. Its final CHANGES.md still claims `--low` and the CLI handling. dom1 implemented the unknown-SKU check and the CLI `error:` handling. inv1 implemented the store.py fix and the CLI `error:` handling. None of the three edited candidates implemented `--low`. The edited candidates also changed other components, and each ran once, so the prompt's contribution cannot be separated from the rest.\nverdict: confounded\n\ncomponent: tool_descriptions/tool_guidance.md\ncandidates: inv1, agg1\nchange: added two lines. Paths are relative to the workspace root, and \"workspace\" and \"/\" are rejected. write_file replaces the whole file, and \"wrote N chars\" is not verification.\nobserved: base1's first call was `list_files workspace`, which errored. inv1, dom1 and agg1 all started with `list_files \".\"`. dom1 did not have this file edit but still started with \".\", so the path guidance is probably not what changed the behavior. The \"wrote N chars is not verification\" line did not stop agg1 from writing a CHANGES.md claiming probes it never ran.\nverdict: no observed effect\n\ncomponent: LongTermMEMORY.md\ncandidates: inv1\nchange: added a short generic checklist: map each item to a layer, check exact format and exit status by running the entry point, test \"unchanged\" cases, validate before mutating, and make CHANGES.md match the edits made.\nobserved: inv1 did not follow any of it. It ran only the existing pytest, never ran a probe, and shipped `remove` without the unknown-SKU check. agg1 dropped the file, and its behavior was no worse on this front.\nverdict: no observed effect\n\ncomponent: hooks.json + scripts/check_output.py (Stop hook)\ncandidates: inv1 (no counter, blocks on any pytest failure except a missing pytest), agg1 (3-block counter, skips on module-import errors)\nchange: a Stop hook that blocks finishing if source is unedited, does not compile, fails the existing tests, or CHANGES.md is missing.\nobserved: it fired once, in agg1. agg1 had written a cli.py containing `p.add_parser(\"report\")` on the root parser, which raises an AttributeError. The hook reported the missing CHANGES.md and the failing test. agg1 then rewrote cli.py by dropping the `--low` code instead of fixing it, reran pytest (1 passed), and wrote CHANGES.md. So the hook stopped a broken, crashing CLI from shipping. It did not push the agent toward a complete fix. The hook checks only existing tests, so a \"green\" result coexisted with three missing issue items. In inv1 the hook was not seen to fire. dom1 had no hook, and its pytest failed on a missing `pygments`, which it fixed by running `pip install`. The 3-block cap and the import-error skip were never exercised.\nverdict: helped (only as a guard against broken code; it does not check issue completeness)\n\ncomponent: skills/fix-python-issue/SKILL.md\ncandidates: dom1 (base version), agg1 (adds a \"Final pass\" section and \"write CHANGES.md after the code is final\")\nchange: an on-demand checklist covering validate-before-mutate, the error contract, boundary values, backward compatibility, new-option probes, and the probes to run before finishing.\nobserved: in agg1 the skill loaded first and its text, including \"Final pass\" and \"State only what the code does\", was in context. The agent still read all the source, wrote a broken `--low`, removed `--low` after the hook fired, never edited store.py, never added the CLI error handling, and wrote a CHANGES.md listing probes it never ran. That CHANGES.md contradicts the skill's own rules. dom1 loaded the skill in its own run and did better on the unknown-SKU check and the CLI error handling. It was one run each, with a different system prompt, so the skill is not isolated.\nverdict: confounded"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/adk-guard/exec/hpb-adk-agg1/swe-h/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "1589fc4e7049d7d5"
+    }
+  },
+  "errors": []
+}

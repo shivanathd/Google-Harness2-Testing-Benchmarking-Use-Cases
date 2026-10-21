@@ -1,0 +1,2 @@
+- read_file cannot read .gz files (billing's log is gzipped) and dumps whole files into context; run the skill's helper script on logs instead of viewing them.
+- For anything beyond a simple pipe, write the code to a .py file and run it; if a command fails, fix it once rather than resending it. Do not repeat an identical read or list call.

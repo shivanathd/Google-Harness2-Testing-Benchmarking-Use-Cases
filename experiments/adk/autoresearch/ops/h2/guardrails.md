@@ -1,0 +1,3 @@
+- Do not guess counts; compute them with code over the entire input.
+- Compare timestamps in UTC after applying each line's own offset; never compare local clock text across timezones.
+- A line only counts as an event of level X if X is its level field, not if X appears in message text or in indented continuation lines.

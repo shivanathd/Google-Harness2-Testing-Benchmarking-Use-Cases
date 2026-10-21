@@ -1,0 +1,2 @@
+- read_file returns a limited preview; do not derive counts from it. Use run_command with python3 for any counting/aggregation.
+- Helper scripts live in scripts/ (e.g. `python3 scripts/log_window.py ...`); run `ls scripts` first.

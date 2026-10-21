@@ -1,0 +1,21 @@
+{
+ "cond": "base",
+ "task": "data-m-v",
+ "rep": 1,
+ "partial": 0.0,
+ "all_pass": false,
+ "checks": {
+  "net_usd": false,
+  "transactions": false,
+  "refunds": false
+ },
+ "harness": "base",
+ "cost_usd": null,
+ "tokens_in": 59437,
+ "tokens_out": 613,
+ "wall_s": 1461.7,
+ "error": "",
+ "infra_error": false,
+ "turns": null,
+ "tool_calls": 13
+}

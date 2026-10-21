@@ -1,0 +1,126 @@
+{
+  "task_id": "ops-m",
+  "domain": "ops",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-cc-agg1/ops-m/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-sonnet/exec/hpb-cc-agg1/ops-m/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "ops-m",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "I made four changes. All of them address the one failure in base1, which computed an answer and never wrote the file.\n\n- **Evidence behind all of them:** base1 explored the logs well. It found the cache-warm and traceback look-alike lines and checked the data for consistency. Its last action printed `failed: 19, users: 8, E401 \u00d77`, then the run ended. `deliverables/base1.md` says \"no deliverable produced\", and `output/` stayed empty. The ops-e library entry describes the same failure: an ad-hoc parser that only prints, then finishing with nothing written.\n- **`scripts/request_failures.py` (new):**\n  - It reads the log directory as one stream, including the gzip file.\n  - It groups attempts by `req` across files and takes the last attempt by attempt number, checking that against time order.\n  - It converts offsets to UTC and applies the half-open window to that last attempt.\n  - It counts failed requests, distinct users and the top code over those last attempts only.\n  - It prints every failed request, and `--write` emits `{\"failed\",\"users\",\"top_code\"}`. It exits 1 and writes nothing on a tie or when there are no failures.\n  - I ran it on `source/logs` for 2026-10-06 08:00 to 12:00 UTC. It gave 19 failed, 8 users and E401, the same as base1's hand-rolled numbers.\n  - One command now both computes and writes, which base1 never did.\n- **`scripts/check_output.py` and `hooks.json` (new):** a Stop hook blocks finishing while `output/` is empty or holds an empty or invalid JSON file. It is aimed at the exact failure in base1. I checked that it exits 2 on an empty `output/` and 0 on the file I wrote. I have not seen the hook fire in a real run.\n- **`systemprompt.md`:**\n  - It points to the script.\n  - It records workspace facts that base1 had to discover: req-less INFO lines quote \"ERROR code=\u2026\", indented traceback lines carry look-alike ERROR text, and the window applies to the last attempt.\n  - It says that computing and printing without writing is not finishing.\n  - It gives one tie/no-match fallback: re-check the window, then state the tie in the final reply.\n  - No skill was added.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "I fixed the two rejection reasons in `skills/log-incident-stats/SKILL.md`. I did not re-read the trajectories this round, so this edit only removes the flagged material.\n\n- **Removed the \"Workspace facts\" block.** It held this task's counts (failed=19, users=8, top_code=E401, per-code tallies, file and line counts). Its useful part is kept as a new generic \"Cross-check before writing\" section, which asks the agent to re-derive and confirm:\n  - the parsed, in-window and failed request counts;\n  - that no req line failed to parse;\n  - that the per-code counts sum to the failed total.\n- **Generalised instance-specific details.**\n  - The example window `2026-10-06T08:00 2026-10-06T12:00` is now a `YYYY-MM-DDTHH:MM` format taken from the task wording.\n  - The named offsets (+02:00, -04:00) became \"check the offsets present\".\n  - The \"08:00 in, 12:00 out\" wording became \"start in, end out\".\n  - The \"E500 is the decoy code here\" note is gone.\n  - The `code=E500` noise example is now `code=...`.\n- **Cleaned the helper script.** The example date in the `scripts/request_failures.py` docstring is now generic. A grep afterwards found no leftover task values in either file.\n- **Left unchanged.** The trigger line in `systemprompt.md` and the method rules.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "kept -> inv1 adopted wholesale: `systemprompt.md` procedure block, `scripts/request_failures.py`, `scripts/check_output.py`, `hooks.json` Stop hook -> The base rollout (1/1) never delivered. It computed 19/8/E401 with a hand-rolled parser, its last action was the printout, and `output/` stayed empty. In the inv1 rollout the agent ran `scripts/request_failures.py` and re-ran it with `--write`. It then reopened the file and checked keys and types. It ended with `{\"failed\":19,\"users\":8,\"top_code\":\"E401\"}` on disk. The inv1 rollout delivered.\nkept -> the \"computing and printing without writing is not finishing\" rule in `systemprompt.md` -> This is the same failure the library entry ops-e describes (computed correctly, ended on a printout). It is now seen in base1 and in dom1.\nkept -> the workspace-facts line in `systemprompt.md` (req-less INFO lines quote ERROR, indented traceback lines carry look-alike ERROR text, the window applies to the last attempt) -> base1 had to discover these noise lines by grepping. The script already ignores them, so the line is short and costs little.\nkept -> the Stop hook (`check_output.py`) -> It has no observed effect. In inv1 the file was already written before finishing, so the hook never fired. It is cheap and targets exactly base1's failure, so I kept it despite having no trace of it firing.\ndropped -> dom1's `skills/log-incident-stats` skill and its trigger line -> The dom1 rollout loaded the skill and ran the script without `--write`. It ended on the printout with \"(nothing produced)\", so that rollout delivered nothing. An edit from a non-delivering rollout is unsafe, and the knowledge it carried is already in inv1's prompt and script. Keeping both would duplicate the script and add always-on trigger text. dom1's extra cross-check section is not merged. All three rollouts (base1, dom1, inv1) found the same 19/8/E401, so it would add context without changing the result.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "ops-m",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 0,
+        "expected_P": 3,
+        "usd": 0.0,
+        "rollout_usd": 0.0,
+        "session_usd": 0.0,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "ops-m",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-cc-agg1/ops-m/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.1392533,
+      "experience": {
+        "cue": "A task has a mechanical compute step and a required output file. A baseline run has already computed the right answer and then ended on a printed result, with the deliverable file missing.",
+        "lesson": "In `systemprompt.md`, put the instruction to write and re-verify the deliverable inside the procedure that runs the computation. Make the write the same command as the compute, for example a `--write` flag on the helper script. Add an explicit step to reopen the file and check its keys and types, and say that a printout with an empty `output/` is not finished. Do not rely on a skill file or a short reminder alone to carry the write step.",
+        "evidence": "Rows 1 and 2. base1 (no instruction) and dom1 (skill plus a short write reminder) both ended on a printout with an empty `output/`. agg1 and inv1 (identical harnesses: procedure block in the prompt with the full write, reopen and verify instruction, and a helper script with `--write`) both re-ran with `--write`, reopened the file and delivered. The Stop hook never fired, so it adds nothing to this contrast.",
+        "confidence": "low. There is one rollout per harness, the prompt and script changed together, and the correct answer was reached by all four rollouts. The record shows that the in-prompt write-and-verify procedure coincided with delivery, but it does not isolate which part caused it.",
+        "edits": "component: systemprompt.md (procedure block for log-analysis tasks)\ncandidates: agg1, inv1 (identical harnesses); dom1 carried a different form\nchange: The base prompt was one generic paragraph. agg1 and inv1 added a procedure block with four parts. (1) Compute with a script and run `scripts/request_failures.py logs START END`. (2) Workspace facts: req-less INFO lines and indented traceback lines quote look-alike ERROR text, the window applies to the last attempt, and file order is not time order. (3) \"Write the deliverable as soon as the numbers are computed, then reopen it and confirm keys and types. Computing and printing without writing is not finishing.\" (4) Report ties instead of guessing. dom1 replaced all of that with a one-line trigger telling the agent to load the `log-incident-stats` skill first, plus a short \"write the file as soon as numbers are computed\" sentence.\nobserved: base1 computed 19/8/E401 with a hand-rolled parser and its last action was the printout; `output/` stayed empty and the deliverable reads \"(no deliverable produced)\". agg1 and inv1 both ran the script, then ran it again with `--write output/answer.json`, reopened the file and asserted keys and types. Both ended with `{\"failed\": 19, \"users\": 8, \"top_code\": \"E401\"}` on disk. dom1 had the short write-reminder but still ended on the printout with no file. The extra write-before-finish sentence in dom1 was therefore not enough on its own. The explicit \"printing is not finishing\" instruction plus a re-open check coincided with delivery in the two rollouts that had them. Each harness has only one rollout, and the script and prompt changed together, so the prompt's own contribution is not isolated.\nverdict: confounded\n\ncomponent: scripts/request_failures.py\ncandidates: agg1, inv1 (top-level `scripts/`); dom1 (copy under `skills/log-incident-stats/scripts/`)\nchange: A new script reads `app.log*` including gzip, groups attempts by req across files, converts offsets to UTC, takes the last attempt, and applies a half-open window. It prints each failed request and the counts. `--write` emits the three keys and refuses to write on a tie or on zero failures.\nobserved: Every rollout got the same answer, 19/8/E401, with or without the script. base1 used its own parser and agreed. The script did not change the numbers. What it changed is that one command computes and writes. agg1 and inv1 used it with `--write` and delivered. dom1 ran the same script without `--write` and delivered nothing. The script alone does not guarantee a file. In dom1 its path was also nested in the skill directory.\nverdict: confounded\n\ncomponent: scripts/check_output.py and hooks.json (Stop hook)\ncandidates: agg1, inv1\nchange: Added a Stop hook that blocks finishing while `output/` is empty or holds invalid JSON.\nobserved: It never fired. In agg1 and inv1 the file was already written and verified before the agent finished. The hook targets exactly the failure seen in base1 and dom1, but no trace shows it intervening.\nverdict: no observed effect\n\ncomponent: skills/log-incident-stats/SKILL.md and the skill trigger line\ncandidates: dom1\nchange: Moved the log-analysis knowledge into a skill: rules for last attempt, UTC window, noise lines and ties, a finish section, and a cross-check section. The system prompt only says to load the skill first.\nobserved: In dom1 the agent loaded the skill and ran the script from the skill path. It stopped at the printout and wrote no file, even though the skill's Finish section says computing without writing is not finishing. The rule sat in a skill file read earlier, and the agent did not act on it at the end. Only one rollout stands behind this.\nverdict: confounded\n\ncomponent: plugin/README.md, skills/README.md, scripts/README.md\ncandidates: agg1, inv1, dom1\nchange: Placeholder README files in the scaffolding directories.\nobserved: None.\nverdict: no observed effect"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-sonnet/exec/hpb-cc-agg1/ops-m/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "d346e44ef7462bf3"
+    }
+  },
+  "errors": []
+}

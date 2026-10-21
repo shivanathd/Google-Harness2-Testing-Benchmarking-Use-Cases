@@ -1,0 +1,10 @@
+  [swe] 1/3 partial      swe-e  :: agg: selection failed: no candidate produced an artifact (finals-only pool has no base fallback)
+  [ops] 1/3 partial      ops-e  :: agg: selection failed: no candidate produced an artifact (finals-only pool has no base fallback)
+  [data] 1/3 partial      data-e  :: agg: selection failed: no candidate produced an artifact (finals-only pool has no base fallback)
+  [swe] 2/3 partial      swe-m  :: agg: selection failed: no candidate produced an artifact (finals-only pool has no base fallback)
+  [ops] 2/3 partial      ops-m  :: agg: selection failed: no candidate produced an artifact (finals-only pool has no base fallback)
+  [data] 2/3 partial      data-m  :: agg: selection failed: no candidate produced an artifact (finals-only pool has no base fallback)
+  [swe] 3/3 partial      swe-h  :: agg: selection failed: no candidate produced an artifact (finals-only pool has no base fallback)
+  [data] 3/3 partial      data-h  :: agg: selection failed: no candidate produced an artifact (finals-only pool has no base fallback)
+  [ops] 3/3 partial      ops-h  :: agg: selection failed: no candidate produced an artifact (finals-only pool has no base fallback)
+{"data": [0, 3], "ops": [0, 3], "swe": [0, 3]} improver_usd 4.7032

@@ -1,0 +1,8 @@
+This fixes the rejected attempt. `skills/log-window-stats/SKILL.md` recorded this instance's own results and parameters: a miscount of 21 against a true 15, users=6, top E500, the line counts 163 and ~130, the user `bob`, and the 2026-10-03 09:00–12:00 window. I did not re-open the trajectory in this pass. The motivating moment is the one the earlier skill text described: the first run counted ERROR events by eye across mixed-timezone lines and got the wrong number.
+
+- **Skill text:** I removed every instance value and kept the method. The skill still says to convert every timestamp to UTC first and to treat the window as start-inclusive, end-exclusive. It also still lists the look-alike lines that are not ERROR events: indented traceback lines, INFO retry lines and WARN lines. Those traps are now written generically, with no ids or counts.
+- **Script command and deliverable step:** The example command now uses `<UTC start>`, `<UTC end>` and `<LEVEL>` placeholders. The deliverable step now says to follow the task's file name, keys and types instead of naming this task's `answer.json` keys.
+- **Script docstring:** The usage line in `scripts/log_window_stats.py` now uses placeholder timestamps. The script's logic is unchanged and it still compiles.
+- **Trigger line:** The `systemprompt.md` line that names the skill is unchanged, so the skill is still reachable.
+
+I grepped the harness afterwards and found no remaining task values (E500, 163, 15, 21, bob, 2026).

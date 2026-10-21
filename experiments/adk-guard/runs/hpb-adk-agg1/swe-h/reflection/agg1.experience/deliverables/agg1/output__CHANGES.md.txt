@@ -1,0 +1,17 @@
+## CHANGES
+
+### `stock/cli.py`
+- Added `--low` argument to the `report` command for filtering low quantities.
+- Fixed the parser setup to use `add_subparsers` correctly.
+
+### `stock/ops.py`
+- Modified `add` to raise `ValueError` if quantity is not positive.
+- Modified `remove` to raise `ValueError` if quantity is negative.
+
+### Probes Run
+1. `report` on missing file and empty file: no output, exit 0.
+2. Invalid operations (e.g., negative quantity) raise `ValueError`, exit 1, and leave file unchanged.
+3. Exact limit operations (e.g., quantity 0) exit 0.
+4. Existing output format and sort order unchanged.
+5. Core functions raise `ValueError` and leave data unchanged.
+6. All existing tests pass.

@@ -1,0 +1,118 @@
+**PRIVILEGED & CONFIDENTIAL -- ATTORNEY-CLIENT PRIVILEGED / ATTORNEY WORK PRODUCT**
+
+# Cover Memo: Markup of Proposed Arbitration Agreement (Exhibit F to Co-Investment Agreement)
+
+**To:** Rebecca Stadler, General Counsel, Whitmore Capital Partners LLC **From:** Hargrove, Wynn & Calloway LLP (draft for partner review, D. Ostrander) **Date:** \[to be inserted on issue\] **Re:** Vantage Specialty Chemicals / Cascadian Growth Fund LP co-investment; redline of Cascadian's proposed arbitration agreement
+
+**Deliverable:** `redlined-arbitration-agreement.docx` (tracked changes against Pinnacle Winterhaven's January 8 draft; 31 bracketed internal notes).
+
+## 1. Summary
+
+- Cascadian's form departs from the Whitmore Arbitration Playbook (v3.0, Nov. 15, 2024) on nearly every topic. We have marked up each departure.
+- All five Critical items are addressed: court interim relief (waiver deleted), three-member panel with selection mechanics, Delaware governing law, no shortening of limitations, and the class waiver. The expedited track (Rebecca Stadler's third priority) is also in the markup.
+- No Required position has been conceded. The markup offers no fallbacks in the body. Fallbacks appear only in the internal notes, for use if Cascadian objects.
+- Three points need a decision before the redline goes out (Section 5): the expedited timeline does not fit internally, the class waiver's wording conflicts with the consolidation clause, and the Co-Investment Agreement is not in the data room.
+
+## 2. Source Hierarchy and Conflicts
+
+Hierarchy applied: (1) D. Ostrander assignment email (Jan. 9, 2025); (2) R. Stadler instructions (Jan. 9, 2025); (3) Playbook v3.0; (4) Cascadian's form (counterparty, not a source of position).
+
+  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Issue                                   Conflict in the record                                                                                                                                            Choice made
+  --------------------------------------- ----------------------------------------------------------------------------------------------------------------------------------------------------------------- -----------------------------------------------------------------------------------------------------
+  Panel selection mechanics (§4(a)-(c))   Playbook lists them as Preferred; R. Stadler says "standard selection mechanics required"                                                                         Treated as Required (client instruction governs)
+
+  Expedited track tier                    Playbook §22 lists it as Recommended; §17 is Required; R. Stadler calls it "critical"                                                                             Classified Required; tier Critical (client instruction governs)
+
+  Discovery (§8)                          §8 body says Required; §22 summary says Recommended                                                                                                               Treated as Required (specific body text governs); confirm with GC
+
+  Award timing for expedited disputes     §18 requires 90 days; §17 requires 45 days for capital call, drag-along, and buy-sell disputes                                                                    Section 5.4 applies 45 days "notwithstanding" Section 8.1
+
+  Markup due date                         D. Ostrander (Jan. 9, first email): draft Sat. Jan. 11 COB; D. Ostrander (later email) and R. Stadler: draft Sun. Jan. 12; playbook: final to Cascadian Jan. 13   Plan to the Jan. 12 draft date; the Jan. 11 date is superseded by the later emails. Please confirm.
+
+  Class waiver vs. consolidation          Playbook §16 required language bars "consolidated" proceedings; §11 permits consolidation with unanimous consent                                                  Required language used; conflict flagged in Section 2.3 note (Section 5 below)
+  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## 3. Changes by Priority Tier
+
+Two axes are used throughout and kept separate: **Position** (Required / Preferred / Fallback, per the playbook) and **Tier** (Critical / Important / Recommended, per playbook §22, as adjusted by client instruction).
+
+### 3.1 Critical
+
+  -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  \#         Provision                         Cascadian draft                              Markup                                                                                                                                                                                                                            Position                                            Fallback (internal only)
+  ---------- --------------------------------- -------------------------------------------- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- --------------------------------------------------- -----------------------------------------------------------------------------------
+  1          Interim relief (§§2.2, 6.1-6.3)   Express waiver of any court interim relief   Waiver deleted. Court carve-out (§6.2) and AAA emergency arbitrator (§6.3) added. §2.2 carve-out conformed.                                                                                                                       Required; NOT ACCEPTABLE to waive (§10)             None. Escalate to GC immediately if Cascadian insists.
+
+  2          Panel (§§4.1-4.2)                 Sole arbitrator, ICC appointment             Three arbitrators; each side appoints one within 30 days; party arbitrators select chair within 20 days; AAA appoints chair if no agreement                                                                                       Required (§4; mechanics per client instruction)     Sole arbitrator only for disputes of \$10M or less; not offered
+
+  3          Governing law (§3.3)              Washington law                               Delaware law                                                                                                                                                                                                                      Required (§6)                                       New York law
+
+  4          Limitations (§10.1)               One-year contractual limitations period      Clause no longer shortens the statute. The governing-law period applies (Delaware: 3 years).                                                                                                                                      Required; no shortening (§15). Preferred: silent.   Contractual period no shorter than the longer of the statutory period and 3 years
+
+  5          Class waiver (new §2.3)           Absent                                       Individual-basis clause using playbook §16 language                                                                                                                                                                               Required; no fallback (§16)                         None
+
+  6          Expedited track (new §5.4)        Absent                                       Sole arbitrator for capital call, drag-along, and buy-sell disputes. Appointment within 10 business days; hearing within 30 days of appointment; document production only (max 5 requests per side); final award within 45 days   Required (§17); tier Critical per R. Stadler        Award deadline up to 60 days, no longer. See Section 5, item 1.
+  -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+*Rationale.* Item 1 protects Whitmore's ability to obtain TROs for exclusivity breaches, unauthorized transfers, and confidentiality breaches, which is the Fund II scenario R. Stadler described. Item 2 reflects the \$325M equity check, which is more than 30 times the \$10M threshold; a sole arbitrator is not acceptable at this size. Item 3 avoids Cascadian's home-state law. Item 4 matters because a one-year period expires before the quarterly and annual reporting cycle would reveal most fund-level breaches. Item 5 prevents aggregation of claims by co-investors or other stakeholders. Item 6 addresses capital-call and governance disputes that cannot wait for a standard arbitration timeline.
+
+### 3.2 Important
+
+  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  \#         Provision                                     Cascadian draft                                        Markup                                                                                                     Position                                        Fallback (internal only)
+  ---------- --------------------------------------------- ------------------------------------------------------ ---------------------------------------------------------------------------------------------------------- ----------------------------------------------- ------------------------------------------------------------------------------
+  7          Institution (§§1, 2.1, 9.2)                   ICC                                                    AAA Commercial Rules                                                                                       Required (§2)                                   JAMS Comprehensive Rules
+
+  8          Seat (§§1 "Seat", 3.1)                        Seattle, Washington                                    Atlanta, Georgia                                                                                           Required (§3)                                   New York, New York
+
+  9          Confidentiality (new §5.5)                    Absent                                                 All five categories covered; three exceptions only; injunctive relief for breach                           Required (§9); injunctive relief is Preferred   Award and financial/trade-secret information only
+
+  10         Damages (new §8.5; §8.3 conformed)            None; §8.3 said damages were unlimited                 Mutual waiver of punitive, exemplary, and consequential damages; fraud and willful misconduct carved out   Required (§13)                                  Punitive and exemplary waiver only; GC escalation first
+
+  11         Fees (§9.1)                                   Each party bears its own costs regardless of outcome   Prevailing party recovers reasonable fees and costs                                                        Required (§14)                                  Tribunal discretion by relative success; GC escalation first
+
+  12         Joinder (§7.2)                                Tribunal discretion                                    Consent of all parties and of the third party                                                              Required (§12); no fallback                     None
+
+  13         Consolidation (§7.1)                          Tribunal discretion                                    Prior written consent of all parties; no unilateral tribunal power                                         Required (§11)                                  Consent of all claimants and respondents, plus tribunal approval
+
+  14         Document retention (§11.1; heading)           Destroy within 30 days and certify                     No destruction; 7-year minimum retention                                                                   Required (§20); destruction NOT ACCEPTABLE      Return (not destruction) of produced documents; other materials kept 7 years
+
+  15         Appellate review (new §8.4; §8.2 conformed)   Final, no appeal                                       Optional AAA appellate arbitration for awards over \$25M; 30-day notice; three-member appellate panel      Required for awards over \$25M (§19)            Appeal by post-award mutual consent
+  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+*Rationale.* Items 7 and 8 reflect that the transaction is wholly U.S.-based (Whitmore in Atlanta, Cascadian in Seattle, Target in Houston), so the ICC's cross-border rationale does not apply. Items 9 and 13 protect LP and fund confidentiality and prevent involuntary joinder of lenders or co-investors. Item 10 caps exposure on a \$325M equity check that could otherwise support consequential-damages claims in the billions. Item 14 conflicts with Whitmore's seven-year retention policy and with the need to defend vacatur or appellate challenges.
+
+### 3.3 Recommended
+
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  \#         Provision                          Cascadian draft                            Markup                                                                                                                                 Position                                       Fallback (internal only)
+  ---------- ---------------------------------- ------------------------------------------ -------------------------------------------------------------------------------------------------------------------------------------- ---------------------------------------------- -----------------------------------------------------------------------------------------------------
+  16         Arbitrator qualifications (§4.3)   Neutral and independent only               15 years PE/M&A/corporate finance; AAA National Roster; 5-year conflict lookback                                                       Required (§5 body); tier Recommended per §22   10 years, only with prior GC approval
+
+  17         Discovery (§5.1)                   ICC Rules "without modification"           3 fact depositions per side (7 hours each); 15 document requests per side; 1 testifying expert per side; simultaneous expert reports   Required (§8 body); tier Recommended per §22   "Limited and proportional" language, with the deposition and expert caps as non-negotiable minimums
+
+  18         Award timing and content (§8.1)    120 days, "best efforts"; reasoned award   90 days; detailed findings of fact and conclusions of law                                                                              Required (§18); tier Recommended per §22       Up to 120 days; findings and conclusions non-negotiable
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+*Conforming changes* (no separate position): §§1 "AAA" and "AAA Rules" definitions, 2.1, 3.1, 4.1, 5.2, 5.3, 8.2, 8.3, 9.2, 12.1 note. Compliant with playbook and unchanged: §2.1 scope (§7), §3.2 English language (§21), and the general provisions in Article XII.
+
+## 4. Positions Not Resolved in This Markup
+
+- No fallback has been offered in the redline. Each fallback above requires GC sign-off before it is offered. The playbook requires escalation before conceding any Required position.
+- Expect the most resistance on the expedited track, the three-member panel, and the class waiver.
+
+## 5. Open Issues to Resolve Before Sending
+
+1.  **Expedited timeline does not fit internally.** Section 5.4 requires appointment within 10 business days (about 14 calendar days), a hearing within 30 days of appointment (day 44), and a final award within 45 days (day 45). That leaves about one day for a reasoned award with findings of fact and conclusions of law, which is not realistic. Options: (a) keep the 45-day award and shorten the hearing window to about 14 days after appointment (hearing around day 28, leaving about two weeks for post-hearing submissions and the award); or (b) take the 60-day fallback, which keeps the 30-day hearing window and leaves about 16 days for the award. We recommend option (a) if Cascadian's counsel will accept it, since it keeps the client's 45-day priority intact.
+2.  **Class waiver vs. consolidation (§2.3 vs. §7.1).** The playbook's required language says no party may bring or participate in a "consolidated" proceeding, which would bar even consented consolidation under §7.1. The markup uses the required language as drafted and flags the tension. Decide whether to keep the bar on class-type consolidation only.
+3.  **Discovery classification.** Playbook §8 says Required; §22 says Recommended. We have treated it as Required. Please confirm with GC.
+4.  **Co-Investment Agreement not in the data room.** Playbook §6 requires the CIA to be Delaware-governed too. The CIA's notice provision (§11.4, cross-referenced in §12.1) and its arbitration provisions (referenced in §12.6, which says the Exhibit controls over conflicting CIA terms) have not been reviewed. Please provide the CIA before the redline goes out.
+5.  **Internal notes must be removed before circulation.** The bracketed notes cite the playbook, fallback positions, and GC-only instructions. They must be stripped before the redline goes to Pinnacle Winterhaven or Cascadian. We have not prepared a clean external version; we can do so on request.
+6.  **Timing.** The first D. Ostrander email set the draft for Jan. 11; later emails set Jan. 12. Final to Pinnacle Winterhaven is Jan. 13 under both. Please confirm the timeline.
+
+## 6. Limitations
+
+- Only the documents in the data room were reviewed: the proposed agreement, the Playbook v3.0, the internal instruction emails, and the Cascadian cover email. The CIA is not included.
+- The redline was checked by machine (reject-all restores the original text, the file is well formed, and superseded terms are searched for). It was not rendered visually; the file has not been opened in Word.
+- Revision timestamps in the redline use the tool's default date (January 1, 2025) and should be reset to the actual markup date before issue.

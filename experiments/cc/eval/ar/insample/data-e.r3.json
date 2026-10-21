@@ -1,0 +1,20 @@
+{
+ "cond": "ar/insample",
+ "task": "data-e",
+ "rep": 3,
+ "partial": 1.0,
+ "all_pass": true,
+ "checks": {
+  "net_usd": true,
+  "transactions": true
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/cc/autoresearch/data/final",
+ "cost_usd": 0.005186130000000001,
+ "tokens_in": 122649,
+ "tokens_out": 2789,
+ "wall_s": 42.7,
+ "error": "",
+ "infra_error": false,
+ "turns": 5,
+ "tool_calls": null
+}

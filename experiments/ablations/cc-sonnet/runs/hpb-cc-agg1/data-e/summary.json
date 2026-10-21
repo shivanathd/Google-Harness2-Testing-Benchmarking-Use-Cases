@@ -1,0 +1,124 @@
+{
+  "task_id": "data-e",
+  "domain": "data",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-cc-agg1/data-e/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-sonnet/exec/hpb-cc-agg1/data-e/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "data-e",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [
+        "inv1",
+        "dom1",
+        "agg1"
+      ],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.0516153,
+          "cached": false,
+          "notes": "KEEP_BASE. I made no changes to the harness.\n\nThe single rollout (base1) did the work correctly and I found no divergence to fix.\n\n- **Reading the data:** It read the full 42-row file before computing. That showed two date formats (`2026-09-15` and `Sep 15, 2026`), quoted thousands separators, and parenthesised negatives such as `(954.34)`.\n- **Duplicates:** It found six txn_ids that appear twice with identical rows (T11007, T11022, T11010, T11019, T11012, T11014). It asserted the copies were identical and counted each txn_id once.\n- **Computation:** It used Decimal, rounded once at the end, and filtered to SETTLED rows dated in 2026-09. The result was 21 transactions and 18691.6368 USD.\n- **Deliverable:** `output/answer.json` has the requested shape: `{\"net_usd\": 18691.64, \"transactions\": 21}`. The script printed the same JSON after writing, and the file reads back intact in the converted deliverable.\n- **Reporting:** The final message stated the assumptions, including that T11007 is the only duplicate that affects the total.\n\nI found nothing that a prose rule, skill, script or hook would have changed. There was no tool error, no repeated hand-rolled step and no skipped invariant. The task is a one-off 42-row file, so a script would be speculative. Always-on text would only add to the context every run pays for. Every candidate edit I considered was either already done correctly by the run or would restate the task's own wording.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.0504674,
+          "cached": false,
+          "notes": "KEEP_BASE. I made no changes to the harness.\n\nThe only rollout, base1, handled every practitioner trap in this workspace correctly without any harness help:\n- **Dates:** it noticed the mixed formats (`2026-09-15` and `Sep 15, 2026`) before computing and parsed both.\n- **Duplicates:** it noticed that T11007, T11022, T11010, T11019, T11012 and T11014 each appear twice. It asserted the repeated rows were identical, then counted each `txn_id` once, as the task says.\n- **Amounts:** it read the parenthesised amounts `(954.34)` and `(888.14)` as negative. It also handled the thousands-separator commas in amounts like `\"1,944.41\"`.\n- **Filtering:** it kept only SETTLED rows dated 2026-09-01 to 2026-09-30 and excluded the PENDING, VOID, August and October rows.\n- **Conversion:** it multiplied by `usd_per_unit` using `Decimal` and rounded once at the end.\n- **Result:** it wrote `{\"net_usd\": 18691.64, \"transactions\": 21}` in the requested shape and stated its assumptions.\n\nThere was no divergence between runs, no repeated failure and no visible near-miss that a harness line would have changed. Adding always-on text would cost context on every run. A skill would also need a trigger line in the always-on text, and I can't tie it to a specific moment in the trajectory. The workspace facts (the duplicate IDs, the parenthesis convention, the date formats) are specific to this matter, so I did not store them as durable memory.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.0536743,
+          "cached": false,
+          "notes": "kept -> base harness unchanged (KEEP_BASE) -> base1 delivered `{\"net_usd\": 18691.64, \"transactions\": 21}`. It read the full file and parsed both date formats. It found the six duplicate txn_ids, asserted the copies were identical and counted each once. It read the parenthesised amounts as negative and handled the quoted thousands separators. It used Decimal and rounded once at the end. I found no error, no hand-rolled step that went wrong, and no repeated failure. There is only 1 base rollout, so a defect would be noise anyway, and I saw none.\ndropped -> inv1 candidate -> its `harness.diff` is empty and its own decision says KEEP_BASE. Its rollout shows no moment where a process rule would have changed anything, and added always-on text would only cost context on every run.\ndropped -> dom1 candidate -> its `harness.diff` is empty and its own decision says KEEP_BASE. The practitioner traps here (duplicates, parenthesis negatives, mixed dates) are specific to this one dataset, and base1 already handled them. Storing them as durable memory would be overfitting to one workspace.\nNeither candidate rollout is associated with an edit, and none of the rollouts I read produced nothing. I made no merge and no edits to disk.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "data-e",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 3,
+        "expected_P": 3,
+        "usd": 0.155757,
+        "rollout_usd": 0.0,
+        "session_usd": 0.155757,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "data-e",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-cc-agg1/data-e/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.0705551,
+      "experience": {},
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-sonnet/exec/hpb-cc-agg1/data-e/agg1",
+      "chosen_tree_is_base": true,
+      "harness_fingerprint": "f4ac612e934c8767"
+    }
+  },
+  "errors": []
+}

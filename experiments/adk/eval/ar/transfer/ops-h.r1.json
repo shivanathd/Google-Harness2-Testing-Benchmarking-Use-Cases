@@ -1,0 +1,27 @@
+{
+ "cond": "ar/transfer",
+ "task": "ops-h",
+ "rep": 1,
+ "partial": 0.0,
+ "all_pass": false,
+ "checks": {
+  "gateway.requests": false,
+  "gateway.error_rate": false,
+  "gateway.p95_ms": false,
+  "search.requests": false,
+  "search.error_rate": false,
+  "search.p95_ms": false,
+  "billing.requests": false,
+  "billing.error_rate": false,
+  "billing.p95_ms": false
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/adk/autoresearch/ops/final",
+ "cost_usd": null,
+ "tokens_in": 2906,
+ "tokens_out": 279,
+ "wall_s": 66.0,
+ "error": "",
+ "infra_error": false,
+ "turns": null,
+ "tool_calls": 3
+}

@@ -1,0 +1,3 @@
+- read_file: reads a whole small file; read tests/ and conftest.py too, not just the source.
+- write_file: overwrites the entire file. Use it only for the source file being fixed (full intended content) and for new files. Never use it on existing tests, and never to "probe" something.
+- run_command: runs from the workspace root. Use it for `python3 scripts/run_tests.py`, ad-hoc check snippets (`python3 -c ...`), and `cp`/`diff` for the output copy. Read the full error before reacting; do not repeat an identical failing command.

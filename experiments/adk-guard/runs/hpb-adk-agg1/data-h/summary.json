@@ -1,0 +1,126 @@
+{
+  "task_id": "data-h",
+  "domain": "data",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-adk-agg1/data-h/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/adk-guard/exec/hpb-adk-agg1/data-h/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "data-h",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.19375720000000002,
+          "cached": false,
+          "notes": "**Evidence:** There is one rollout, base1. It listed the workspace and read all five files, including POLICY.md. Its next call was `write_file output/answer.json` with `{\\\"net_usd\\\": 123456.78, \\\"transactions\\\": 12, \\\"chargebacks\\\": 3}`. That content is a made-up placeholder with no computation behind it. The backslash-escaped quotes also make the file invalid JSON. The agent never computed anything, never reopened the file, and then ended its turn.\n\nThe rollout only shows `list_files`, `read_file` and `write_file` calls. I can't tell whether a shell was available, so I wrote the fallback for both cases.\n\n**Changes**\n1. **`systemprompt.md`** (always-on, short). This rewrites the generic one-liner. It follows the placeholder write and the escaped-quote file in base1.\n   - It forbids placeholder values and requires computing from the source files before writing.\n   - It tells the agent to write JSON with plain quotes and then reopen the file to check it parses.\n   - It points to the helper script, and gives a by-hand fallback if commands can't be run.\n   - It carries workspace facts I checked against the data:\n     - Convert timestamps to UTC before taking the month. For example, ch_028 at `2026-09-01T03:49+05:30` is 2026-08-31 in UTC.\n     - Drop test customers from both charges and chargebacks. C09 and C10 are the test customers here, and ch_090 and ch_091 are large test charges.\n     - JPY amounts are whole yen.\n     - A chargeback can reverse a charge made in any month. cb_2 reverses ch_000, which was captured on 2026-08-31 UTC.\n     - Count \"transactions\" before removing charged-back charges.\n2. **`scripts/net_revenue.py`** (new). This replaces the hand arithmetic across 47 charges with mixed time zones and four currencies.\n   - It is stdlib-only and takes `--month`. It uses Decimal, converts timestamps to UTC and rounds once.\n   - It drops test customers from charges and chargebacks. It books the reversal and the 15.00 fee in the UTC month of `chargeback_at`.\n   - It writes the three-key JSON and prints diagnostics on stderr. The diagnostics cover test rows dropped, charges whose month moved when converted to UTC, and chargebacks on charges that weren't captured.\n   - I ran it on the source files and got `{\"net_usd\": 5072.12, \"transactions\": 9, \"chargebacks\": 3}`. I counted the transactions and chargebacks by hand and they match. I did not hand-check the net figure.\n3. **`hooks.json` and `scripts/check_output.py`** (new Stop hook). It blocks finishing if `output/answer.json` is missing, isn't valid JSON, has the wrong types, or has a net figure with more than 2 decimals. base1 would have been stopped by this: it wrote an invalid-JSON placeholder and ended its turn. The hook accepts any valid computed file, so it doesn't block correct completion.\n\nNo skill was added, because nothing in the evidence calls for one. The README stubs and the other files are unchanged.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.24360719999999997,
+          "cached": false,
+          "notes": "This revises the rejected attempt. I made no new trajectory-driven changes and did not re-read the rollouts this round. The only edits remove instance-specific content from `skills/revenue-reconcile/SKILL.md`.\n\n- **Workspace-fact block removed.** The \"Workspace fact (this task instance)\" section is gone. It listed the September customers flagged as test accounts, specific charge and chargeback ids, the expected counts and the expected net figure. Those belong to this one instance, so a later task would inherit them as wrong anchors.\n- **Rule 3 example generalized.** The INR magnitude example (a specific paise amount and its converted value) was this task's data. It now says to sanity-check the largest converted amounts against the others.\n- **Fee wording generalized.** Rules 4 and 5 no longer hard-code the flat chargeback fee; they point to the fee stated in `POLICY.md`. The \"Run it\" line now shows `--fee AMOUNT from POLICY.md` as an option. The script still defaults the fee to 15.00, which comes from the earlier version.\n- **Left unchanged.** The method rules stay: UTC month boundaries, captured-only recognition, minor units and fx, test-customer exclusion, chargeback timing, and count definitions. So do the \"before finishing\" checks and the trigger line in `systemprompt.md`. All of these are general method, not this instance's data.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.1621173,
+          "cached": false,
+          "notes": "kept -> INV candidate (inv1): `hooks.json` Stop hook, `scripts/check_output.py`, `scripts/net_revenue.py`, expanded `systemprompt.md` -> base1 wrote a made-up placeholder `{\"net_usd\": 123456.78, ...}` with backslash-escaped quotes and never computed anything. In inv1 the helper script ran in one call and wrote 5072.12 / 9 / 3. I recomputed that independently from `source/` and got the same three values. inv1 is the only rollout that delivered a correct file.\nkept -> inv1 prompt line \"Start with list_files '.' ... do not probe '/' or guess directory names\" -> base1 hit two path errors before finding \".\". dom1 repeated `list_files /workspace` about 38 times and ran out of its 40-call limit.\nrevised -> inv1 `systemprompt.md` -> I replaced the sentence with this task's literal timestamps (`2026-09-01T03:49+05:30`, `2026-09-30T22:55+05:30`) with a general instruction to convert to UTC, drop test customers, treat JPY as whole units, and let a chargeback reverse a charge from any month. Those timestamps would be wrong anchors on a later task. The method rules stay. I did not re-run anything after this edit.\ndropped -> DOM candidate (dom1): `skills/revenue-reconcile` and its `recognise.py`, plus the trigger line -> its rollout produced nothing. It loaded the skill, then looped on invalid `list_files` calls until the 40-call limit with no answer.json written, so I treated it as unsafe. Its rules duplicate what the inv1 script and prompt already carry, and the skill's script path (`skills/...`) never got a chance to run. I did not merge any of it.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "data-h",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 4,
+        "expected_P": 3,
+        "usd": 0.599482,
+        "rollout_usd": 0.0,
+        "session_usd": 0.599482,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "data-h",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-adk-agg1/data-h/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.1410998,
+      "experience": {
+        "cue": "A task asks for exact figures computed from several exported data files under a written policy. The base harness has no executable tooling and a one-line prompt, and the agent can run commands.",
+        "lesson": "In `systemprompt.md`, name the deterministic helper script by its exact command, and keep the \"start with `list_files '.'`, never probe '/'\" line. Put the helper at a root-level path such as `scripts/` that the first directory listing shows. Do not hide the method behind a skill the agent must load first. Keep the prompt's method rules general (conversions, exclusions, count definitions) and leave out instance-specific timestamps or ids. After the helper runs, still check its stderr diagnostics against POLICY.md and the raw files, because its default fee and rules are fixed.",
+        "evidence": "Rests on the systemprompt.md and scripts/net_revenue.py rows, which carry the contrast only as a bundle. base1 had neither and wrote an invented, invalid-JSON placeholder after reading every file. agg1 and inv1 listed \".\", ran the script, and wrote the correct file in 3 calls. dom1 put the method in a skill and cut the orientation line, then spent 38 calls on invalid path probes and delivered nothing. The dom1 failure is a single rollout with several simultaneous changes. The \"root-level script, not a skill\" part is therefore a hypothesis. The \"pointer plus script beats bare prompt\" part is better supported.",
+        "confidence": "low-medium. One task, one rollout per candidate, and agg1 and inv1 are near-duplicates, so they do not count as independent confirmation. The prompt and script were always changed together.",
+        "edits": "component: systemprompt.md\ncandidates: agg1, inv1 (dom1 rewrote it differently)\nchange: The base prompt was one generic sentence. agg1 and inv1 expanded it in four ways. They forbid placeholder values. They say to start with `list_files \".\"` and not to probe \"/\". They point to `python3 scripts/net_revenue.py --month YYYY-MM`, with a by-hand fallback. They give method rules: convert to UTC, drop test customers, JPY is whole units, a chargeback can reverse a charge from any month, and count transactions before removing charged-back ones. inv1 also hard-coded this task's literal timestamps as examples. agg1 replaced them with the general instruction. dom1 instead cut the prompt back to the base sentence plus one line telling the agent to load the `revenue-reconcile` skill and not to write placeholders.\nobserved: base1 hit two path errors (`workspace`, then `/`) before finding \".\". It read all five files, then wrote the placeholder `{\\\"net_usd\\\": 123456.78, \\\"transactions\\\": 12, \\\"chargebacks\\\": 3}` with escaped quotes and computed nothing. agg1 and inv1 ran `list_files \".\"` first, ran the script once, wrote the file, and finished in 3 calls. Their rollouts are essentially identical, so the literal-timestamp difference between them had no visible effect. dom1 had no orientation line. After loading the skill it called `list_files` on \"/\" and \"/workspace\" about 38 times and hit the 40-call limit with no output. This prompt change cannot be separated from the script it points to.\nverdict: confounded\n\ncomponent: scripts/net_revenue.py\ncandidates: agg1, inv1 (dom1 removed it from its tree)\nchange: New stdlib-only Decimal script. It converts timestamps to UTC, keeps only captured charges, drops test-customer charges and chargebacks, reverses the full charge plus the 15.00 fee in the UTC month of `chargeback_at`, rounds once, and writes the three-key JSON. It prints diagnostics to stderr.\nobserved: In agg1 and inv1, one `run_command` produced `{\"net_usd\": 5072.12, \"transactions\": 9, \"chargebacks\": 3}`. The diagnostics flagged ch_028 as shifted into August UTC, the dropped test charges ch_090 and ch_091, and test chargeback cb_5. The agent then wrote that same content to output/answer.json. The decision notes say the author recomputed the figures independently from `source/` and matched. This is the only path that produced a correct deliverable. Neither agg1 nor inv1 read the CSVs or POLICY.md, so the script's fee default and rules were never checked against the policy in the run. The script ships with the prompt pointer, so the two effects are not separable.\nverdict: confounded\n\ncomponent: hooks.json + scripts/check_output.py (Stop hook)\ncandidates: agg1, inv1\nchange: A Stop hook that blocks finishing if output/answer.json is missing, is not valid JSON, has the wrong types, or has a net figure with more than 2 decimals.\nobserved: The hook never fired in agg1 or inv1, because both wrote a valid file. base1's invalid placeholder is the case it was written for, but no run with the hook exercised it.\nverdict: no observed effect\n\ncomponent: skills/revenue-reconcile (SKILL.md + scripts/recognise.py) plus the skill-trigger line in systemprompt.md\ncandidates: dom1\nchange: The method rules and a second helper script were packaged as a loadable skill instead of a root-level script. The agent had to load it first. The prompt dropped the \"start with list_files '.'\" guidance. In the version shown the skill text had already been stripped of instance-specific facts.\nobserved: The skill loaded fine, but the next 38 calls were all invalid `list_files` on \"/\" or \"/workspace\". The run hit the 40-call limit and wrote no answer. The skill's script path was never tried. The cause may be the missing orientation line, the skill indirection, or just a one-off rollout. base1 lacked the same line and recovered after two errors, so a single run does not isolate it.\nverdict: confounded\n\ncomponent: plugin/README.md, skills/README.md, scripts/README.md (stubs)\ncandidates: agg1, inv1\nchange: Placeholder README files in the new directories.\nobserved: Nothing observable. No run read them.\nverdict: no observed effect"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/adk-guard/exec/hpb-adk-agg1/data-h/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "849de2ad7c261c49"
+    }
+  },
+  "errors": []
+}

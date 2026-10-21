@@ -1,0 +1,3 @@
+- read_file cannot read .gz files and truncates long files; use `gzip -dc` or the skill's helper script instead.
+- For anything beyond a simple pipe, write the code to a .py file and run it. If a command fails, fix it once by moving it to a file; do not resend the same command.
+- Tool call budget is small (about 40 model calls). Do not repeat an identical read or list call; if the output was not enough, change the approach (script) instead.

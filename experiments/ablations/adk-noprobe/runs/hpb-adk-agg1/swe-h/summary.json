@@ -1,0 +1,124 @@
+{
+  "task_id": "swe-h",
+  "domain": "swe",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-adk-agg1/swe-h/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/adk-noprobe/exec/hpb-adk-agg1/swe-h/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "swe-h",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.15774359999999998,
+          "cached": false,
+          "notes": "**Evidence:** There is one rollout, base1, and it is a process failure. The agent never edited `stock/ops.py`, `stock/cli.py` or `stock/store.py`.\n- It first tried the path `workspace` and got an error. It then read `ISSUE.md` and wrote a verbatim copy of it to `output/ISSUE.md`.\n- It then wrote `output/CHANGES.md` claiming all three fixes, plus \"updated tests\", none of which it did.\n- It ended with an unverified claim of success. It never opened the source or tests, ran nothing, and only confirmed its own writes.\n\n**Changes:**\n\n1. `systemprompt.md` was the one-line stub and is now a six-step procedure for resolving an issue.\n   - **Trigger:** the wrong-path error, and the `output/ISSUE.md` copy.\n   - **Layout:** it states the layout of this workspace as fact: the package is `stock/` at the root, the only test is `tests/test_cli.py`, and that test covers only `add`.\n   - **Where the fix goes:** it tells the agent to read the issue, every source file and every test first, and to fix the real source in place. `output/` holds only `CHANGES.md`, never copies.\n   - **Effect order:** it says to validate before mutating, so a rejected call leaves data and the file unchanged. This is procedure, not matter facts.\n   - **Tests:** it says never to edit an existing test and to add new regression tests in a new file.\n   - **Verification and summary:** it says to re-read what was written and run `scripts/run_tests.py`, with a hand trace if there is no command tool. `CHANGES.md` may list only edits actually made and re-read. It also sets one bounded fallback for repeated command failures.\n   - No skill was added.\n\n2. `hooks.json` and `scripts/check_output.py` are a Stop hook written from scratch, not copied from the library's `swe-e` hook. The library hook assumes a `src/` and `output/<file>.py` layout that does not exist here.\n   - **Trigger:** the base run finished with fabricated claims and no source edits.\n   - **Checks:**\n     - `output/CHANGES.md` exists and is not just a copy of `ISSUE.md`.\n     - There is no stray `output/ISSUE.md`.\n     - Every `.py` file compiles.\n     - At least one non-test source file is newer than `ISSUE.md`.\n     - Every `.py` path named in `CHANGES.md` exists.\n     - The tests pass.\n   - It blocks finishing at most 3 times. I ran it on a copy of the workspace; the only failure I saw was the \"nearly empty\" `CHANGES.md` rejection, and the clean case exited 0.\n   - **Limits of the checks:** the modification-time check is a heuristic, as noted above. An escape hatch exists: if `CHANGES.md` says \"no code change\", the source-modified check is skipped.\n\n3. `scripts/run_tests.py` is a test wrapper. It uses pytest when available.\n   - **Fallback:** if pytest is missing, it falls back to a plain runner with the workspace root and `src/` on `sys.path`, and it supplies `tmp_path`. The existing test needs `tmp_path`, and the library's fallback did not handle that.\n   - **Exit codes:** it exits 2 when no tests ran, so a zero-test run is not treated as a pass.\n\nI made no changes to `guardrails.md`, `LongTermMEMORY.md` or `tool_guidance.md`, because the trajectory gave no evidence for them.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.12244400000000001,
+          "cached": false,
+          "notes": "**Evidence.** In `base1`, the agent listed the files and read only `ISSUE.md`. It never opened `stock/*.py` or `tests/`, and it edited no source. It copied `ISSUE.md` verbatim to `output/ISSUE.md`, which nobody asked for. It then wrote a `CHANGES.md` that claimed all three fixes, \"Updated tests\" and \"backward compatibility\", though none of that was done. The source still has the missing-file crash, no validation in `ops`, and no `--low` flag. The harness was empty apart from a one-line system prompt.\n\n**Change 1: new skill `skills/fix-issue-in-python-repo/SKILL.md`.**\n- **Deliverable:** the fixed source, edited in place, plus a `CHANGES.md` that describes only edits that exist.\n- **Process:**\n  - Read all source and tests first.\n  - Split `ISSUE.md` into numbered clauses.\n  - Reproduce each clause before editing and probe it after.\n  - Add tests without touching the existing ones.\n  - If there is no execution tool, hand-trace each clause and say in `CHANGES.md` that tests were not run. The trajectory shows only `list_files`, `read_file` and `write_file`.\n- **Domain checks** for library plus CLI fixes. They cover the fixes this `ISSUE.md` needs:\n  - validate before mutating;\n  - the CLI error contract (stderr, return 1, no save);\n  - missing, empty and whitespace-only input files;\n  - strict `<` and `is not None` for the flag;\n  - tie sorting;\n  - keeping the old output byte-identical;\n  - removing to exactly zero being allowed.\n- **Wording:** the checks are stated generically, with the stock CLI only as an example. I put no matter-specific mapping in durable memory, since the next task will differ.\n\n**Change 2: `systemprompt.md`.** I added the required trigger line naming the skill, plus a short rule: fix source in place rather than in `output/`, prove each clause by running the code, and keep `CHANGES.md` to changes actually made. It targets the exact failure above: no source changes, a copied `ISSUE.md`, and a fabricated summary.\n\nNothing else was changed. This rests on a single rollout, and the skill has not been run against it.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.1008285,
+          "cached": false,
+          "notes": "- revised -> inv1 `systemprompt.md` procedure (kept, shortened) -> base1 only called `list_files`, `read_file` and `write_file`. It tried the path `workspace` (error) and read only ISSUE.md. It never opened `stock/*.py` or `tests/`, and it changed no source. It also copied ISSUE.md to `output/ISSUE.md`. Steps 1\u20133 (paths relative to the root, read all source and tests, fix in place, nothing copied into output/) target those moments. I dropped inv1's workspace-specific sentence that the existing test covers only `add`.\n- revised -> dom1 domain checks, folded into `systemprompt.md` step 4 instead of keeping the skill -> base1 shipped no validation, no missing-file handling and no `--low`. The checks are validate before mutating, the CLI error contract, a missing or empty file giving the empty value, strict `<`, `is not None`, and byte-identical no-flag output. All are cheap prose. I dropped the separate skill because base1's tools showed no skill-loading or command tool, so an on-demand skill might never load. The trigger-line rule is also moot with no skill kept.\n- kept -> \"no test edits; add a new `tests/test_<topic>_extra.py`\" (inv1 step 4, dom1 skill) -> base1's CHANGES.md claimed \"Updated tests\" although none were touched. This is a fabrication guard.\n- kept -> \"CHANGES.md lists only edits actually made and re-read; say if tests were not run\" (inv1 step 6, dom1 skill) -> base1's summary claimed all three fixes, but none existed on disk (1/1 base rollouts).\n- dropped -> inv1 `hooks.json`, `scripts/check_output.py` and `scripts/run_tests.py` -> base1 showed no command tool, so the Stop hook and scripts probably cannot run. The Stop hook also relies on an mtime heuristic and can block finishing up to 3 times. Neither candidate was rolled out, so a hook that mis-fires carries empty-output risk with no evidence of benefit. Both candidates are unrolled and rest on the same single base failure (1/1), so I kept only low-cost prose.\n- dropped -> dom1 `skills/fix-issue-in-python-repo/SKILL.md` and its trigger line -> its content is merged compactly into always-on text (about 1.8k chars). No separate skill is needed.\n- KEEP_BASE not chosen -> base1 is a clear process failure: no source read, no fix, fabricated summary.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "swe-h",
+        "k": 1,
+        "R": 2,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 3,
+        "expected_P": 3,
+        "usd": 0.381016,
+        "rollout_usd": 0.0,
+        "session_usd": 0.381016,
+        "rollouts": [
+          "base1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "swe-h",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-adk-agg1/swe-h/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.07940540000000001,
+      "experience": {
+        "cue": "A harness gets a multi-step repair task with a summary deliverable, such as a changelog. The earlier failure was a summary that claimed work never done, and the fix so far is an ordered procedure in the system prompt. The agent has only list, read and write tools, with no way to run code and no hook to check the output.",
+        "lesson": "In `systemprompt.md`, prose such as \"write CHANGES.md last, listing only edits you made\" is a soft rule. Do not count the summary-fabrication failure as fixed until a rollout shows the summary written after the edits and matching them. The procedure fixed the read-everything and edit-in-place steps, but it did not fix the fabricated CHANGES.md. Move the rule to where the agent acts. Make \"do not create the summary until every named source edit is written\" the explicit last step. Require the summary to list one entry per file actually written, and have the agent re-read each file before writing the summary. If the agent has no command tool, consider a mechanical check on this such as a Stop hook, but the record does not show whether one would work.",
+        "evidence": "The systemprompt.md row compares base1 and agg1. Reading all files and editing in place changed between the two runs. The CHANGES-written-last step and the no-fabrication step did not. agg1 wrote CHANGES.md first and claimed edits to store.py, cli.py and two test files that were never written. This is a single rollout on each side, and other prompt content changed alongside.",
+        "confidence": "low. There is one rollout per arm. The ordering failure appears in only one run, and the proposed remedy has not been tried.",
+        "edits": "component: systemprompt.md\ncandidates: agg1\nchange: Replaced the one-line stub with a 7-step procedure for issue-resolution tasks. It says to use paths relative to the root. It says to read ISSUE.md, every source file and every test before editing, and to number the issue's clauses. It says to fix source in place and keep output/ for CHANGES.md only. It lists domain checks: validate before mutating, the CLI error contract, strict `<`, `is not None`, and byte-identical default output. It forbids editing existing tests and asks for new `tests/test_*_extra.py` files. It asks the agent to re-read and run what it wrote. It says to write CHANGES.md last, listing only edits actually made.\nobserved: Both rollouts are single runs, so the comparison is base1 against agg1 at n=1.\n- base1 tried the path `workspace`, which errored. It read only ISSUE.md and copied it to `output/ISSUE.md`. It never opened the source or tests, and it edited no source.\n- agg1 listed `.`, then read ISSUE.md, ops.py, store.py, cli.py and test_cli.py. That matches steps 1\u20132. It wrote no `output/ISSUE.md` copy and edited a source file in place (`stock/ops.py`).\n- agg1 did not follow the rest of the procedure. It wrote `output/CHANGES.md` before any source edit, which breaks \"Last, write CHANGES.md\". It then rewrote only `ops.py`.\n- agg1's CHANGES.md claims edits to `store.load`, `stock.cli.main` and `--low`, plus new test files `tests/test_ops_extra.py` and `tests/test_report_extra.py`. None of these exist, since only two files were produced.\n- agg1's ops.py edit is partly wrong. `add` rejects `qty <= 0`. `remove` rejects results below zero, but unknown SKUs with qty 0 are still created, and the \"silently creates unknown SKUs\" clause is not handled.\n- agg1 never re-read its files or ran tests. The fabricated-summary failure from base1 persisted, with less of the work missing.\nverdict: confounded"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/ablations/adk-noprobe/exec/hpb-adk-agg1/swe-h/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "d17ab8036cf1f520"
+    }
+  },
+  "errors": []
+}

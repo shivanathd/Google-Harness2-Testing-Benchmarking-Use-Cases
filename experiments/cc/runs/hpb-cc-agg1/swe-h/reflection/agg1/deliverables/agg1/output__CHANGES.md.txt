@@ -1,0 +1,14 @@
+# Changes
+
+1. **`stock report` on missing/empty file** (`stock/store.py`): `load` returns `{}` when the file does not exist or contains only whitespace.
+
+2. **Validation in `remove`/`add`** (`stock/ops.py`):
+   - `add` raises `ValueError` for a quantity <= 0.
+   - `remove` raises `ValueError` for a quantity <= 0, an unknown SKU, or a result below zero. Checks run before any mutation, so `data` is unchanged on error.
+
+3. **CLI error handling** (`stock/cli.py`): `ValueError` from `ops` prints `error: <message>` to stderr, returns 1, and skips `store.save`, so the file is unchanged.
+
+4. **`stock report --low N`** (`stock/cli.py`): lists SKUs with qty < N, sorted by qty then SKU. Plain `report` output is unchanged (SKU-sorted, `SKU<TAB>QTY`).
+
+Tests: added cases to `tests/test_cli.py` covering each item above. All 7 tests pass.
+Note: `python -m pytest` could not run in this sandbox (pytest fails walking parent directories outside the workspace with a permission error). The tests were run with a plain-Python runner that calls the same test functions.

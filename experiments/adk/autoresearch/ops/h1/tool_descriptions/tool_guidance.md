@@ -1,0 +1,3 @@
+- read_file pages through large files; check the "[N lines total]" header and read everything, or better, process the file with python3 via run_command.
+- Paths are relative to the workspace root (e.g. `app.log`, `output/answer.json`); use `ls -1` first to see the layout. Deliverables go under output/.
+- Helper scripts live in scripts/ and run as `python3 scripts/<name>.py`.

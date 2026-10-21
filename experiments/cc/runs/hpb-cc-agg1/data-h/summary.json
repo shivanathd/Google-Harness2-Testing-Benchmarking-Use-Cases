@@ -1,0 +1,123 @@
+{
+  "task_id": "data-h",
+  "domain": "data",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-cc-agg1/data-h/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/cc/exec/hpb-cc-agg1/data-h/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "data-h",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [
+        "inv1",
+        "agg1"
+      ],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.07215479999999999,
+          "cached": false,
+          "notes": "KEEP_BASE. I changed no files.\n\nThe one rollout, `base1`, did the work correctly and without wasted steps:\n- It read POLICY.md and all four CSVs, then computed the result with a Decimal script instead of by hand.\n- It converted timestamps to UTC and applied the test-customer exclusion to chargebacks as well as charges.\n- It booked chargebacks by the UTC month of `chargeback_at`, counting chargebacks on charges made in earlier months (ch_000).\n- It wrote `output/answer.json` and reopened it with a JSON parse to check it.\n\nI checked its result against the source data. Nine charges are captured in September UTC and belong to non-test customers. ch_028 and ch_022 fall in August UTC. ch_015 and ch_026 fall in October UTC. The three September chargebacks (cb_0, cb_2, cb_6) are the right ones. cb_5 is dropped because its customer is a test account. The answer is `{\"net_usd\": 5072.12, \"transactions\": 9, \"chargebacks\": 3}`, which matches the task's output shape.\n\nThere was no tool error, no repeated failure and no skipped step, and there is only one run, so there is no divergence to learn from. Any addition would be speculative:\n- **Skill or script:** a skill or script would cover a procedure the agent already handled on its own.\n- **Always-on prose:** extra prose would only use up context.\n- **Plugin:** a plugin is not warranted, because the deliverable was written and verified.\n- **Workspace facts:** I did not add facts such as the fx rates or the test-customer IDs. They are specific to this dataset, and the agent reads them from the files in seconds.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.1098659,
+          "cached": false,
+          "notes": "**Evidence:** There was one rollout, base1. It reached net 5072.12, 9 transactions, 3 chargebacks. I rechecked the boundary cases by hand and they hold. The rollout:\n- converted `captured_at` and `chargeback_at` to UTC;\n- excluded test customers C09/C10 from both charges and chargebacks (cb_5 on ch_022);\n- reversed the August charge ch_000 through a September chargeback;\n- counted charged-back charges in \"transactions\".\n\nNo failure or divergence needs fixing, so I made no corrective edit. The harness had no domain knowledge at all (a one-line system prompt and empty skills and scripts READMEs). The base solver got this right on its own, but nothing guarantees it next time.\n\n**Changes (pure additions, small):**\n1. I added `skills/revenue-reconciliation/SKILL.md`. It holds:\n   - Practitioner rules: filter order, UTC month from the event timestamp, JPY exponent 0, rounding only at the end, a chargeback reversing the full charge plus fee in its own UTC month, and the literal definitions of the two count fields.\n   - A \"before finishing\" checklist: account for every chargeback row, check rows near month edges in UTC, inspect large-value outliers, and use the same filtered set for counts and amounts.\n   - Workspace facts, labelled as this task's and to be re-verified. They cover test customers C09/C10 and the large C09 charges ch_090/ch_091. They also cover the UTC edge cases ch_028 (out), ch_015 (out) and ch_011 (in), and the cross-month chargebacks cb_0 and cb_2. The September result is included.\n2. I added a trigger line to `systemprompt.md`: \"When the task turns payment/finance exports ... load the `revenue-reconciliation` skill.\" Without it the skill would never be opened. It is the only always-on cost.\n\nI added no scripts, plugins or subagents. I did not touch output shape: the skill says to deliver exactly the requested file and fields.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.0762076,
+          "cached": false,
+          "notes": "KEEP_BASE. I changed no files.\n\ndropped -> dom1 `skills/revenue-reconciliation` skill plus its trigger line in `systemprompt.md` -> The base rollout already reached 5072.12 / 9 / 3 with no errors or detours. It converted to UTC, excluded test customers from chargebacks as well as charges, and counted charged-back charges. dom1's rollout reached the identical answer, so its skill added no measurable gain. Its \"Workspace facts\" section hard-codes this dataset's IDs and result (C09/C10, ch_028, cb_5, \"net 5072.12\"). That is an answer leak that would mislead on other months or exports, and it costs an always-on trigger line.\n\ndropped -> inv1 (KEEP_BASE candidate, no files changed) -> Its rollout was also 5072.12 / 9 / 3 with the same method. It identified no failure to fix, and I agree. Both candidate rollouts delivered a valid `answer.json`, so none of them was a non-delivering rollout.\n\ndropped -> generic checklist in dom1 (filter order, boundary rows checked in UTC, every chargeback row accounted for) -> Base1 did all of this unprompted (one Decimal script, `answer.json` re-parsed afterwards). The base set is 1/1 clean, so there is no repeated failure to aim an edit at, and any prose would only spend context.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "data-h",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 3,
+        "expected_P": 3,
+        "usd": 0.258228,
+        "rollout_usd": 0.0,
+        "session_usd": 0.258228,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "data-h",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-cc-agg1/data-h/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.0543698,
+      "experience": {},
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/cc/exec/hpb-cc-agg1/data-h/agg1",
+      "chosen_tree_is_base": true,
+      "harness_fingerprint": "020675403b27bd72"
+    }
+  },
+  "errors": []
+}

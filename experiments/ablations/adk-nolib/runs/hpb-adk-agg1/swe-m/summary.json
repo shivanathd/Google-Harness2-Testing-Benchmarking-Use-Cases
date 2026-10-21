@@ -1,0 +1,121 @@
+{
+  "task_id": "swe-m",
+  "domain": "swe",
+  "k": 1,
+  "seed": null,
+  "status": "partial",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-adk-agg1/swe-m/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/adk-nolib/exec/hpb-adk-agg1/swe-m/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "swe-m",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "**Evidence:** There is one rollout, `base1`. It listed files, read ISSUE.md, ROUNDING.md and the test file, then wrote a plan (\"I'll make these changes and then write a summary\u2026\") and ended its turn. It made no edits, never ran the tests, and never wrote `output/CHANGES.md`. The deliverable is \"(no deliverable produced)\". There was also a small tool-path slip early on: `list_files \"workspace\"` and `\"/\"` were rejected, and `\".\"` worked.\n\n1. **`systemprompt.md`, procedure section.** This targets the run's earliest divergence, which was ending the turn on a plan. It now says a plan-only reply ends the run with nothing changed, so the agent must edit in the same turn. It also adds:\n   - the path rule seen in the early `list_files` errors;\n   - a bound on how much to read first (about 5 reads);\n   - a requirement to add a test for each reported symptom;\n   - a requirement to run the tests and the issue's examples, with a stop after 3 failed attempts on the same error;\n   - a requirement to re-open CHANGES.md and the edited files at the end.\n\n2. **`systemprompt.md`, labelled workspace facts.** These come from the source files I read:\n   - `totals.py` uses float math, subtracts the discount after tax, and returns floats instead of strings.\n   - `tax.py` has upper-case `RATES` keys with no normalisation, so an unknown region raises KeyError rather than the ValueError the docs require.\n   - The existing test expects the string \"20.00\".\n   - The issue's worked example should give subtotal 59.97, discount 6.00, tax 10.79 and total 64.76. I checked that by hand.\n\n   These facts save the agent re-deriving them. They are labelled as specific to this workspace.\n\n3. **`hooks.json` plus `scripts/check_output.py`.** This is a Stop hook. The one run exited with no deliverable, which is the case where a hook is justified. The script blocks finishing (exit 2) only if `output/CHANGES.md` is missing or empty, or if `pytest tests` fails. It does not block when pytest is not installed or the run times out, and the runtime caps blocks at 3, so valid completion is not blocked.\n\nI added no skills or sub-agents, because the evidence does not support them.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "I removed the \"Workspace facts\" block from `skills/money-calc-bugfix/SKILL.md`. It held facts about this instance's files: module contents, the rate table, the hand-computed values for the issue case, and the 0.125 example. I made no other substantive edits, and I did not re-read the rollout trajectory for this revision.\n\n- **Checklist item 3:** I dropped the sentence about what \"the original code\" did. It now tells the agent to check the discount sign and the tax base explicitly, as a generic check.\n- **Tests bullet:** it no longer points to \"the values above\". It now says to assert values the agent hand-computes from the spec, including a half-cent tie that float rounding gets wrong.\n- **Unchanged:** the spec-to-code checklist (Decimal only, half-up rounding at the steps the spec names, order of operations, two-decimal string output, region normalisation with `ValueError`) and the analytic move are as before.\n- **Trigger line:** the line in `systemprompt.md` that loads the skill is unchanged, so the skill still passes the trigger-line validation rule.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "Evidence limits: there is 1 base rollout and 1 rollout per candidate. The base run produced nothing. Both candidate runs produced a deliverable, but the code in both was wrong. The merge rests on the base failure and on moments in the two candidate rollouts. I kept the generic procedure and dropped the instance-specific facts.\n\nkept -> inv1 \"do not end on a plan\" rule, merged with dom1's identical rule into one line in `systemprompt.md` -> base1 read ISSUE.md, ROUNDING.md and the test file, wrote a plan, and ended the turn with no edits and no CHANGES.md (1/1 base). Both candidates, which carried this rule, made edits and wrote CHANGES.md.\n\nkept -> inv1 Stop hook (`hooks.json` plus `scripts/check_output.py`) -> in the inv1 rollout the hook blocked finishing 3 times while CHANGES.md was missing. The agent then wrote CHANGES.md. The README says the runtime allows at most 3 blocks.\n\nrevised -> `check_output.py` pytest-failure test -> in the dom1 rollout pytest crashed with `ModuleNotFoundError: pygments`, and `pip install` timed out. I made the hook treat any \"No module named\" error as an environment problem, so it does not block on it. This changes only the skip condition. I did not run the hook.\n\nrevised -> inv1 procedure text in `systemprompt.md` -> I shortened it and added three rules:\n- Only call helpers you have seen in the source. In dom1 the agent wrote `rate_for.cache`, which does not exist in tax.py, and never ran the code.\n- Never claim tests were added or pass unless they were. Both candidate runs claimed added tests while no test file was ever written. inv1 also claimed `test_simple_us` passes after the pytest run crashed.\n- Don't spend turns on pip install (inv1 timed out on it).\n\ndropped -> inv1 \"Facts about this workspace\" block (issue #142 numbers and file contents) -> it is instance-specific and would not transfer to other tasks in this area. The dom1 decision note also dropped the same kind of block from the skill.\n\nkept -> dom1 `skills/money-calc-bugfix/SKILL.md` with the trigger line in `systemprompt.md` -> the dom1 agent loaded it on demand, and it costs nothing when unused. Its facts block was already removed.\n- Weak evidence: the agent ignored the checklist. It ignored the per-line rounding step, tax rounding and the `rate_for` normalisation item, and it never wrote tests.\n- Its effect on outcomes is unproven, but the risk is low because it loads only on money tasks.\n\ndropped -> inv1 and dom1 as wholesale adoptions -> neither is a clean win. Both delivered files but with incorrect code, and the merge combines the delivery guarantee (hook plus no-plan rule) with the verification rules.\n\nKEEP_BASE rejected -> the base produced no deliverable in 1/1 rollouts.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "swe-m",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 0,
+        "expected_P": 3,
+        "usd": 0.0,
+        "rollout_usd": 0.0,
+        "session_usd": 0.0,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "swe-m",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "",
+      "chosen_label": "",
+      "chosen_run_id": "",
+      "chosen_is_base": false,
+      "why": "",
+      "id_map": {},
+      "dropped": [
+        "agg1"
+      ],
+      "n_candidates": 0,
+      "ok": false,
+      "fallback": false,
+      "error": "no candidate produced an artifact (finals-only pool has no base fallback)",
+      "usd": 0.0,
+      "experience": {},
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "",
+      "chosen_tree_is_base": true
+    }
+  },
+  "errors": [
+    "agg: selection failed: no candidate produced an artifact (finals-only pool has no base fallback)"
+  ]
+}

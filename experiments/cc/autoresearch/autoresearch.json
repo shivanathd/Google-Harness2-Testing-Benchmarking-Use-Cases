@@ -1,0 +1,114 @@
+{
+  "data": {
+    "dev_task": "data-e",
+    "best_dev_score": 1.0,
+    "log": [
+      {
+        "iter": 0,
+        "score": 1.0,
+        "kept": true,
+        "notes": "baseline"
+      },
+      {
+        "iter": 1,
+        "score": 1.0,
+        "kept": false,
+        "notes": "sy dates, amounts, duplicates and currencies, using a script with Decimal and a single final rounding, printing row counts after each filter, and verifying the output schema. The baseline already scored 1.0, so this change aims to keep that result reliable on similar tasks. I haven't run it.</notes>"
+      },
+      {
+        "iter": 2,
+        "score": 1.0,
+        "kept": false,
+        "notes": "icating by the stated ID, filtering exactly, using Decimal with a single final rounding, printing row counts after each filter, and re-reading the output file to check its schema. The baseline already scores 1.0, so this is a low-risk change meant to keep the agent reliable on harder inputs.</notes>"
+      },
+      {
+        "iter": 3,
+        "score": 1.0,
+        "kept": false,
+        "notes": "e stated ID.\n- Compute in a script with Decimal and round once at the end.\n- Print row counts after each filter and fail loudly on values that won't parse.\n- Re-read the output file to check its schema.\n\nI haven't run the agent with the new guardrails, so the effect on the score is untested.</notes>"
+      },
+      {
+        "iter": 4,
+        "score": 1.0,
+        "kept": false,
+        "notes": "on checklist to guardrails.md. It covers inspecting the raw file for messy values, applying only the stated filters, parsing with Decimal and rounding once, and checking row counts and the output schema. The score is already 1.0, so this is a small, generic safeguard and I haven't tested it.</notes>"
+      }
+    ],
+    "final": "/Users/me/GoogleHarness2/experiments/cc/autoresearch/data/final"
+  },
+  "ops": {
+    "dev_task": "ops-e",
+    "best_dev_score": 1.0,
+    "log": [
+      {
+        "iter": 0,
+        "score": 1.0,
+        "kept": true,
+        "notes": "baseline"
+      },
+      {
+        "iter": 1,
+        "score": 1.0,
+        "kept": false,
+        "notes": "th an inclusive start and exclusive end, using only the record's own level field, ignoring continuation lines and embedded \"ERROR\" or `user=` text, checking ties, and verifying the output schema. The baseline already scored 1.0, so this is meant to keep that result reliable on similar tasks.</notes>"
+      },
+      {
+        "iter": 2,
+        "score": 1.0,
+        "kept": false,
+        "notes": "re parsing, start-inclusive/end-exclusive windows, skipping continuation lines and level/user/code words inside message text, checking ties, and verifying the output schema. The score was already 1.0, so this is a robustness change aimed at other tasks of the same kind, and I haven't run it.</notes>"
+      },
+      {
+        "iter": 3,
+        "score": 1.0,
+        "kept": false,
+        "notes": "n, [start,end) windows, tie checks, schema verification) and a reusable scripts/log_window_stats.py helper for timezone-aware windowed log counts. The score was already 1.0, so this aims to keep it reliable on other tasks of the same kind. The helper reproduces the current output on app.log.</notes>"
+      },
+      {
+        "iter": 4,
+        "score": 1.0,
+        "kept": false,
+        "notes": "m the record's own fields. It also says to convert offsets to UTC with start-inclusive, end-exclusive windows, check ties, and match the output schema exactly. The score was already 1.0, so this is a defensive change meant to keep it there. I did not run the agent, so the effect is untested.</notes>"
+      }
+    ],
+    "final": "/Users/me/GoogleHarness2/experiments/cc/autoresearch/ops/final"
+  },
+  "swe": {
+    "dev_task": "swe-e",
+    "best_dev_score": 1.0,
+    "log": [
+      {
+        "iter": 0,
+        "score": 1.0,
+        "kept": true,
+        "notes": "baseline"
+      },
+      {
+        "iter": 1,
+        "score": 1.0,
+        "kept": false,
+        "notes": "g, and tests edge cases. It also covers running the existing tests, adding new ones, copying deliverables to output/, and summarising. The baseline already scored 1.0, so I kept the change small and general. I did not run the agent with the new prompt, so its effect on the score is untested.</notes>"
+      },
+      {
+        "iter": 2,
+        "score": 1.0,
+        "kept": false,
+        "notes": "t only the reported symptom. It also covers edge-case checks against each spec clause, copying the deliverable to output/ and confirming the copy matches, and a brief summary at the end. The baseline already scored 1.0, so I kept the change small. I did not run the agent with the new prompt.</notes>"
+      },
+      {
+        "iter": 3,
+        "score": 1.0,
+        "kept": false,
+        "notes": "requirement and not only the reported symptom. It also covers testing valid and invalid inputs and boundary cases, copying the deliverable to output/ and checking the copy matches, and ending with a short summary. The baseline already scored 1.0, so I kept the change small and didn't run it.</notes>"
+      },
+      {
+        "iter": 4,
+        "score": 1.0,
+        "kept": false,
+        "notes": "ment, check valid, invalid and boundary inputs, run the existing tests, copy the deliverable to output/ and confirm the copy matches, and summarise any interpretation choices. The baseline already scored 1.0, so this is a small change meant to keep that behaviour consistent on similar tasks.</notes>"
+      }
+    ],
+    "final": "/Users/me/GoogleHarness2/experiments/cc/autoresearch/swe/final"
+  },
+  "improver_usd": 0.6
+}

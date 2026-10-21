@@ -1,0 +1,1 @@
+{"executor": "cc", "root": "../experiments/ablations/cc-haiku", "no_probe": false, "no_library": false, "tiers": ["easy", "medium", "hard"], "domains": ["data", "ops", "swe"], "share_base": "../experiments/ablations/cc-sonnet", "improver_sessions": 6, "improver": "claude-haiku-5-5"}

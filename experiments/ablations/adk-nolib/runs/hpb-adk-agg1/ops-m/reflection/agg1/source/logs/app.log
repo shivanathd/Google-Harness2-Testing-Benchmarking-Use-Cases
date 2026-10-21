@@ -1,0 +1,94 @@
+2026-10-06T13:47:35+02:00 ERROR req=r610040 user=hal attempt=1 code=E500 msg=failed
+2026-10-06T07:47:36-04:00 INFO user=cai msg=cache warm after ERROR code=E500
+2026-10-06T14:01:53+02:00 INFO req=r610036 user=eli attempt=1 status=200 msg=ok
+2026-10-06T14:06:16+02:00 ERROR req=r610023 user=ben attempt=1 code=E500 msg=failed
+2026-10-06T14:07:39+02:00 INFO req=r610023 user=ben attempt=2 status=200 msg=ok
+2026-10-06T08:08:24-04:00 INFO user=ben msg=cache warm after ERROR code=E500
+2026-10-06T12:08:32+00:00 ERROR req=r610062 user=cai attempt=1 code=E409 msg=failed
+2026-10-06T08:11:28-04:00 ERROR req=r610063 user=fay attempt=1 code=E401 msg=failed
+2026-10-06T08:13:30-04:00 INFO req=r610079 user=eli attempt=1 status=200 msg=ok
+2026-10-06T08:14:42-04:00 INFO req=r610105 user=dev attempt=1 status=200 msg=ok
+2026-10-06T12:15:56+00:00 INFO user=dev msg=cache warm after ERROR code=E500
+2026-10-06T08:20:21-04:00 INFO req=r610002 user=cai attempt=1 status=200 msg=ok
+2026-10-06T08:21:19-04:00 INFO req=r610002 user=cai attempt=2 status=200 msg=ok
+2026-10-06T14:21:47+02:00 ERROR req=r610044 user=dev attempt=1 code=E401 msg=failed
+2026-10-06T14:22:02+02:00 INFO user=dev msg=cache warm after ERROR code=E500
+2026-10-06T08:28:07-04:00 INFO req=r610090 user=dev attempt=1 status=200 msg=ok
+2026-10-06T08:28:31-04:00 ERROR req=r610090 user=dev attempt=2 code=E503 msg=failed
+2026-10-06T12:29:07+00:00 ERROR req=r610090 user=dev attempt=3 code=E401 msg=failed
+2026-10-06T14:34:35+02:00 INFO req=r610046 user=ben attempt=1 status=200 msg=ok
+2026-10-06T12:38:13+00:00 ERROR req=r610003 user=eli attempt=1 code=E401 msg=failed
+2026-10-06T14:39:16+02:00 ERROR req=r610003 user=eli attempt=2 code=E401 msg=failed
+2026-10-06T12:39:18+00:00 INFO req=r610003 user=eli attempt=3 status=200 msg=ok
+2026-10-06T12:41:31+00:00 ERROR req=r610005 user=eli attempt=1 code=E503 msg=failed
+2026-10-06T12:41:34+00:00 ERROR req=r610034 user=gus attempt=1 code=E409 msg=failed
+  Traceback (most recent call last):
+  UpstreamError: ERROR code=E409 user=hal
+2026-10-06T14:42:07+02:00 ERROR req=r610034 user=gus attempt=2 code=E409 msg=failed
+2026-10-06T14:43:00+02:00 ERROR req=r610005 user=eli attempt=2 code=E503 msg=failed
+  Traceback (most recent call last):
+  UpstreamError: ERROR code=E500 user=dev
+2026-10-06T12:43:17+00:00 ERROR req=r610034 user=gus attempt=3 code=E503 msg=failed
+2026-10-06T12:43:49+00:00 INFO req=r610005 user=eli attempt=3 status=200 msg=ok
+2026-10-06T12:44:48+00:00 INFO user=eli msg=cache warm after ERROR code=E500
+2026-10-06T14:51:06+02:00 INFO req=r610054 user=dev attempt=1 status=200 msg=ok
+2026-10-06T14:52:24+02:00 ERROR req=r610054 user=dev attempt=2 code=E503 msg=failed
+2026-10-06T08:54:11-04:00 INFO req=r610030 user=dev attempt=1 status=200 msg=ok
+2026-10-06T09:13:34-04:00 ERROR req=r610055 user=fay attempt=1 code=E409 msg=failed
+2026-10-06T13:15:57+00:00 ERROR req=r610007 user=eli attempt=1 code=E500 msg=failed
+2026-10-06T15:16:22+02:00 ERROR req=r610007 user=eli attempt=2 code=E503 msg=failed
+  Traceback (most recent call last):
+  UpstreamError: ERROR code=E409 user=eli
+2026-10-06T09:16:35-04:00 INFO req=r610007 user=eli attempt=3 status=200 msg=ok
+2026-10-06T09:18:21-04:00 INFO req=r610104 user=cai attempt=1 status=200 msg=ok
+2026-10-06T13:18:45+00:00 ERROR req=r610104 user=cai attempt=2 code=E409 msg=failed
+2026-10-06T09:20:05-04:00 ERROR req=r610104 user=cai attempt=3 code=E409 msg=failed
+2026-10-06T15:28:44+02:00 ERROR req=r610041 user=hal attempt=1 code=E503 msg=failed
+  Traceback (most recent call last):
+  UpstreamError: ERROR code=E401 user=ben
+2026-10-06T09:30:13-04:00 ERROR req=r610041 user=hal attempt=2 code=E401 msg=failed
+2026-10-06T15:46:50+02:00 ERROR req=r610027 user=gus attempt=1 code=E401 msg=failed
+2026-10-06T09:47:07-04:00 INFO user=gus msg=cache warm after ERROR code=E500
+2026-10-06T09:47:36-04:00 ERROR req=r610067 user=eli attempt=1 code=E503 msg=failed
+2026-10-06T15:47:44+02:00 INFO req=r610067 user=eli attempt=2 status=200 msg=ok
+2026-10-06T15:47:48+02:00 ERROR req=r610057 user=ben attempt=1 code=E500 msg=failed
+  Traceback (most recent call last):
+  UpstreamError: ERROR code=E401 user=ivy
+2026-10-06T15:49:11+02:00 ERROR req=r610057 user=ben attempt=2 code=E503 msg=failed
+2026-10-06T15:49:23+02:00 INFO req=r610057 user=ben attempt=3 status=200 msg=ok
+2026-10-06T15:51:01+02:00 ERROR req=r610001 user=ana attempt=1 code=E503 msg=failed
+2026-10-06T13:51:24+00:00 ERROR req=r610001 user=ana attempt=2 code=E401 msg=failed
+2026-10-06T13:52:09+00:00 INFO user=ana msg=cache warm after ERROR code=E500
+2026-10-06T10:03:04-04:00 ERROR req=r610096 user=gus attempt=1 code=E503 msg=failed
+2026-10-06T10:03:09-04:00 ERROR req=r610096 user=gus attempt=2 code=E500 msg=failed
+  Traceback (most recent call last):
+  UpstreamError: ERROR code=E503 user=hal
+2026-10-06T14:03:45+00:00 INFO req=r610096 user=gus attempt=3 status=200 msg=ok
+2026-10-06T14:13:34+00:00 ERROR req=r610020 user=dev attempt=1 code=E401 msg=failed
+  Traceback (most recent call last):
+  UpstreamError: ERROR code=E401 user=dev
+2026-10-06T10:16:24-04:00 INFO req=r610053 user=hal attempt=1 status=200 msg=ok
+2026-10-06T14:17:17+00:00 ERROR req=r610053 user=hal attempt=2 code=E500 msg=failed
+2026-10-06T14:18:24+00:00 ERROR req=r610053 user=hal attempt=3 code=E401 msg=failed
+2026-10-06T14:18:33+00:00 INFO user=hal msg=cache warm after ERROR code=E500
+2026-10-06T14:23:23+00:00 ERROR req=r610013 user=cai attempt=1 code=E401 msg=failed
+2026-10-06T16:24:00+02:00 INFO user=cai msg=cache warm after ERROR code=E500
+2026-10-06T10:32:22-04:00 ERROR req=r610108 user=gus attempt=1 code=E401 msg=failed
+2026-10-06T10:32:39-04:00 ERROR req=r610108 user=gus attempt=2 code=E503 msg=failed
+2026-10-06T14:42:11+00:00 ERROR req=r610072 user=ana attempt=1 code=E500 msg=failed
+2026-10-06T14:43:25+00:00 INFO req=r610072 user=ana attempt=2 status=200 msg=ok
+2026-10-06T10:44:43-04:00 INFO req=r610078 user=eli attempt=1 status=200 msg=ok
+2026-10-06T14:45:01+00:00 INFO req=r610078 user=eli attempt=2 status=200 msg=ok
+2026-10-06T14:46:47+00:00 ERROR req=r610070 user=dev attempt=1 code=E409 msg=failed
+2026-10-06T14:52:35+00:00 ERROR req=r610028 user=hal attempt=1 code=E401 msg=failed
+  Traceback (most recent call last):
+  UpstreamError: ERROR code=E401 user=gus
+2026-10-06T14:52:38+00:00 INFO req=r610028 user=hal attempt=2 status=200 msg=ok
+2026-10-06T14:53:07+00:00 INFO user=hal msg=cache warm after ERROR code=E500
+2026-10-06T14:55:44+00:00 INFO req=r610107 user=ana attempt=1 status=200 msg=ok
+2026-10-06T14:58:48+00:00 ERROR req=r610017 user=dev attempt=1 code=E503 msg=failed
+2026-10-06T16:59:10+02:00 INFO req=r610017 user=dev attempt=2 status=200 msg=ok
+2026-10-06T14:59:48+00:00 ERROR req=r610017 user=dev attempt=3 code=E409 msg=failed
+  Traceback (most recent call last):
+  UpstreamError: ERROR code=E401 user=ben
+2026-10-06T15:00:37+00:00 INFO user=dev msg=cache warm after ERROR code=E500

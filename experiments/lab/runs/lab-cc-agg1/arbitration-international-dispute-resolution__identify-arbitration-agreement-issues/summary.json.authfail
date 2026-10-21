@@ -1,0 +1,125 @@
+{
+  "task_id": "arbitration-international-dispute-resolution/identify-arbitration-agreement-issues",
+  "domain": "arbitration-international-dispute-resolution",
+  "k": 1,
+  "seed": null,
+  "status": "partial",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "lab-cc-agg1/arbitration-international-dispute-resolution/identify-arbitration-agreement-issues/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/lab/exec/lab-cc-agg1/arbitration-international-dispute-resolution/identify-arbitration-agreement-issues/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "arbitration-international-dispute-resolution/identify-arbitration-agreement-issues",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [
+        "inv1",
+        "dom1",
+        "agg1"
+      ],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": true,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.0,
+          "cached": false,
+          "notes": "",
+          "error": "[inv1.a1] claude_cli/claude-haiku-5-5: CLI error: success Failed to authenticate: OAuth session expired and could not be refreshed"
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": true,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.0,
+          "cached": false,
+          "notes": "",
+          "error": "[dom1.a1] claude_cli/claude-haiku-5-5: CLI error: success Failed to authenticate: OAuth session expired and could not be refreshed"
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": true,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.0,
+          "cached": false,
+          "notes": "",
+          "error": "[agg1.a1] claude_cli/claude-haiku-5-5: CLI error: success Failed to authenticate: OAuth session expired and could not be refreshed"
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "arbitration-international-dispute-resolution/identify-arbitration-agreement-issues",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 6,
+        "expected_P": 3,
+        "usd": 0.0,
+        "rollout_usd": 0.0,
+        "session_usd": 0.0,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "arbitration-international-dispute-resolution/identify-arbitration-agreement-issues",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "",
+      "chosen_label": "",
+      "chosen_run_id": "",
+      "chosen_is_base": false,
+      "why": "",
+      "id_map": {},
+      "dropped": [
+        "agg1"
+      ],
+      "n_candidates": 0,
+      "ok": false,
+      "fallback": false,
+      "error": "no candidate produced an artifact (finals-only pool has no base fallback)",
+      "usd": 0.0,
+      "experience": {},
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "",
+      "chosen_tree_is_base": true
+    }
+  },
+  "errors": [
+    "agg: selection failed: no candidate produced an artifact (finals-only pool has no base fallback)"
+  ]
+}

@@ -1,0 +1,1 @@
+{"hooks": {"Stop": [{"hooks": [{"type": "command", "command": "python3 scripts/check_output.py src/durations.py:output/durations.py"}]}]}}

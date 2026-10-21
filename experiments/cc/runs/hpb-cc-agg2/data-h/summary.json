@@ -1,0 +1,169 @@
+{
+  "task_id": "data-h",
+  "domain": "data",
+  "k": 2,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-cc-agg2/data-h/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/cc/exec/hpb-cc-agg2/data-h/base1"
+    },
+    {
+      "label": "base2",
+      "run_id": "hpb-cc-agg2/data-h/base2",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/cc/exec/hpb-cc-agg2/data-h/base2"
+    }
+  ],
+  "modes": {
+    "seq": {
+      "mode": "seq",
+      "task_id": "data-h",
+      "k": 2,
+      "finals": [
+        "c1",
+        "c2"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [
+        "inv1",
+        "c1",
+        "inv2",
+        "dom2",
+        "c2"
+      ],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.0679355,
+          "cached": false,
+          "notes": "KEEP_BASE. I changed no files.\n\n- **Both runs match.** base1 and base2 produced the same `output/answer.json`: `{\"net_usd\": 5072.12, \"transactions\": 9, \"chargebacks\": 3}`. I did not recompute the figure independently. My check was limited to base1's printed intermediates, which are internally consistent.\n- **Both followed the same workflow.** Each read POLICY.md and the four CSVs. Each then wrote one Decimal-based script that did four things:\n  - converted `captured_at` to UTC before assigning the month;\n  - excluded test customers from charges and chargebacks;\n  - booked chargebacks by `chargeback_at` in UTC;\n  - rounded only the final figure.\n\n  Each then wrote the JSON in the requested shape, with no extra fields.\n- **The one slip was self-corrected.** In base1's first script the fee sign was wrong (`usd - 15`, which gave 5162.12). The agent caught it on re-reading its own output and fixed it before writing the file (`usd + 15`, which gave 5072.12). Because it was a one-off arithmetic slip, caught within the run, it doesn't justify a script, skill or plugin. Adding always-on text would cost context on every run for no demonstrated gain.\n- **Existing components are fine.** The system prompt already says to write deliverables under `output/`, and both runs did. Neither run hit a tool error, a timeout or a missing-deliverable problem.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.11669849999999998,
+          "cached": false,
+          "notes": "Both rollouts reached the same answer: `{\"net_usd\": 5072.12, \"transactions\": 9, \"chargebacks\": 3}`. I recomputed it independently and it matches. So no rule in the current harness needs correcting, and the change below is small and on-demand.\n\n- **New skill `skills/revenue-reconciliation/SKILL.md`, with a trigger line added to `systemprompt.md`.**\n  - **Motivating moment:** in base1, the first script subtracted `usd - 15`, which adds the fee back. It printed 5162.12 and only caught the error on a re-read, then fixed it to `usd + 15` and got 5072.12. base2 got the sign right first time. That is the one divergence between the runs.\n  - **What the skill encodes:**\n    - convert every timestamp with its offset to UTC before taking the month;\n    - drop test customers from both revenue and chargebacks;\n    - treat JPY as already in whole units;\n    - deduct each chargeback as the full charge plus the fee;\n    - count a chargeback in its own booking month, even if the charge came from another month;\n    - count `transactions` even when the charge was later charged back.\n  - **Pre-write checklist:** list the recognised charge IDs and booked chargeback IDs, give each exclusion a named reason, check the UTC month-boundary charges, recompute net as gross minus reversals minus fee \u00d7 count, and confirm the output keys and number formats.\n  - **Workspace facts:** I recorded only the file set, the currencies, the test-customer behaviour and the fee-sign slip, labelled as this task's data. I left the final figure out of the skill.\n- **Not changed:** the guardrails, memory and tool guidance. The runs show no evidence that a change there would alter behaviour.",
+          "error": ""
+        },
+        {
+          "label": "c1",
+          "dim": "COMPOSE",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.0794839,
+          "cached": false,
+          "notes": "**Decision: KEEP_BASE.** I changed no files, and the current checkpoint is the original harness. This is the first round, so no earlier rounds' edits exist to keep or drop.\n\n**Evidence inventory.** I read all four rollouts: base1, base2, the inv1 candidate and the dom1 candidate.\n- **Answers.** All four wrote `{\"net_usd\": 5072.12, \"transactions\": 9, \"chargebacks\": 3}`.\n- **Check against POLICY.md.** I checked this against the policy and dom1's printed intermediates:\n  - Charges are converted to UTC before the month is taken. The boundary charges ch_022 and ch_028 (2026-09-01T03:xx+05:30) fall in August UTC. ch_022 is also a test customer.\n  - Test customers C09 and C10 are excluded from both revenue and chargebacks. That drops ch_090 and ch_091 and the chargeback cb_5.\n  - The three September chargebacks are cb_0, cb_2 and cb_6. Each reverses the full charge plus the 15.00 fee.\n  - Gross is 7101.946, chargeback charges are 1984.831, and fees are 45.00. That gives a net of 5072.115, which rounds to 5072.12.\n- **Tool problems.** None of the runs hit a tool error, a timeout, or a missing deliverable.\n\n**inv1.** It left the harness unchanged and produced the same answer. It confirms that the base harness is sufficient.\n\n**dom1 (rejected).** It added a `revenue-reconciliation` skill and a trigger line in `systemprompt.md`.\n- **What the motivation was.** The skill targets base1's one slip: the first script subtracted `usd - 15`, which adds the fee back. It printed 5162.12, and the agent caught it on re-reading and fixed it before writing the file.\n- **What the dom1 rollout showed.** It loaded the skill and got the same answer base2 reached without it. The skill therefore showed no measurable benefit.\n- **Why not adopt it.**\n  - Base2, base1's final answer and inv1 were already correct without it.\n  - The skill restates POLICY.md, which the agent reads every time.\n  - Its \"Workspace facts\" section hardcodes details of this particular dataset and a past slip, which is overfit and could mislead on different data.\n  - Adopting it would add an always-on trigger line and a skill for no demonstrated gain.\n\nIf a later round shows a fee-sign or UTC-boundary error that is not self-corrected, dom1's checklist is the place to start. A script would probably suit that better than prose.",
+          "error": ""
+        },
+        {
+          "label": "inv2",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.10015410000000001,
+          "cached": false,
+          "notes": "KEEP_BASE. I changed no files, so the checkpoint is unchanged from the previous round.\n\n- **Evidence read.** I read task.md, the current harness, all earlier decisions (c1, dom1, inv1), and both base rollouts (base1, base2). I also checked the three pool candidates' produced answers and final summaries.\n- **Answers agree.** All base and pool runs wrote `{\"net_usd\": 5072.12, \"transactions\": 9, \"chargebacks\": 3}`. That figure matches the 5072.115 intermediate printed in both base runs.\n- **Workflow was sound every time.**\n  - The agent read POLICY.md and the four CSVs, then wrote one Decimal-based script.\n  - It converted timestamps to UTC before taking the month and excluded test customers from both charges and chargebacks.\n  - It booked chargebacks by `chargeback_at`, deducted the full charge plus the 15.00 fee, and rounded only the final figure.\n  - It wrote the JSON in the requested shape.\n- **No tool problems.** Nothing timed out, was denied, or went unread. The `ls: ..: Operation not permitted` line in both base runs is harmless: the listing still printed and the agent moved on.\n- **One slip, and it was caught.** In base1 the first script used `usd - 15`, which added the fee back and printed 5162.12. The agent noticed the sign error before writing the file and fixed it. It is a single arithmetic slip that the run recovered from within the same run. That does not justify a script, skill or plugin, and always-on prose would cost context in every run for no demonstrated gain.\n- **Deliverable.** The deliverable text reads back as valid and complete, so a completion check would add nothing.\n- **dom1's skill.** Its rollout got the same answer base2 reached without it. Its hardcoded workspace facts would be overfit, so I did not adopt it.",
+          "error": ""
+        },
+        {
+          "label": "dom2",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.08412239999999999,
+          "cached": false,
+          "notes": "KEEP_BASE. I changed no files.\n\n- **Evidence checked.** I read base1, base2 and the dom1, c1 and inv1 candidates. All five runs wrote `{\"net_usd\": 5072.12, \"transactions\": 9, \"chargebacks\": 3}`.\n- **Independent recompute.** I recomputed the figure from the source CSVs, applying POLICY.md with the following rules:\n  - Month is taken after converting `captured_at` to UTC.\n  - Test customers C09 and C10 are dropped from charges and chargebacks.\n  - JPY is treated as whole units.\n  - Each September chargeback reverses the full charge plus the 15.00 fee.\n  - Chargebacks are booked by UTC `chargeback_at`.\n  \n  The result was 5072.115, which rounds to 5072.12, with 9 transactions and 3 chargebacks. This matches every run, so there is no wrong-answer failure for a harness change to fix.\n- **The only divergence.** In base1, the first script subtracted `usd - 15` for each chargeback, which adds the fee back and printed 5162.12. The agent caught it on re-reading and fixed it before writing the file. base2 and the other runs got the sign right the first time. A single slip that the agent corrected within the run does not justify a new skill, which would also add an always-on trigger line.\n- **Why not dom1's skill.** The dom1 candidate added a `revenue-reconciliation` skill. Its rollout reached the same answer as the unmodified runs, so it shows no gain.\n  - It mostly restates POLICY.md, which every run reads in full.\n  - Its \"workspace facts\" section records a past slip rather than any verified join or mapping.\n- **Tool problems.** No run hit a tool error, a timeout or a missing deliverable, so a plugin or script has no failure to address.\n- **When to revisit.** If a later round shows an uncorrected fee-sign or UTC-boundary error, the first thing to add is a script that computes the month in UTC and the fee deduction. Add prose only after that.",
+          "error": ""
+        },
+        {
+          "label": "c2",
+          "dim": "COMPOSE",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.0626878,
+          "cached": false,
+          "notes": "KEEP_BASE. I changed no files, so the current checkpoint in `context/harness/` is the final harness. It is the original harness. No earlier round's edits survive, because none were made.\n\n**Evidence inventory.** I inspected all of these:\n- `base1` and `base2`.\n- The round-1 candidates `inv1`, `dom1` and `c1`.\n- The round-2 candidates `inv2` and `dom2`.\n- The decision files for c1, dom1, dom2, inv1 and inv2.\n\n**What the runs show.** All seven runs wrote the same `output/answer.json`: `{\"net_usd\": 5072.12, \"transactions\": 9, \"chargebacks\": 3}`. I did not recompute the figure from the source CSVs. The rollout summaries and the round-1 decisions give the same intermediates and the same figure. In every run:\n- The month was taken after converting timestamps to UTC, and the boundary charges fell into August.\n- Test customers C09 and C10 were excluded from revenue and from chargebacks.\n- The three September chargebacks (cb_0, cb_2, cb_6) were each deducted as the full charge plus the 15.00 fee.\n- The `transactions` count included ch_002 and ch_023, which were later charged back.\n- The JSON had exactly the three requested keys.\n\n**Candidates.**\n- **`inv2` and `dom2`:** their `harness.diff` files are empty, so they left the harness unchanged. They give the same answer as the base runs, which is the on-policy evidence that the harness works.\n- **`inv2` rollout:** the final summary flags one interpretation. ch_000 was captured in August UTC but charged back on 16 September, and the agent booked the reversal in September. That reading follows POLICY.md rule 5, and `dom2` made the same call and reached the same numbers. Adding guidance there would only restate the policy.\n- **`dom1` and `c1` (round 1):** these added a `revenue-reconciliation` skill plus a trigger line. They got the same answer as the unmodified runs, so they showed no gain. The skill restates POLICY.md, which every run reads in full, and its hardcoded workspace facts are overfit. I did not adopt it.\n\n**The only slip.** In `base1`, the first script used `usd - 15`, which adds the fee back and printed 5162.12. The agent caught it on re-reading and fixed it before writing the file. It happened once across seven runs and was corrected within the run. It is not enough to justify a skill, a script or always-on text.\n\n**Tool problems.** No run hit a tool error, a timeout or a missing deliverable. There is nothing for a plugin or script to fix.\n\n**When to revisit.** If a later run leaves a fee-sign or UTC-boundary error uncorrected, add a small script that does the UTC month assignment and the fee deduction. Add prose only after that.",
+          "error": ""
+        }
+      ],
+      "similarity": null,
+      "ledger": {
+        "mode": "seq",
+        "task_id": "data-h",
+        "k": 2,
+        "R": 8,
+        "expected_R": 8,
+        "P": 6,
+        "session_attempts": 6,
+        "expected_P": 6,
+        "usd": 0.511082,
+        "rollout_usd": 0.0,
+        "session_usd": 0.511082,
+        "rollouts": [
+          "base1",
+          "base2",
+          "inv1",
+          "dom1",
+          "c1",
+          "inv2",
+          "dom2",
+          "c2"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "c1",
+          "inv2",
+          "dom2",
+          "c2"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "seq": {
+      "task_id": "data-h",
+      "mode": "seq",
+      "k": 2,
+      "chosen_id": "A",
+      "chosen_label": "c1",
+      "chosen_run_id": "hpb-cc-seq2/data-h/c1",
+      "chosen_is_base": false,
+      "why": "Candidates A and B are byte-for-byte identical: `{\"net_usd\": 5072.12, \"transactions\": 9, \"chargebacks\": 3}`. Both follow the requested shape, so no criterion separates them. I didn't recompute the figure from the source. Either pick has the same correctness risk.",
+      "id_map": {
+        "A": "c1",
+        "B": "c2"
+      },
+      "dropped": [],
+      "n_candidates": 2,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.11472760000000001,
+      "experience": {},
+      "trivial": false,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/cc/exec/hpb-cc-seq2/data-h/c1",
+      "chosen_tree_is_base": true,
+      "harness_fingerprint": "020675403b27bd72"
+    }
+  },
+  "errors": []
+}

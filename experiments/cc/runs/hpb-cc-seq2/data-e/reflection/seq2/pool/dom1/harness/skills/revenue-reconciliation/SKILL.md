@@ -1,0 +1,19 @@
+---
+name: revenue-reconciliation
+description: Checklist for turning a payment-processor export plus an FX/finance table into a net revenue figure for a period (status filter, dedupe, date/amount normalisation, FX conversion, refunds).
+---
+# Net revenue from payment exports
+
+Analytic move: filter -> dedupe -> normalise -> convert -> sum. The deliverable is a figure someone will book or report, so the count and the amount must describe the same set of transactions.
+
+Before computing, profile each column of the export and list every distinct format/value seen (do not assume the first rows are representative):
+- **Identity**: the task says what identifies a transaction (e.g. txn_id). Exports often repeat rows. Collapse repeats by that key on the NORMALISED row (after date/amount parsing). If repeats of one key differ in status, date, amount or currency, that is a real conflict: do not silently pick one; apply the task's wording (e.g. latest/final status) if it gives one, otherwise choose the most defensible reading and say so.
+- **Dates**: mixed formats (ISO and "Mon DD, YYYY") are normal. Parse all, fail loudly on any unparsed value, and apply the period boundary on the parsed date (month AND year; check the first/last day of the period and adjacent-month rows).
+- **Amounts**: strip thousands separators; accounting parentheses "(1,234.50)" mean negative; a leading minus is negative. Refunds are negative and REDUCE revenue; never take absolute values. Count refunds in the transaction count if they pass the filters.
+- **Status**: filter on the exact status the task names; case/whitespace variants count as the same value. Check the distinct status list so nothing is dropped by a spelling variant.
+- **FX**: use the rate column exactly as defined (check direction: "USD per unit" means multiply). Every currency in the export must have a rate; list any that do not. Convert each transaction, sum unrounded, round once at the end to the requested precision (Decimal, not float).
+- **Output**: write exactly the keys/shape the task specifies, numbers as numbers.
+
+Before finishing, confirm: rows read vs unique keys vs included count are all stated in your notes; excluded rows are accounted for by a reason (status, period, duplicate); recomputing the total by a second route (e.g. sum per currency then convert) agrees.
+
+Workspace fact (this task instance, verify before reuse): transactions.csv had 42 rows / 36 unique txn_ids with identical repeats, ISO and "Sep 15, 2026" dates, parenthesised and comma-formatted amounts, a 2026-10-26 SETTLED row, and only USD/EUR/INR rates in fx.csv.

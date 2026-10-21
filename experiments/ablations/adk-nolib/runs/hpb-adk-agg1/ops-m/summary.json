@@ -1,0 +1,126 @@
+{
+  "task_id": "ops-m",
+  "domain": "ops",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-adk-agg1/ops-m/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/adk-nolib/exec/hpb-adk-agg1/ops-m/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "ops-m",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.332742,
+          "cached": false,
+          "notes": "This revision fixes the two problems that got the last attempt rejected. Both edits are in `skills/log-failure-stats/SKILL.md` and `skills/log-failure-stats/scripts/log_failures.py`.\n\n- **Instance data removed from `SKILL.md`.** I deleted the \"Workspace facts\" block, including the line that recorded the result counts and window for this task's logs. I also took the concrete dates and the `output/answer.json` path out of the run command, which now uses `<logdir> <START> <END> --out output/<name>.json`. A grep of the harness finds no `2026` or `E401` anywhere.\n- **Method kept as checks the agent re-derives.** A short section now covers the three checks that came from the base run's trajectory. They are written as procedure, with no task values:\n  - Convert every timestamp to UTC before windowing, because offsets vary and file order doesn't follow time.\n  - Group attempts by request id across all files and count a request as failed only if its final attempt is an error inside the window.\n  - Ignore lines that merely mention an error but are not request attempts.\n- **Script docstring.** The example window in the usage line of `log_failures.py` now reads `YYYY-MM-DDTHH:MM`, so the script no longer carries this task's dates.\n- **Unchanged.** `systemprompt.md` already has the trigger line naming `log-failure-stats`, and the helper script still ships at `skills/log-failure-stats/scripts/log_failures.py`.\n- **Not re-checked.** I didn't re-read the trajectories or run the helper this round. The edits only remove task-specific content and keep the existing method.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.2455352,
+          "cached": false,
+          "notes": "My previous attempt was rejected because the skill recorded this instance's data. I removed that data and changed nothing else.\n\n- **`skills/log-incident-stats/SKILL.md`:**\n  - I deleted the \"Workspace facts\" block (line format, request count, file names, no exact duplicates).\n  - I removed the concrete code `E401`. Rule 7 now says \"codes as strings exactly as written in the log\".\n  - I replaced the example `E500` cache-warm line and the `UpstreamError` traceback example with generic descriptions.\n  - I removed the specific timestamp offsets (+00:00, +02:00, -04:00), the example window times, and the \"08:00/12:00\" borderline reference. The skill now says to take the window from the task and convert it to UTC.\n  - What is left is method only: classify by the last attempt, window on the last attempt's UTC time with an inclusive start and exclusive end, ignore header-less noise lines, take code and user from the last attempt, and report ties explicitly.\n- **`skills/log-incident-stats/scripts/log_stats.py`:** the docstring example timestamp is now the placeholder `YYYY-MM-DDTHH:MM:SS+00:00`.\n- **Trigger line:** the `systemprompt.md` line naming `log-incident-stats` is unchanged. A grep for `E401` and `2026` across the harness finds nothing now. I did not re-read the trajectories this round.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.1654695,
+          "cached": false,
+          "notes": "kept -> inv1 `log-failure-stats` skill plus its `scripts/log_failures.py` helper -> The base rollout (1/1) delivered nothing. It read the `.gz` as binary, ran a grep/awk pipeline, and then sent the same quote-broken command twice with exit=2 each time. inv1 loaded the skill, ran the helper once and wrote `{\"failed\":19,\"users\":8,\"top_code\":\"E401\"}`. Neither the base nor the candidates' own context shows the correct answer, so I only know both candidates delivered the same value. The skill's trigger line is in `systemprompt.md`, and the script ships inside the skill directory.\nkept -> inv1 `systemprompt.md` bullets (inspect briefly and script it, write early and reopen, fix a failing command once, never resend it) -> Base failure was the repeated identical broken command with no file written. These are three short bullets, and they apply to every run rather than only to log tasks. inv1's single rollout shows no ill effect from them.\ndropped -> dom1 `log-incident-stats` skill, helper and trigger line -> dom1 delivered the same answer (19/8/E401), so its rollout gives no reason to prefer it over inv1. Keeping both would duplicate triggers. I preferred inv1's helper for three reasons. It detects gzip by magic bytes. It uses the latest UTC timestamp and reports any attempt-number disagreement in an audit block. It exits 1 on a tied top code, where dom1 only prints a warning. dom1's silent dropping of exact-duplicate lines is a small risk that inv1 avoids.\ndropped -> inv1 Stop hook (`hooks.json`) and `scripts/check_output.py` -> `hooks.json` is not an editable harness component. With the hook gone the script would be an unreferenced file. The systemprompt bullet \"do not finish without a file under output/\" covers the same need.\nrevised -> `guardrails.md`, `LongTermMEMORY.md` and `tool_guidance.md` stay empty -> Nothing in the evidence argues for always-on text there.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "ops-m",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 5,
+        "expected_P": 3,
+        "usd": 0.743747,
+        "rollout_usd": 0.0,
+        "session_usd": 0.743747,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "ops-m",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-adk-agg1/ops-m/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.1337762,
+      "experience": {
+        "cue": "A task asks for aggregate statistics from messy, multi-file data (rotated, compressed, mixed-timezone, retried records). Unscripted shell pipelines on such data failed in the base run: the agent read the compressed file as text and resent the same broken command.",
+        "lesson": "Add a skill to the harness that contains a tested helper script for this analysis shape, and add a one-line trigger in systemprompt.md that names the skill and the task shape. The helper should handle compressed files by magic bytes, convert timestamps to UTC, group by record id across all files, and classify by each record's last attempt. It should print an audit block and exit non-zero on ambiguity such as ties. Keep instance data (dates, codes, counts) out of the skill and trigger line. Check afterwards that the first action in the run is `load_skill` and that the helper's exit code is 0.",
+        "evidence": "The skill and trigger rows. base1 had neither and produced no deliverable after a repeated exit=2 grep/awk command. inv1, agg1 and dom1 each loaded a skill first, ran its helper once with exit=0, and wrote the same 19/8/E401 answer. dom1 has a different skill and no extra bullets, and it succeeded, so the helper-plus-trigger pattern is what the contrast supports. The systemprompt bullets and the Stop hook did not fire in any run.",
+        "confidence": "low. Each arm ran once, the skill and trigger edits were never separated, and the correct answer is not known. The contrast is one failed base run against three runs that agree with each other.",
+        "edits": "component: skills/log-failure-stats (SKILL.md and scripts/log_failures.py)\ncandidates: inv1, agg1. agg1 is the adopted harness, and dom1's diff shows this skill removed from it. The skill is a log-stats helper script plus method notes.\nchange: Added a skill with a helper script. The script reads plain and gzip files (detected by magic bytes) and groups attempts by request id across all files. It converts timestamps to UTC, takes the latest attempt, and applies a start-inclusive, end-exclusive window. It skips lines that have no request id or are traceback text. It prints an audit block and exits 1 on a tied top code. The SKILL.md tells the agent to run the helper rather than hand-roll grep/awk, and it lists three re-derivation checks.\nobserved: In base1 there was no skill. The agent read the `.gz` file through `read_file` and ran a grep/awk pipeline. It then sent the same quote-broken command twice (exit=2 both times) and wrote no `output/answer.json`. In inv1 and agg1 the agent's first action was `load_skill log-failure-stats`. It then ran the helper once (exit=0) and wrote `{\"failed\":19,\"users\":8,\"top_code\":\"E401\"}`. agg1 passed the window as naive `2026-10-06T08:00:00`, and the script treats naive times as UTC, so it worked. Each arm ran once. The skill was changed together with the systemprompt bullets, so this skill's effect is not isolated from theirs. dom1, a different skill without the bullets, also succeeded. That suggests some skill-with-helper was enough here.\nverdict: confounded\n\ncomponent: skills/log-incident-stats (SKILL.md and scripts/log_stats.py)\ncandidates: dom1\nchange: An alternative skill with seven method rules and a helper script. Its last attempt is the highest `attempt=` number, not the latest timestamp. The script drops exact-duplicate lines. It requires a strict `req= user= attempt=` header. It takes ISO timestamps with an offset. It only warns on ties and does not exit non-zero.\nobserved: dom1 loaded the skill (`load_skill log-incident-stats`) and ran the helper once with `+00:00` bounds (exit=0). It wrote the same 19/8/E401 as inv1 and agg1. In this data the highest attempt number and the latest timestamp pick the same last attempt, so the two helper designs gave the same answer. The two skill forms are not distinguished by outcome. Nothing shows whether the differences (duplicate dropping, tie handling) matter.\nverdict: no observed effect\n\ncomponent: systemprompt.md, working-order bullets (inspect briefly and script it, write early and reopen, do not finish without output/, fix a failing command once, never resend it)\ncandidates: inv1, agg1. dom1 omitted them and kept only a trigger line.\nchange: Added three general bullets covering working order, a never-resend-a-failed-command rule, and a switch-approach-after-two-failures rule.\nobserved: Neither inv1 nor agg1 hit a shell error. Both went straight from the skill to one helper run, so the error-recovery bullets never fired. The first-action choice (`load_skill`) is explained by the trigger line below. dom1 produced the same answer without these bullets. There is no execution evidence for or against them.\nverdict: no observed effect\n\ncomponent: systemprompt.md, trigger line\ncandidates: inv1, agg1 (naming `log-failure-stats`); dom1 (naming `log-incident-stats`)\nchange: A one-line pointer sent log-statistics tasks to a skill. Both forms named the skill.\nobserved: All three arms invoked `load_skill` as their first action. base1 had no pointer and never loaded a skill. It went directly to `read_file` and grep. The pointer is the most plausible reason the agent used a helper. But the skill content changed at the same time, and each arm ran once.\nverdict: confounded\n\ncomponent: hooks.json and scripts/check_output.py (Stop hook that blocks finishing until output/ has a well-formed deliverable)\ncandidates: inv1\nchange: Added a Stop hook that exits 2 if `output/` is empty or its JSON does not parse. It is absent from agg1, the adopted harness.\nobserved: inv1 wrote a valid `output/answer.json` on its first helper run. Nothing in the trajectory suggests the hook blocked or changed anything. In base1 the failure was an agent that never wrote a file, and that case was not run with the hook.\nverdict: no observed effect\n\ncomponent: guardrails.md, LongTermMEMORY.md, tool_descriptions/tool_guidance.md\ncandidates: none (unchanged in all three candidates)\nchange: No edits.\nobserved: No difference.\nverdict: no observed effect"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/ablations/adk-nolib/exec/hpb-adk-agg1/ops-m/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "b12f7681d7d5baa8"
+    }
+  },
+  "errors": []
+}

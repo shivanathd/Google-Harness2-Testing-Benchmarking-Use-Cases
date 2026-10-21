@@ -1,0 +1,15 @@
+### output/CHANGES.md
+## CHANGES
+
+### Code Changes
+- Updated `ops.add` and `ops.remove` to validate inputs before modifying data.
+- Enhanced `store.load` to handle missing or empty files by returning `{}`.
+- Added error handling in `cli.main` to catch exceptions and return appropriate status codes.
+- Introduced `--low` argument in `cli.main` for filtering reports by quantity.
+- Added tests for `report` on missing and empty files, `remove` with invalid quantities, and `--low` filtering.
+
+### Behavioural Decisions
+- `remove` with non-positive quantity is rejected, maintaining consistency with `add`.
+- `report` command now filters by quantity using `--low` without altering the output format.
+- `load` now returns `{}` for missing or empty files, ensuring no file is created on error.
+- `ops.remove` raises `ValueError` for invalid operations, ensuring data remains unchanged.

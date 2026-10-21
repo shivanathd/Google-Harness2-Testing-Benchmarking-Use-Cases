@@ -1,0 +1,20 @@
+{
+ "cond": "h2-sequential-k2/variant",
+ "task": "data-e-v",
+ "rep": 2,
+ "partial": 1.0,
+ "all_pass": true,
+ "checks": {
+  "net_usd": true,
+  "transactions": true
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/cc/runs/hpb-cc-seq2/data-e/harnesses/c1",
+ "cost_usd": 0.00457398,
+ "tokens_in": 95416,
+ "tokens_out": 2359,
+ "wall_s": 26.0,
+ "error": "",
+ "infra_error": false,
+ "turns": 4,
+ "tool_calls": null
+}

@@ -1,0 +1,28 @@
+{
+ "cond": "h2-parallel-k1/transfer",
+ "task": "swe-m",
+ "rep": 3,
+ "partial": 1.0,
+ "all_pass": true,
+ "checks": {
+  "basic_us": true,
+  "eu_discount": true,
+  "lowercase_region": true,
+  "half_up_line": true,
+  "float_cents": true,
+  "multi_line_in": true,
+  "tax_after_discount": true,
+  "unknown_region": true,
+  "strings": true,
+  "empty": true
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/ablations/cc-sonnet/runs/hpb-cc-agg1/swe-e/harnesses/agg1",
+ "cost_usd": 0.00622734,
+ "tokens_in": 100682,
+ "tokens_out": 4618,
+ "wall_s": 40.3,
+ "error": "error_max_turns",
+ "infra_error": false,
+ "turns": 5,
+ "tool_calls": null
+}

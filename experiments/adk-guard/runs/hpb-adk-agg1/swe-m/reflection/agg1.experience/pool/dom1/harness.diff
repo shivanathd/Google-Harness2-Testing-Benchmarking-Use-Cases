@@ -1,0 +1,99 @@
+--- current/LongTermMEMORY.md
++++ dom1/LongTermMEMORY.md
+@@ -1,5 +0,0 @@
+-Checks to re-derive on every bug-fix task (the issue lists symptoms; the cited spec lists the contract):
+-- Turn each bullet of the cited doc/spec into one probe and run it, not just the issue's examples: return types and output format, rounding mode, case handling, error type for invalid input.
+-- Compare the current code's return types with the spec's, not only the reported symptoms; a symptom list is usually a subset of the divergences.
+-- Run the issue's own example before and after the edit, and confirm the output changed as intended.
+-- Deliverable is the file the task names (here output/CHANGES.md); fix the source in place and keep public names and signatures.
+--- current/hooks.json
++++ dom1/hooks.json
+@@ -1 +0,0 @@
+-{"hooks": {"Stop": [{"hooks": [{"type": "command", "command": "python3 scripts/check_output.py"}]}]}}
+--- current/scripts/check_output.py
++++ dom1/scripts/check_output.py
+@@ -1,64 +0,0 @@
+-#!/usr/bin/env python3
+-"""Stop hook: block finishing until the fix and output/CHANGES.md exist and are usable.
+-
+-Exit 2 (stderr goes to the agent) when a deterministic check fails; exit 0 otherwise.
+-Checks: output/CHANGES.md exists and is non-trivial; every non-test .py file compiles;
+-at least one non-test .py file was modified after the workspace was set up (mtime well
+-after the newest task file, e.g. ISSUE.md/tests); the existing tests pass (skipped if
+-pytest is missing). The mtime check is a heuristic, and the hook can block at most 3 times.
+-"""
+-import hashlib
+-import os
+-import pathlib
+-import py_compile
+-import subprocess
+-import sys
+-
+-root = pathlib.Path.cwd()
+-problems = []
+-
+-changes = root / "output" / "CHANGES.md"
+-if not changes.is_file() or len(changes.read_text(errors="ignore").strip()) < 20:
+-    problems.append("output/CHANGES.md is missing or nearly empty; write a short summary of what you "
+-                    "changed and why (after the fix is made and verified).")
+-
+-SKIP = {"output", "tests", ".git", "__pycache__", ".pytest_cache", "node_modules", ".venv", "venv"}
+-src = [p for p in root.rglob("*.py")
+-       if not (set(p.relative_to(root).parts[:-1]) & SKIP) and p.name != "conftest.py"
+-       and not p.name.startswith("test_")]
+-for p in src:
+-    try:
+-        py_compile.compile(str(p), doraise=True)
+-    except py_compile.PyCompileError as e:
+-        problems.append(f"{p.relative_to(root)} does not compile: {e}")
+-
+-digest = hashlib.md5(b"".join(p.read_bytes() for p in sorted(src))).hexdigest()
+-marker = pathlib.Path(os.environ.get("TMPDIR", "/tmp")) / ("stopsrc-" + hashlib.md5(str(root).encode()).hexdigest())
+-try:
+-    if marker.exists() and marker.read_text() == digest:
+-        problems.append("Your source files are byte-identical to the last time you tried to finish. "
+-                        "Re-writing the same code changes nothing: write DIFFERENT code that fixes the cause.")
+-    marker.write_text(digest)
+-except OSError:
+-    pass
+-
+-refs = [p for p in [root / "ISSUE.md", *(root / "tests").rglob("*.py")] if p.is_file()]
+-if src and refs:
+-    base = max(p.stat().st_mtime for p in refs)
+-    if not any(p.stat().st_mtime > base + 2 for p in src):
+-        problems.append("No source file looks modified: you have not edited the code yet. Make the actual "
+-                        "edit (read the file, then write_file the full corrected source), re-run the "
+-                        "issue's example, then write output/CHANGES.md.")
+-
+-if (root / "tests").is_dir():
+-    try:
+-        r = subprocess.run([sys.executable, "-m", "pytest", "-q", "-x", "tests"],
+-                           capture_output=True, text=True, timeout=90)
+-        if r.returncode not in (0, 5) and "No module named pytest" not in r.stderr:
+-            problems.append("tests fail:\n" + (r.stdout + r.stderr)[-1500:])
+-    except Exception:
+-        pass
+-
+-if problems:
+-    print("Cannot finish yet:\n" + "\n".join(problems), file=sys.stderr)
+-    sys.exit(2)
+--- current/systemprompt.md
++++ dom1/systemprompt.md
+@@ -1,10 +1,3 @@
+ You are an assistant that completes tasks inside a workspace directory. Read the task, do the work, and write the requested deliverables under output/.
+ 
+-Rules for every run:
+-- Never end a turn by only saying what you will do next; make the tool call. A plan is not progress, and the run ends when you stop calling tools.
+-- Order of work for a bug report: read the issue, the docs/specs it cites, the source files and the existing tests; make the edit to the source (full corrected file via write_file); check it by running the issue's own example(s) plus the edge cases the docs state; run the existing tests; only then write output/CHANGES.md. Keep public names and signatures.
+-- Never overwrite existing tests. Add new tests only in a new file such as tests/test_<module>_extra.py.
+-- Paths are relative to the workspace root (no leading "/" and no "workspace/" prefix); start with list_files ".". Run commands from the root: `python3 -m pytest -q tests`, or `python3 -c "..."` for one-off checks. If a command fails, read the error and change approach; do not repeat it unchanged.
+-- "wrote N chars" proves nothing. Re-run the example and confirm the output now differs from the buggy one. Finish by re-reading output/CHANGES.md.
+-- When the task is an issue/bug report in a Python codebase, after reading the issue, spec and source, load the `fix-python-bug` skill and follow it.
+-- Writing a file with the same content you read is not an edit. If a test or probe still shows the old output, change the code itself, then re-run.
++When the task is an issue/bug report in a Python codebase, load the `fix-python-bug` skill first and follow it. Never end a turn by only stating what you will do next: make the tool call. The run is not done until the source is edited and the requested file under output/ (e.g. output/CHANGES.md) exists.
+--- current/tool_descriptions/tool_guidance.md
++++ dom1/tool_descriptions/tool_guidance.md
+@@ -1,3 +0,0 @@
+-- list_files/read_file/write_file paths are relative to the workspace root; "workspace" and "/" are rejected. read_file returns small files whole (start_line 0 is fine).
+-- write_file replaces the whole file: send complete intended content, never on existing tests.
+-- Use run_command (from the workspace root) for pytest and probes.

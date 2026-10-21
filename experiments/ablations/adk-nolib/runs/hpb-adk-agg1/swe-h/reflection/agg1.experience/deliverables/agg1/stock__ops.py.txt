@@ -1,0 +1,9 @@
+def remove(data, sku, qty):
+    if qty <= 0:
+        raise ValueError("quantity must be positive")
+    if sku not in data:
+        raise ValueError(f"SKU {sku} not found")
+    if data[sku] < qty:
+        raise ValueError(f"Cannot remove {qty} from {sku}: only {data[sku]} available")
+    data[sku] = data[sku] - qty
+    return data

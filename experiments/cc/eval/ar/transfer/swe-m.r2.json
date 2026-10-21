@@ -1,0 +1,28 @@
+{
+ "cond": "ar/transfer",
+ "task": "swe-m",
+ "rep": 2,
+ "partial": 1.0,
+ "all_pass": true,
+ "checks": {
+  "basic_us": true,
+  "eu_discount": true,
+  "lowercase_region": true,
+  "half_up_line": true,
+  "float_cents": true,
+  "multi_line_in": true,
+  "tax_after_discount": true,
+  "unknown_region": true,
+  "strings": true,
+  "empty": true
+ },
+ "harness": "/Users/me/GoogleHarness2/experiments/cc/autoresearch/swe/final",
+ "cost_usd": 0.00897371,
+ "tokens_in": 240498,
+ "tokens_out": 6249,
+ "wall_s": 50.9,
+ "error": "",
+ "infra_error": false,
+ "turns": 16,
+ "tool_calls": null
+}

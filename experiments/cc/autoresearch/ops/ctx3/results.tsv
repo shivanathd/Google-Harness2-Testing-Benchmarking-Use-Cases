@@ -1,0 +1,4 @@
+iter	score	kept	notes
+0	1.000	True	baseline
+1	1.000	False	th an inclusive start and exclusive end, using only the record's own level field, ignoring continuation lines and embedded "ERROR" or `user=` text, checking ties, and verifying the output schema. The 
+2	1.000	False	re parsing, start-inclusive/end-exclusive windows, skipping continuation lines and level/user/code words inside message text, checking ties, and verifying the output schema. The score was already 1.0,

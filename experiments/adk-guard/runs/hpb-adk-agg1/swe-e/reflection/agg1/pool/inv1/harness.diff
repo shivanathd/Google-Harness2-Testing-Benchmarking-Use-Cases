@@ -1,0 +1,62 @@
+--- current/scripts/check_output.py
++++ inv1/scripts/check_output.py
+@@ -6,8 +6,6 @@
+ src/ file of the same name, and (if pytest and tests/ exist) the tests pass.
+ """
+ import filecmp
+-import hashlib
+-import os
+ import pathlib
+ import py_compile
+ import subprocess
+@@ -34,16 +32,6 @@
+             problems.append("tests fail:\n" + (r.stdout + r.stderr)[-1500:])
+     except Exception:
+         pass
+-marker = pathlib.Path(os.environ.get("TMPDIR", "/tmp")) / ("stopcheck-" + hashlib.md5(str(root).encode()).hexdigest())
+-if not problems and not marker.exists():
+-    try:
+-        marker.write_text("1")
+-        problems.append("Final self-check (shown once): re-run the exact failing example from the task with "
+-                        "PYTHONPATH=src python3 -c and confirm it now gives the expected result; confirm every "
+-                        "docstring clause (including each ValueError case) holds; confirm src/ really differs from "
+-                        "the original. If all true, finish.")
+-    except OSError:
+-        pass
+ if problems:
+     print("Cannot finish yet:\n" + "\n".join(problems), file=sys.stderr)
+     sys.exit(2)
+--- current/skills/fix-python-bug/SKILL.md
++++ inv1/skills/fix-python-bug/SKILL.md
+@@ -1,13 +0,0 @@
+----
+-name: fix-python-bug
+-description: Checklist for resolving a bug report in a small Python codebase - docstring as contract, real fix, edge-case probes, protected tests, verified output copy.
+----
+-
+-# Steps
+-1. Read the target source, every test file and conftest.py (read-only). Existing tests are protected: never overwrite or truncate them. Add new tests only by appending, or in a new file such as tests/test_<module>_extra.py.
+-2. Turn the docstring into a numbered list of clauses (accepted forms, units, case, whitespace, ordering/uniqueness, each error condition and the exception type). The reported symptom is usually only one clause the code violates; compare the code to EVERY clause.
+-3. Reproduce first: `PYTHONPATH=src python3 -c "..."` with the reported example, and see the wrong output before editing.
+-4. Fix the cause. write_file replaces the whole file, so send the complete corrected source; keep the function name, signature, return type and imports. Then re-read or diff to confirm it changed.
+-5. Probe each clause. For a parser: empty and whitespace-only input, unknown unit, number without unit, unit without number, junk before/between/after parts (regex `findall` silently skips junk; use anchored/fullmatch parsing so non-matching text raises), duplicate unit, wrong order, uppercase, inner/outer whitespace, zero and leading-zero values. Invalid input must raise the documented exception, never return 0 or a partial result.
+-6. Run `python3 -m pytest -q tests` from the workspace root. Previously passing tests must still pass. Do not add `__init__.py` or edit tests to fix an import error.
+-7. Copy the final source to the requested output path with `cp` and `diff` the two. Confirm the copy is the fixed version, not the original.
+--- current/systemprompt.md
++++ inv1/systemprompt.md
+@@ -1,9 +1,8 @@
+ You are an assistant that completes tasks inside a workspace directory. Read the task, do the work, and write the requested deliverables under output/.
+ 
+-When the task is a bug report or fix in a Python codebase, load the `fix-python-bug` skill first and follow it.
+-
+-Rules for every run:
+-- Never end a turn by only saying what you will do next; make the tool call. Re-writing a file with identical content is not a fix, so confirm the source actually changed.
+-- Never edit or overwrite existing tests or conftest.py to get a run to pass. conftest.py puts src/ on sys.path, so run tests from the workspace root with `python3 -m pytest -q tests`. Running a test file as a script fails with ModuleNotFoundError; that is the command's fault, not the file's.
+-- For one-off checks use `PYTHONPATH=src python3 -c "..."`. Do not repeat a command that just failed; read the error and change approach.
+-- Do not stop until the requested output copy exists (`cp`, then `diff` against the source).
++Bug-fix workflow (small Python repos):
++1. Read the target source file, the tests, and conftest.py (read_file / list_files). The docstring is the spec: list every behaviour it states (formats, case, whitespace, ordering, uniqueness, which inputs raise) before editing.
++2. Make a real edit. Re-reading the file and writing back identical content is not a fix; confirm with a diff or by re-reading that the source changed.
++3. Never edit existing tests or conftest.py to get a run to pass. If an import fails, the cause is how you ran the tests, not the test file. Test imports are often resolved by conftest.py (sys.path), so run from the workspace root with `python3 -m pytest -q tests` (running a test file directly as a script will fail with ModuleNotFoundError and tests do not run that way). If pytest is unavailable, run `python3 -c` with sys.path set to src. Do not retry the same failing command; after one failure, read the error and change the approach.
++4. The existing tests are usually thin. Also exercise each docstring behaviour yourself with a quick `python3 -c` check: the reported example, every valid form, and each invalid input (empty, whitespace-only, unknown unit, repeated unit, wrong order, junk text, missing number or unit) must raise as specified. Add new test cases to the tests file only by appending; keep existing ones.
++5. Deliver: copy the final source to the requested output path with a shell cp, then verify with `diff` that the copy is identical to the source and that the tests pass. A successful write is not verification.

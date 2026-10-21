@@ -1,0 +1,123 @@
+{
+  "task_id": "swe-h",
+  "domain": "swe",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-cc-agg1/swe-h/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/cc/exec/hpb-cc-agg1/swe-h/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "swe-h",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [
+        "inv1",
+        "agg1"
+      ],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.0690778,
+          "cached": false,
+          "notes": "KEEP_BASE. I made no edits to the harness.\n\nI read the task, the ISSUE and source files, the one rollout (base1) and its deliverables. The base run worked cleanly:\n- **Sequencing:** it read all the files first. It stated a plan with a check for each step, then edited the three modules.\n- **Verification:** it ran a throwaway script outside the workspace that covered the missing and empty file cases, each error path (file unchanged, exit 1, `error:` on stderr) and `--low` ordering. It also called the existing test directly.\n- **Deliverable:** it wrote `output/CHANGES.md`. The file is complete. It matches the final summary and says plainly that pytest could not run.\n\nThe only friction was in the pytest step. At `[ACTION] Bash python -m pytest tests -q` the sandbox raised PermissionError on parent and home paths such as `~/.aws`. The agent retried once with a pinned rootdir, then fell back to calling `test_add_then_file` directly with a temp path. That cost two commands and ended in a sound fallback. Prose would not have changed the outcome, and this is a single environmental quirk, not a recurring failure.\n\nI did not add a skill, script, plugin or always-on text. Each would cost context and change no behaviour that the trajectory shows needs changing. The CHANGES.md shape was not constrained beyond \"short summary\", and the agent met it.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.0987721,
+          "cached": false,
+          "notes": "Only one rollout (base1) exists, and it resolved all three issue items correctly. Because there is no divergence between runs, I kept the change small and added no always-on knowledge.\n\nChange: I added the on-demand skill `skills/issue-fix-checklist/SKILL.md`. The only always-on edit is a one-line trigger in `systemprompt.md`.\n\nThe skill encodes issue-resolution practice for small Python codebases. Each point traces to a moment in base1:\n- **Clause table and \"must not change\" rows.** Item 3 of ISSUE.md says plain `report` output must not change. base1 only asserted its own new behaviour in its check script and never compared old and new output byte for byte.\n- **Validate before mutate, and exit 1 never reaches `store.save`.** base1 got this right. The skill makes it a checked rule instead of luck.\n- **Exception reach.** base1 put `store.load` outside its try block. The skill points out that `JSONDecodeError` is a `ValueError`, so a broad `except ValueError` could catch it. That risk is visible in the code but did not show up in the run.\n- **Boundaries.** The skill lists `< N` at N-1, N and N+1, plus zero-byte and whitespace-only files. base1 covered most of these ad hoc.\n- **Judgement calls go in CHANGES.md.** base1 chose to let `remove` reject non-positive quantities and to keep a SKU at 0 after removing down to zero. It surfaced both, and the skill makes that the standard.\n- **Regression tests.** base1 explicitly added no tests to `tests/`, even though the repo has a test suite and three new behaviours. The skill tells the agent to add them. It should still run the test functions directly if pytest cannot start. In base1, pytest failed on sandbox-blocked home paths, both with and without `--rootdir`, and the agent ran the test function directly.\n\nI did not touch pytest-workaround procedure (reading order, commands), which belongs to the procedure candidate.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": true,
+          "attempts": 1,
+          "usd": 0.08984400000000001,
+          "cached": false,
+          "notes": "kept -> KEEP_BASE (no files edited) -> base1 delivered all three ISSUE.md items and a complete output/CHANGES.md. It also rejected a non-positive qty in `remove`, because a negative remove would silently add stock. The only friction was one sandbox pytest PermissionError, which it worked around by calling the test directly. That is an environment quirk seen in 1/1 rollouts, and it is not something prose should fix.\ndropped -> dom1 `issue-fix-checklist` skill plus its trigger line in `systemprompt.md` -> dom1's rollout also delivered, but its skill step 7 says to \"choose the narrowest reading\". In that rollout `remove` was left accepting qty<=0, which the run itself flagged as \"a possible gap\". base1 closed that gap without the skill. The skill's other points were already done in base1: validate before mutating, not saving on error, and boundary checks. The extra regression-test file is harmless, but one rollout does not show it is worth the added instructions and the 'narrowest reading' regression risk.\ndropped -> inv1 (no harness change) -> its author found nothing that needed changing. I agree, because base1 shows no repeated failure to act on.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "swe-h",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 3,
+        "expected_P": 3,
+        "usd": 0.257694,
+        "rollout_usd": 0.0,
+        "session_usd": 0.257694,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "swe-h",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-cc-agg1/swe-h/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.09230830000000001,
+      "experience": {},
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/cc/exec/hpb-cc-agg1/swe-h/agg1",
+      "chosen_tree_is_base": true,
+      "harness_fingerprint": "020675403b27bd72"
+    }
+  },
+  "errors": []
+}

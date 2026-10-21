@@ -1,0 +1,5 @@
+component: skills/revenue-reconciliation/SKILL.md (new file) and the trigger line in systemprompt.md
+candidates: dom1
+change: Added a skill that restates the POLICY.md rules: UTC month assignment, excluding test customers from revenue and chargebacks, JPY as whole units, a chargeback reversing the full charge plus the fee, and counts. It also has a pre-write checklist and a "workspace facts" section that records the base1 fee-sign slip. The trigger line in systemprompt.md tells the agent to load the skill for revenue or chargeback tasks.
+observed: dom1 loaded the skill as its first action (rollouts/dom1.md:1) and wrote `{"net_usd": 5072.12, "transactions": 9, "chargebacks": 3}`. Every other run wrote the same output without the skill. The only divergence in any run was base1's first script, which used `usd - 15` and printed 5162.12. The agent caught that on re-reading and fixed it before writing the file. base2, inv1 and c1 got the sign right with no skill. No single run shows the skill preventing an error that would otherwise have been submitted.
+verdict: no observed effect

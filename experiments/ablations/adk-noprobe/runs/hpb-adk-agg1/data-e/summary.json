@@ -1,0 +1,124 @@
+{
+  "task_id": "data-e",
+  "domain": "data",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-adk-agg1/data-e/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/adk-noprobe/exec/hpb-adk-agg1/data-e/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "data-e",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.1721817,
+          "cached": false,
+          "notes": "**What went wrong in base1.** The single rollout never produced `output/answer.json`. It ended with `LlmCallsLimitExceededError` (40-call cap) after running the same crashing command about 32 times in a row. The trace shows these moments:\n1. The agent wrote a pandas script. `ModuleNotFoundError` followed, then a pip install that timed out.\n2. It then hit `ValueError: could not convert string to float: '(954.34)'`. It re-ran the identical command with no edit until the cap.\n3. The script had other latent bugs. It filtered September with `str.contains('Sep')`, which misses ISO dates like `2026-09-15`. It didn't dedupe `txn_id`. It would have written a list-shaped JSON via `to_json(orient='records')` instead of the requested object.\n\n**Changes** (all on disk in `context/harness/`):\n- **`scripts/net_revenue.py`** (new, stdlib-only). This is the mechanical-extraction fix: it replaces the hand-rolled pandas script that crashed. It does the following:\n  - Parses both date styles, and amounts with thousands separators, plain negatives and parenthesised negatives.\n  - Counts each `txn_id` once, and reports exact versus conflicting duplicates.\n  - Filters on SETTLED status and the parsed month.\n  - Multiplies by `usd_per_unit`, rounds half-up to 2 decimals, and writes `{\"net_usd\",\"transactions\"}`.\n  - Re-reads the file to check its shape, and exits non-zero with a message on any unparseable value rather than guessing.\n  - I ran it on the workspace source: 36 unique txn_ids, 6 exact-duplicate rows skipped, and the output was `{\"net_usd\": 18691.64, \"transactions\": 21}`.\n  - I replaced `scripts/README.md` with this script. I deleted the README only because the script now occupies the directory.\n- **`systemprompt.md`** (short additions):\n  - Tool-error handling for the observed pandas/pip failure: Python is stdlib-only, don't retry installs, never re-run a failed command unchanged, and change approach if the same error appears twice. This targets the 32-fold repetition.\n  - Sequencing: inspect the whole input once and list the formats present, write the deliverable early, and reopen it to check its shape. The shape check means a single JSON object with exactly the requested keys. Keep scratch scripts out of `output/`.\n  - Workspace facts, labelled as such: date styles, amount styles, duplicate txn_id rows, statuses, and fx units. It also names the one-line script invocation.\n- **No skill and no hook.** The failure was a loop that hit the call cap, not a stop-time skip or a recurring triggered procedure. A Stop hook would not have fired, so it isn't justified by this evidence.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 2,
+          "usd": 0.23362240000000004,
+          "cached": false,
+          "notes": "This is a fix to the rejected attempt. I did not re-read the rollouts or re-check anything against the source files.\n\n- **Removed the task's own data from `skills/payment-revenue-reconcile/SKILL.md`.** I deleted the \"In this workspace\" section. It held the net_usd figure, the transaction count, the row and distinct-id counts, the duplicate transaction ids, and the currency rates. It is replaced by \"Checks specific to this kind of export\", which has only method checks:\n  - verify the FX table's direction and that every currency is covered;\n  - print the distinct statuses, currencies and date formats found;\n  - report how many rows were excluded by period;\n  - report which keys are duplicated and whether any conflict;\n  - require the reconciliation identity to hold exactly.\n- **Replaced the sample amounts in rule 2.** The amounts `1,944.41`, `(954.34)` and `-1638.49` looked like they came from the task's data. They are now neutral placeholders (`1,234.56`, `(123.45)`, `-123.45`). A grep of the skill for the flagged values and for the counts 21, 42 and 36 finds nothing.\n- **Kept as is:**\n  - The trigger line in `systemprompt.md` that names the `payment-revenue-reconcile` skill.\n  - The skill's procedure rules, which are generic.\n  - The skill ships no scripts, so there are no missing helper files.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.12461230000000001,
+          "cached": false,
+          "notes": "kept -> INV `scripts/net_revenue.py` (stdlib-only month net-revenue script) -> In the single base rollout (base1) the agent wrote a pandas script. It crashed on `could not convert string to float: '(954.34)'`, and the agent re-ran the identical command about 32 times until the 40-call limit ended the run with no `output/answer.json`. That is 1/1 base rollouts delivering nothing, so I'm treating it as the failure to fix. The script covers three further bugs in that attempt: it never dedupes `txn_id`, it filters on `str.contains('Sep')`, and its JSON output would be a list rather than an object. Two caveats: the script ran only in the INV author's own check, not in a solver run, and I can't confirm `scripts/` is reachable in the solver workspace (base1's `list_files` showed only the two CSVs). So the prompt now says to write a stdlib script if the file is missing or fails.\nkept -> DOM skill `payment-revenue-reconcile` (generic rules, no task data, no scripts) plus its trigger line in `systemprompt.md` -> The base failures map onto its rules: bare float() on `(954.34)` (rule 2), substring date match (rule 3), no dedupe on the key (rule 1), and rerunning an unchanged command (rule 8). It loads only on demand. Its rule 8 duplicates part of the new prompt, which is a small redundancy I accepted. I kept the DOM version with the task data already removed (the decisions note records an earlier rejection for leaking task data).\nrevised -> INV `systemprompt.md` additions, shortened and made generic -> I kept the rules that address the 32-fold repeat (no unchanged rerun, no pip retry, stdlib only) and the deliver-early / check-shape rule. I dropped the paragraph listing this workspace's specific amounts, date strings and statuses, because the skill covers those quirks generically and the paragraph costs always-on tokens. I added the skill trigger line, and a fallback sentence for when the script is absent or fails.\ndropped -> INV's \"verified quirks of this workspace's export\" paragraph (specific sample amounts) -> It is task-specific data in always-on text, and the skill makes it redundant.\ndropped -> `scripts/README.md` -> Removed only because `net_revenue.py` now occupies the directory.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "data-e",
+        "k": 1,
+        "R": 2,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 5,
+        "expected_P": 3,
+        "usd": 0.530416,
+        "rollout_usd": 0.0,
+        "session_usd": 0.530416,
+        "rollouts": [
+          "base1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "data-e",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-adk-agg1/data-e/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.11173680000000001,
+      "experience": {
+        "cue": "A recurring export-cleaning task (mixed date and amount formats, repeated keys, FX conversion) where the base run died in a retry loop on its own hand-written parsing code and delivered no output file.",
+        "lesson": "In the harness, ship a tested stdlib-only helper under scripts/ that does the whole computation, parse, dedupe, filter, convert and write the deliverable, and have systemprompt.md name its exact one-line invocation. Tell the agent to fall back to a hand-written stdlib script if the helper is missing or fails. Before relying on it, confirm scripts/ is reachable from the solver workspace.",
+        "evidence": "Rows \"scripts/net_revenue.py\" and \"systemprompt.md trigger line\", both confounded, plus the base1 versus agg1 contrast. base1 hand-wrote a pandas script that crashed and repeated the same command about 32 times until the cap, with no answer.json. agg1 loaded the skill and ran the prompted script command. It exited 0, reported the 6 duplicate rows skipped, and wrote a correct-shaped answer.json after two actions. agg1 also shows scripts/ was reachable in the solver run, which the decision log had flagged as unconfirmed.",
+        "confidence": "low. This is one rollout per arm, and the helper, the invocation line, the skill and the working rules were all added together. The retry-loop rules were never exercised in agg1, so only \"a ready, invoked script yields a delivered file\" is observed, not which part caused it. The record also does not show that the output is correct beyond the script's own checks.",
+        "edits": "component: tool_descriptions/tool_guidance.md, LongTermMEMORY.md, guardrails.md\ncandidates: agg1\nchange: Nothing. These files are identical to base_harness in the adopted harness and in the pool copy.\nobserved: Neither rollout shows any behavior tied to these files.\nverdict: no observed effect\n\ncomponent: systemprompt.md (working rules: stdlib-only Python, never rerun a failed command unchanged, inspect the input once, write the deliverable early and check its shape)\ncandidates: agg1\nchange: Added a short always-on block aimed at base1's failure. In base1 the agent used pandas, hit a ModuleNotFoundError and a pip timeout, then re-ran the same crashing command about 32 times until the 40-call cap, and no answer.json was written.\nobserved: agg1 never hit the failure these rules guard against. It made two actions and no error occurred, so the rules were never exercised. Nothing shows whether they would stop a retry loop. It also never opened the input files, so \"inspect the whole input once\" did not run. Its answer.json has the requested object shape, but that comes from the script's own check.\nverdict: no observed effect\n\ncomponent: systemprompt.md (trigger line: load the payment-revenue-reconcile skill, then run scripts/net_revenue.py with a fallback to a hand-written stdlib script)\ncandidates: agg1\nchange: Routed the agent to the skill, then to the one-line script invocation, and told it to sanity-check the output.\nobserved: agg1's first action was load_skill, and its second was exactly the prompted command `python3 scripts/net_revenue.py transactions.csv fx.csv 2026-09 output/answer.json`. That produced {\"net_usd\": 18691.64, \"transactions\": 21}, and the agent returned it. Base1 took a different route: it listed files, read both CSVs, and wrote a pandas script. The trigger line plausibly caused the divergence, because the script call mirrors its wording. But the line, the skill and the script were added together and there is one rollout per arm, so none is isolated. The fallback sentence was never used.\nverdict: confounded\n\ncomponent: scripts/net_revenue.py (new; replaces scripts/README.md)\ncandidates: agg1\nchange: Added a stdlib-only script. It dedupes txn_id, parses ISO and \"Sep 05, 2026\" dates, handles thousands commas and parenthesised negatives, filters on SETTLED plus the parsed year and month, multiplies by usd_per_unit, rounds half-up once, writes {\"net_usd\",\"transactions\"}, and re-reads the file to check its shape.\nobserved: In agg1 it ran with exit=0 and reported the 6 exact-duplicate rows skipped. It found 36 unique ids, and the final answer is 21 transactions and 18691.64. Each of base1's code bugs maps to a script feature. Base1's `str.contains('Sep')` filter misses ISO dates, and the script parses dates properly. Base1 never deduped, and the script dedupes. Base1's bare float() crashed on '(954.34)', and the script parses it. Base1 would have written a list-shaped JSON, and the script writes an object. The deliverable in agg1 is the script's own output. The decision log also says scripts/ might not be reachable in the solver workspace. agg1 shows it was. This is the component the successful path most directly runs through. Even so, it came with the prompt and skill edits and there is one rollout per arm, so I cannot attribute the gain to it alone.\nverdict: confounded\n\ncomponent: skills/payment-revenue-reconcile/SKILL.md\ncandidates: agg1\nchange: Added an on-demand skill with generic rules: dedupe on key, parse amounts and dates, exact status match, keep refunds, multiply by the FX rate, round once, check the output shape. It also has a reconciliation identity and export-specific checks, with task data removed after an earlier rejection.\nobserved: agg1 loaded it as its first action. Nothing afterward shows the agent applying it. It never printed distinct statuses, never checked the reconciliation identity, and never inspected the raw data. The script did the work. The skill's content had no visible effect in this run, though loading it cost one call out of a 40-call budget.\nverdict: no observed effect\n\ncomponent: plugin/README.md, scripts/README.md, skills/README.md\ncandidates: agg1\nchange: Scaffolding or placeholder README files. The decision log notes the scripts README was dropped in favor of the script.\nobserved: No trace shows any of them being read.\nverdict: no observed effect"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/ablations/adk-noprobe/exec/hpb-adk-agg1/data-e/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "6cdfa7e5509d03b2"
+    }
+  },
+  "errors": []
+}

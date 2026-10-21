@@ -1,0 +1,5 @@
+Fixes for stock CLI:
+- Prevent `stock report` from crashing on missing/empty stock files
+- Add error handling for invalid operations in `ops.remove` and `ops.add`
+- Update CLI to print error messages and return exit status 1 on errors
+- Add tests for error handling behavior

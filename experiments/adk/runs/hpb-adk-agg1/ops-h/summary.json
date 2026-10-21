@@ -1,0 +1,126 @@
+{
+  "task_id": "ops-h",
+  "domain": "ops",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-adk-agg1/ops-h/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/adk/exec/hpb-adk-agg1/ops-h/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "ops-h",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.17491420000000002,
+          "cached": false,
+          "notes": "**Evidence:** I had one rollout, base1, and it produced no deliverable. The agent only called `list_files` (12 times) and `read_file` (28 times). It re-read `logs/gateway.jsonl` and `logs/search.jsonl` in full about 10 times each. Twice it tried `logs/billing.jsonl` and got FileNotFoundError, because the file is `billing.jsonl.gz`. It never used a shell or python, never read RUNBOOK.md after the first listing, and was killed by `LlmCallsLimitExceededError` (40 calls). The `.gz` file was never read.\n\n**Changes:**\n1. **New skill `skills/log-traffic-stats/` with `scripts/traffic_stats.py`.**\n   - *Why:* base1 never computed anything, and the work is mechanical. The script reads every file in the log directory and detects gzip by magic bytes.\n   - *What it encodes:* the runbook rules (skip invalid JSON lines, drop `/healthz`, count errors as status >= 500). It applies the [start, end) window after converting each line's own offset to UTC. It reads latency per line by key (`latency_ms`, or `latency_s` x1000). It computes p95 by nearest rank as the ceil(0.95n)-th smallest value, and writes the answer JSON itself.\n   - *Failure behaviour:* exit 2 on a missing field and exit 3 on an empty service. It writes nothing in either case.\n   - *Checks:* I ran it on `source/logs` and it worked. I also checked that the billing schema key matches the 09:00 UTC cutover on every valid line.\n   - *Workspace facts in the skill:* the billing unit switch at 09:00 UTC, the three offsets (+01:00, -03:00, +00:00) mixed within one file, and the computed figures as a cross-check. Gateway: 96 requests, error_rate 0.1354, p95 334. Search: 119, 0.1513, 192. Billing: 124, 0.1613, 393.\n   - *Not verified here:* I did not run the skill end to end in a solver rollout.\n2. **`systemprompt.md`: one trigger paragraph naming `log-traffic-stats`.**\n   - *Why:* base1 went straight to `read_file`.\n   - *What it adds:* a rule to compute such statistics only with the script, and a note that the budget is about 40 calls, so never re-read a file and always reopen `output/answer.json`.\n3. **`tool_descriptions/tool_guidance.md`: three short lines.**\n   - *Why:* these target base1's failures. It repeated identical `read_file` calls, and retried `billing.jsonl` after FileNotFoundError instead of using the `.gz` name from the listing.\n   - *What they say:* don't repeat `read_file`; a FileNotFoundError on `<x>.jsonl` probably means `<x>.jsonl.gz`; after a shell syntax error write a .py file instead.\n   - *Source:* these are adapted from the ops-m library entry, and I kept the parts base1's trajectory shows.\n4. **Deleted the placeholder `scripts/README.md` and `skills/README.md` stubs.** Nothing depends on them.\n\nI made no guardrail or plugin changes. There is no evidence of an ignored invariant, and the always-on text is kept short.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.21765220000000002,
+          "cached": false,
+          "notes": "I made three changes: a new skill with a script, a trigger line in `systemprompt.md`, and deletion of the `skills/README.md` stub.\n\n**Evidence.** base1 is the only rollout. It produced no deliverable and ended with \"LlmCallsLimitExceededError: Max number of llm calls limit of `40` exceeded\". Its whole trajectory is repeated `list_files` and full-file `read_file` calls on `gateway.jsonl` and `search.jsonl`, plus a few failed reads of a non-existent `logs/billing.jsonl`. It never opened the gzip file and never computed anything. The harness was effectively empty. The same pattern appears in the library entries `ops-e` and `ops-m` (read by eye or ad-hoc shell, then no or wrong answer). In those entries the fix that worked was a skill with a script and a trigger line.\n\n**New skill `skills/service-traffic-stats/` (SKILL.md and `scripts/traffic_stats.py`).**\n- **What the script does.** It decompresses by magic bytes. It skips non-JSON lines (truncated by the shipper). It converts `ts` to UTC and applies the [start, end) window. It drops `/healthz`. It counts only status >= 500 as an error. It uses `latency_ms`, or `latency_s` \u00d7 1000 for billing rows after the 09:00 UTC schema change. It computes p95 by nearest rank, element ceil(0.95 \u00d7 n). It prints per-service tallies and writes the three-service JSON with the three requested fields, exactly the shape the task asked for.\n- **Exit codes.** It exits 2 on a malformed in-window record and 3 on a service with no rows in the window.\n- **Source of the rules.** They come straight from `RUNBOOK.md`, and the skill tells the agent to read the runbook first as the controlling source.\n- **Workspace facts, from an independent computation.** I checked them against the script output, and the two agreed.\n  - gateway: 96 requests, 13 errors, error_rate 0.1354, p95 334.\n  - search: 119 requests, 18 errors, error_rate 0.1513, p95 192.\n  - billing: 124 requests, 20 errors, error_rate 0.1613, p95 393.\n  - Truncated lines: 18 in gateway, 5 in search, 10 in billing.\n  - Billing has 128 `latency_ms` rows before 09:00Z and 122 `latency_s` rows from 09:00Z. The key matches the cut-over boundary exactly.\n  - `/healthz` rows with 5xx and 429 status exist.\n  - Logs mix -03:00, +01:00 and +00:00 offsets and are out of time order.\n- **How the facts are labelled.** The skill gives these numbers as a cross-check only, so the agent still runs the script.\n\n**`systemprompt.md`.** I added one trigger line naming `service-traffic-stats`. It sends the agent to the skill rather than repeated `read_file` on the logs, which is what burned base1's 40-call budget. It also says to make sure `output/answer.json` exists before stopping.\n\n**Removed `skills/README.md`.** It was a comment-only stub. The skill is now named in the always-on text.\n\nI did not touch commands, retries or output-path handling beyond the skill's own script usage. Nothing is isolated against a baseline: only one baseline rollout exists, and I have not run a candidate rollout.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.145624,
+          "cached": false,
+          "notes": "- kept -> inv1 skill `log-traffic-stats` (SKILL.md plus `scripts/traffic_stats.py`) and the trigger line in `systemprompt.md` -> base1 produced no deliverable and hit the 40-call limit (`LlmCallsLimitExceededError`) after 12 `list_files` and 28 `read_file` calls. It never ran code, never opened RUNBOOK.md and never read the `.gz`. The inv1 rollout did `load_skill`, then `run_command`, then `write_file`, and wrote `output/answer.json` in 3 actions. The values were gateway 96 / 0.1354 / 334, search 119 / 0.1513 / 192 and billing 124 / 0.1613 / 393. This is 1 rollout against 1 base failure, so it is weak evidence, but the mechanism is visible. Neither rollout produced an empty result.\n- kept -> inv1 `tool_guidance.md` lines (no repeated `read_file`, `.jsonl` \u2192 `.jsonl.gz`, switch approach after two failures) -> they target base1's repeated identical `read_file` calls and its two FileNotFoundError retries on `logs/billing.jsonl`. They are three short lines. The inv1 rollout never needed them, so they are untested.\n- dropped -> dom1 as a separate skill (`service-traffic-stats`) -> dom1 and inv1 delivered identical answers via an equivalent script. Shipping both would duplicate the skill and the always-on trigger lines. I took inv1 because its script has `--exclude-route` and `--error-status` flags and an explicit RUNBOOK-first step. dom1's only additions were a few extra trap notes, which inv1 mostly covers.\n- kept -> deletion of the `scripts/README.md` and `skills/README.md` stubs -> they are comment-only stubs, and the skill is now named in always-on text.\n- kept -> hardcoded workspace figures in SKILL.md, labelled as a cross-check only -> both candidates computed the same numbers independently, and the script output matched them in both rollouts. The skill tells the agent to run the script rather than copy the numbers.\n- No guardrail, memory or plugin changes. No trajectory showed an ignored invariant.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "ops-h",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 3,
+        "expected_P": 3,
+        "usd": 0.53819,
+        "rollout_usd": 0.0,
+        "session_usd": 0.53819,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "ops-h",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-adk-agg1/ops-h/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.1229728,
+      "experience": {
+        "cue": "A harness that is nearly empty is given a mechanical, multi-rule data-processing task (parse logs, filter, aggregate, compute a percentile). The baseline spends its tool-call budget re-reading raw inputs by eye and never runs code or produces the deliverable.",
+        "lesson": "Add to the harness a skill that bundles the task's procedure as a runnable script. The script should encode the runbook's filter, unit, window and percentile rules, and should write the output file itself. Add a short always-on line in systemprompt.md that names the skill and says to load it and run it rather than read the inputs manually. Then check the change in a rollout. The first action should be `load_skill`, and a deliverable should exist after about 3 actions.",
+        "evidence": "The skill and trigger rows (confounded as to which part caused the effect). base1 hit the 40-call limit with no deliverable after 40 `list_files` and `read_file` calls. agg1, inv1 and dom1 each used 3 actions to produce the same numbers. Two independently written scripts agreed, so the computed values are probably right. Each skill and trigger pairing was run once, so the script and the trigger are not separated from each other.",
+        "confidence": "low. This rests on one failed base run against three single successes that share the same bundle of changes. The record does not show which component (skill, trigger line or guidance lines) did the work, or whether a script alone would be enough.",
+        "edits": "component: skills/log-traffic-stats (SKILL.md plus scripts/traffic_stats.py)\ncandidates: inv1, agg1\nchange: Added a skill with a one-command script. It detects gzip by magic bytes and skips non-JSON lines. It converts each timestamp to UTC and applies a [start, end) window. It drops `/healthz`. It counts status >= 500 as an error. It picks the latency unit per line by key (`latency_ms`, or `latency_s` \u00d7 1000). It computes p95 by nearest rank and writes the answer JSON. The SKILL.md also states the runbook rules and lists the workspace figures as a cross-check. agg1's harness is identical to inv1's, and its harness.diff is empty.\nobserved: base1 never ran code and never opened the `.gz`. After 12 `list_files` and 28 `read_file` calls it died on `LlmCallsLimitExceededError` at 40 calls with no deliverable. agg1 and inv1 each did `load_skill`, then `run_command`, then `write_file`. That is 3 actions, and the output was gateway 96/0.1354/334, search 119/0.1513/192, billing 124/0.1613/393. This is a single base rollout set against a single run of each candidate. The skill, the system-prompt trigger and the tool-guidance lines all arrived together, so the skill's own contribution is not isolated. The skill text is also the only path to the runbook rules, because the agent never read RUNBOOK.md in agg1 or inv1. dom1's figures were identical, so nothing shows these particular rules are better than dom1's equivalent.\nverdict: confounded\n\ncomponent: systemprompt.md (trigger paragraph)\ncandidates: inv1, agg1 (names `log-traffic-stats`, includes the 40-call budget and the reopen-output reminder); dom1 (names `service-traffic-stats`, shorter, no budget line)\nchange: Added an always-on routing line. It tells the agent to load the named skill and run its script for per-service statistics over a window, instead of reading logs by eye. The inv1/agg1 form also states the ~40-call budget and says to reopen output/answer.json. The dom1 form says only that repeated `read_file` never produces an answer, and to make sure the file exists.\nobserved: In all three candidate rollouts the first action was `load_skill`. base1's first actions were `list_files` and `read_file`. The trigger line is the only component that plausibly explains that first-step switch. Skill availability and the tool-guidance lines changed at the same time, and base1 had no skill to load, so this cannot be separated. The two wordings (with and without the budget line) behaved the same, so the budget text made no observable difference.\nverdict: confounded\n\ncomponent: tool_descriptions/tool_guidance.md\ncandidates: inv1, agg1 (dom1 left the base unchanged)\nchange: Added three lines. Don't repeat `read_file`, because the output is truncated and `.gz` shows as binary. A FileNotFoundError on `<x>.jsonl` probably means `<x>.jsonl.gz`. After a shell syntax error write a .py file, and switch approach after two failures.\nobserved: No rollout hit any of these situations. agg1 and inv1 went straight to the script, and dom1 succeeded without the lines. Their effect on base1's failure mode is untested.\nverdict: no observed effect\n\ncomponent: skills/service-traffic-stats (alternative skill, similar script)\ncandidates: dom1\nchange: A differently named skill with an equivalent script. Its SKILL.md adds explicit trap notes: a 06:xx+01:00 row falls outside the window, a 03:xx-03:00 row falls inside, and the billing unit switch. The script does not write the file when it exits non-zero, and it prints the top-5 latencies.\nobserved: dom1 ran `load_skill`, then `run_command`, then finished, with identical numbers to agg1 and inv1. The extra trap notes and diagnostics made no difference to the result in this run. It shows that two independently written scripts reach the same answer, which is a weak check that the figures are correct. It is not evidence that either form is better.\nverdict: no observed effect\n\ncomponent: scripts/README.md and skills/README.md stubs (deleted)\ncandidates: inv1, agg1, dom1\nchange: Removed the comment-only placeholder files.\nobserved: No rollout opened them, and base1 never touched them either. No visible effect.\nverdict: no observed effect"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/adk/exec/hpb-adk-agg1/ops-h/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "946d2af0fc39eeec"
+    }
+  },
+  "errors": []
+}

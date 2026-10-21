@@ -1,0 +1,126 @@
+{
+  "task_id": "swe-e",
+  "domain": "swe",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-adk-agg1/swe-e/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/adk-guard/exec/hpb-adk-agg1/swe-e/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "swe-e",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "There was one rollout, base1. It failed in four ways, and each change below traces to one of them.\n\n- **The agent never fixed the bug.** Its first `write_file` rewrote `src/durations.py` with the same buggy regex, `([hm])`, so the 's' unit was still missing. I added steps 1\u20132 to `systemprompt.md`. They tell the agent to list every docstring behaviour first, make a real edit, and confirm with a diff that the source changed.\n- **The agent misdiagnosed a test-run failure and overwrote the tests.** It ran `python3 tests/test_durations.py` directly, which gives `ModuleNotFoundError`. The test imports `durations` and relies on `conftest.py` to put `src/` on `sys.path`, and that only works under pytest. The agent then clobbered `tests/test_durations.py` three times and added a stray `src/__init__.py`. The final test file contains only the line `from src.durations import parse_duration`. I added step 3 to `systemprompt.md`, which says to run `python3 -m pytest -q tests` from the workspace root. It also says never to edit existing tests or `conftest.py` to get a run to pass, and not to repeat a failing command. `tool_descriptions/tool_guidance.md` now warns that `write_file` overwrites the whole file and must not be used on tests.\n- **The agent never made `output/durations.py`.** The run ended mid-debugging with no deliverable. I added step 5 to `systemprompt.md`, which says to `cp` the source to the output path and `diff` the two. I also added `hooks.json` (Stop event) and `scripts/check_output.py`. The hook blocks finishing if `output/*.py` is missing, doesn't compile, differs from the `src/` file of the same name, or if the pytest run fails. It lets the run finish if pytest is not installed or `tests/` is absent. The Stop hook can block finishing at most 3 times, so it can't trap the agent.\n- **The existing tests are thin and cover only `1h30m`.** The docstring promises more: case-insensitive units, whitespace, h-m-s order, each unit at most once, and `ValueError` for bad input. I added step 4 to `systemprompt.md`, which has the agent check each of those behaviours itself and append new tests without removing existing ones.\n\nI did not run the new hook in a workspace, only compiled it, and I did not run the new prompt text against a rollout.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "- I removed the \"Workspace facts\" block from `skills/fix-python-bug/SKILL.md`, as the rejection asked. It described this instance's files: `src/durations.py`, `parse_duration`, its regex bug, and the single test in `tests/test_durations.py`.\n- I changed the last checklist bullet from \"raised as ValueError\" to \"the exception type the docstring names\", so the skill no longer carries an instance-specific detail.\n- What remains is the generic practitioner checks:\n  - Turn the docstring into numbered clauses.\n  - Reproduce the failure first.\n  - Make a minimal fix.\n  - Probe each clause, including the parser edge cases.\n  - Treat existing tests as protected.\n  - Run `python3 -m pytest -q` from the workspace root.\n  - Copy the fixed source to the output path and `diff` it.\n- The trigger line in `systemprompt.md` still names `fix-python-bug`, so the skill passes the trigger-line rule.\n- I did not re-read the trajectories this round. The edit only removes the flagged content.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.14924590000000001,
+          "cached": false,
+          "notes": "Evidence caveat: no rollout, base or candidate, actually fixed the bug. All three left the regex `([hm])` unchanged. Only inv1 produced an output file, and that file held the buggy source. The dom1 rollout produced nothing: it loaded the skill and then stopped mid-debugging. The merge below is therefore built from the observed failure mechanisms, not from any run that succeeded. I have not run it.\n\nkept -> inv1 Stop hook (`hooks.json` plus `scripts/check_output.py`) -> In the base1 rollout, the run ended with no `output/durations.py`. In inv1, the hook blocked finishing twice with \"output/ has no .py deliverable\", and the agent then ran `cp`. The hook fires inside the tool loop, so it can't be skipped. inv1 is the only rollout that delivered an output file. The hook passes silently on a buggy file, so inv1's delivery is not evidence of a fix.\n\nrevised -> Stop hook gets a one-time final self-check message, keyed by a marker file in TMPDIR -> In inv1, the final turn ended after `cp` with the bug untouched, and the hook passed because it checks only file existence, a diff and tests. The hook can't know the reported example, so the message tells the agent to re-run it, check each docstring clause, and confirm `src/` changed. A stale marker from an earlier run in the same directory would only skip the message. The hook still blocks at most 3 times, so it can't trap the agent.\n\nkept -> `tool_guidance.md` from inv1: `write_file` overwrites the whole file, never use it on tests, \"wrote N chars\" is not verification -> In base1, `write_file` clobbered `tests/test_durations.py` three times. In base1, inv1 and dom1, the first `write_file` re-wrote `src/durations.py` with identical buggy content.\n\nrevised -> `systemprompt.md`: inv1's five-step workflow condensed into a few always-on rules, plus a trigger line for the skill -> The base prompt was one line and three of three runs went wrong. In base1, the agent ran `python3 tests/test_durations.py` directly, got `ModuleNotFoundError`, and then overwrote the tests and added `src/__init__.py`. The new text carries three rules, each tied to an observed moment:\n- Run pytest from the workspace root, because conftest sets the path.\n- Never end a turn on a statement of intent. Both inv1 and dom1 ended turns with \"Let's update the regex\u2026\" and no tool call.\n- Use `PYTHONPATH=src python3 -c`. inv1 repeated `python3 -c \"from durations import \u2026\"` about eight times with the same `ModuleNotFoundError`, because its guidance said only \"sys.path set to src\".\n\nrevised -> dom1 `fix-python-bug` skill, kept on demand and trimmed -> dom1 loaded it, and the skill's docstring-clause list and parser probes (anchored/fullmatch rather than `findall`) are the only content pushing toward a full fix. I changed step 4 from \"use Edit, not a full rewrite\" to \"send the complete corrected source via `write_file`\". The rollouts show no Edit tool, only `write_file`. The trigger line is in `systemprompt.md`. dom1's rollout produced nothing, so I am not treating its outcome as support. The skill's content is generic, and the dom1 rollout shows no failure caused by it.\n\ndropped -> inv1's long step-by-step prompt text and the `systemprompt.md` duplication with the skill -> The always-on text costs budget in every run, and the details now live in the skill.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "swe-e",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 1,
+        "expected_P": 3,
+        "usd": 0.149246,
+        "rollout_usd": 0.0,
+        "session_usd": 0.149246,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "swe-e",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-adk-agg1/swe-e/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.18908629999999998,
+      "experience": {
+        "cue": "A small-repo bug-fix task where the agent has a hard LLM-call budget and reports success from weak checks. The agent re-writes the file unchanged and re-runs probes that print the wrong output, and prompt or skill text asking for a \"real edit\" or \"verify the output\" has no visible effect.",
+        "lesson": "Do not rely on the prompt or skill (systemprompt.md, skills/fix-python-bug/SKILL.md) to make the agent edit the source or deliver a file. Put deliverable-existence in the Stop hook (hooks.json + scripts/check_output.py), where it can't be skipped. Any added check must test a deterministic fact the hook can compute, such as the source differing from a pristine snapshot taken before the run. Do not add free-text \"re-verify\" reminders to the hook, because the agent saw wrong outputs and repeated them until the call limit.",
+        "evidence": "Edit row \"hooks.json + scripts/check_output.py\". In inv1 the stop hook blocked twice and the agent then ran `cp`. In base1 and dom1, with only prompt-level instructions, no output file appeared. In agg1 the free-text self-check led to about 20 identical probe commands and a call-limit error with no source edit. The skill and prompt rows show the \"make a real edit\" text was present in agg1 and inv1, and both still re-wrote the buggy source. A source-differs-from-snapshot check was not tried in any rollout, so the recommendation to add it is untested.",
+        "confidence": "low. Each contrast is a single rollout. No run produced the fix, so no edit is shown to improve correctness. The only observed contrast is that a hook-enforced delivery happened where prompt-only delivery did not.",
+        "edits": "component: hooks.json + scripts/check_output.py (Stop hook that blocks finishing until output/*.py exists, compiles, matches src/, and pytest passes)\ncandidates: agg1 (with a one-time self-check message), inv1 (without the self-check). dom1 removed it. The base has no hook.\nchange: The hook adds a deterministic gate on finishing. In agg1 it also shows a one-time \"re-run the failing example, check every docstring clause, confirm src/ changed\" message, keyed by a TMPDIR marker file.\nobserved: The existence gate worked in inv1. The agent ended its turn on a statement of intent with no `cp`. The hook then blocked it twice with \"output/ has no .py deliverable\", and the agent ran `cp`. In base1 and dom1 there was no hook and no output file was produced. The hook cannot tell a no-op fix from a real one. inv1's delivered file still has the buggy `([hm])` regex. In agg1 the agent had already run `cp`, so the existence gate passed. The self-check message then blocked the first stop. The agent re-ran the probes and they showed 45s\u21920, ''\u21920, '45x'\u21920 and '1h30m15s'\u21925400. It never edited `src/`. It repeated the identical `1h30m15s` command about 20 times until the run hit the 29-LLM-call limit (`LlmCallsLimitExceededError`). The self-check showed the bug but did not make the agent act on it, and it used up the call budget. The existence gate is supported by one rollout against two that had no hook. The self-check has one rollout and no positive effect.\nverdict: confounded. The existence gate looks like it helped (inv1 vs base1/dom1, a single rollout each). The self-check message showed no benefit and coincided with budget exhaustion.\n\ncomponent: systemprompt.md\nchange: Base: one sentence. agg1: a trigger line for `fix-python-bug` plus four rules \u2014 never end a turn on intent, never edit tests or conftest, run `python3 -m pytest -q tests` from the workspace root, use `PYTHONPATH=src python3 -c`, and don't stop until the output copy exists. inv1: a five-step workflow inlined in the prompt with no skill. dom1: the trigger line plus one short sentence about not overwriting tests and not stopping before the output copy exists.\nobserved: base1 ran `python3 tests/test_durations.py` as a script and got `ModuleNotFoundError`. It then rewrote `tests/test_durations.py` three times and added `src/__init__.py`. None of agg1, inv1 or dom1 touched the tests. agg1 ran pytest from the root, used `PYTHONPATH=src`, and recovered from its first `NameError` in one step. inv1's prompt said only \"sys.path set to src\", and it repeated `python3 -c \"from durations import \u2026\"` about eight times with the same `ModuleNotFoundError`. dom1 ended a turn on \"Let's start by running the command\u2026\" and produced no output. The agg1 and inv1 prompts both said \"make a real edit\" and \"re-writing identical content is not a fix\", yet both runs' first `write_file` re-wrote the identical buggy source. The prompt text did not produce the fix.\nverdict: confounded. Tests stayed intact in every edited prompt, but each candidate also changed other components and each has one rollout. The `PYTHONPATH=src` instruction visibly mattered, comparing agg1 with inv1. Nothing shows the prompt causing a real source edit.\n\ncomponent: skills/fix-python-bug/SKILL.md\nchange: agg1 and the harness have a 7-step checklist: docstring clauses, reproduce first, fix, probe each clause, run pytest, `cp` and `diff`. dom1 has an older, longer version that adds \"Analytic move\" and says to use \"Edit, not a full rewrite\", although the rollouts show only `write_file`. inv1 has no skill.\nobserved: agg1 and dom1 both loaded the skill as their first action. Neither wrote the docstring-clause list or reproduced the symptom before editing. agg1's first `write_file` re-wrote the buggy source unchanged. dom1 stopped mid-debugging on a `ModuleNotFoundError`. Neither run shows the skill's content changing what the agent did. Its probe list only appeared in agg1 because the hook's self-check message prompted it.\nverdict: no observed effect\n\ncomponent: tool_descriptions/tool_guidance.md\nchange: Added two lines. `write_file` overwrites the whole file and must not be used on tests or conftest. \"wrote N chars\" is not verification. Commands run from the workspace root. dom1 deleted the file.\nobserved: Neither agg1 nor inv1 clobbered tests. base1 did, but base1 also lacked the prompt rules, so the effect can't be attributed to this file. agg1 still wrote identical content to `src/durations.py`, and \"wrote 509 chars\" was followed by a re-run that showed 0 for `'45s'`. This did not stop the no-op write.\nverdict: no observed effect\n\ncomponent: whole-harness outcome (all four rollouts)\nchange: Not a single edit. This row records the result across the round.\nobserved: No rollout fixed the bug. The `([hm])` regex stayed unchanged in base1, agg1, inv1 and dom1. The agent never replaced it, even after seeing `parse_duration('45s')` print 0 (agg1) and the stop-hook output. The agent also never added the `s` unit, the ValueError cases or the anchored parsing. agg1's final message claimed the function was fixed while the file was unchanged. Only agg1 and inv1 produced an `output/durations.py`, and both are byte-equivalent to the buggy source (509 vs 510 chars of whitespace difference).\nverdict: confounded. Every edit improved process hygiene at best. None produced the fix, and the adopted candidate was chosen without a selector, so adoption says nothing about quality."
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/adk-guard/exec/hpb-adk-agg1/swe-e/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "9739dc5f43370903"
+    }
+  },
+  "errors": []
+}

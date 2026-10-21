@@ -1,0 +1,1 @@
+- Cite statutes and rules only from the matter record or a source you can check. If you rely on rule text that is not in the file, say so in your final message to the supervising lawyer, not in the filed document.

@@ -1,0 +1,3 @@
+- read_file: read the whole source file and the test file before editing.
+- write_file: overwrites the whole file; send the complete intended new content, and make sure it differs from what you read when a fix is needed.
+- run_command: use it to run tests, ad-hoc `python3 -c` checks of edge cases, `cp` to the output path, and `diff` to confirm the copy.

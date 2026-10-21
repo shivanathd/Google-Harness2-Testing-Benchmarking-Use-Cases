@@ -1,0 +1,121 @@
+{
+  "task_id": "arbitration-international-dispute-resolution/draft-markup-of-proposed-interim-order",
+  "domain": "arbitration-international-dispute-resolution",
+  "k": 1,
+  "seed": null,
+  "status": "partial",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "lab-cc-agg1/arbitration-international-dispute-resolution/draft-markup-of-proposed-interim-order/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/lab/exec/lab-cc-agg1/arbitration-international-dispute-resolution/draft-markup-of-proposed-interim-order/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "arbitration-international-dispute-resolution/draft-markup-of-proposed-interim-order",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.04657152999999999,
+          "cached": false,
+          "notes": "Scope: one rollout (base1), inspected in full. No candidate harnesses exist. The library sibling (procedural-order draft markup) was read for precedent. Only `systemprompt.md` changed. The other six components are unchanged and empty or pointer-only. No skill, script, subagent or plugin was added, because the single run got the core work right and nothing repeated.\n\nCHANGE 1, `systemprompt.md`, \"Reading documents\": added a read-coverage rule and a workspace fact.\n- Moment: base1 ran `head -c 32000` on the Application (Bash output persisted at 31.3KB, only a 2KB preview seen). It then ran `Read` on `/tmp/nis_app.md`, which returned only through line 289 (\u00b691) of a 439-line file, with no marker. At the next step it wrote \"Read everything needed\" without checking the last line against `wc -l` (439).\n- The run then cited Application \u00b697(b) (\"48 hours\"), \u00b6\u00b6105\u2013110 and \u00b6107(a)\u2013(d), which lie after line 289. The figures match the file, so either the run saw more than the recorded read or it was lucky. The record cannot settle which. The check was never made, and the final message does not disclose the gap.\n- Workspace fact, verified by re-extracting with the same read_doc.py: the Application extracts to 439 lines; line 289 is \u00b691; \u00b6105 begins at line 329; \u00b6\u00b6112\u2013114 end the file at about line 377.\n\nCHANGE 2, `systemprompt.md`, \"Doing the work\": the read-back instruction now names the `output/` path, and says a word count, byte copy or grep count is not a read-back.\n- Moment: the final deliverable check was `pandoc output/marked-up-interim-order.docx --track-changes=all | grep -c \"[\"`, which returned \"6\", followed by \"The deliverable is in place.\" The base prompt already asks for a read-back through read_doc.py, and the run did not use it. The run's checks on `/tmp/mk/marked.docx` (reject-all identical to the original, accept-all read) covered a byte-identical copy, so the risk was low. The change strengthens the existing instruction; it does not add a new one.\n\nKEEP (no change, deliberately):\n- Redline mechanics. The run built tracked changes from the original document.xml with an lxml engine, not by regenerating the docx. It checked that rejecting all changes reproduces the original text exactly, read the accepted text back, and ran a structural check. This worked and is the behaviour to preserve. The anchor assertion caught one bad anchor on the first pass, and it was fixed in one edit. Not a repeated failure, so no script.\n- Self-review. The run found that its first build cited the privileged strategy memo (\"Memo s.3.x\") in filing-facing comments and moved those cites to INTERNAL-tagged notes. The self-review worked. The remaining 16 INTERNAL-tagged comments are a deliverable-shape question, so I left them alone.\n- Date reconciliation. The \"29 April 2025\" invitation date is supported by the Application and the memo, not by the tribunal email, whose Date header is blank. The run flagged the 13 May 2025 deadline against the system date.\n\nUNRESOLVED / NOT ACTED ON:\n- The workspace root `CLAUDE.md` (1378 bytes) was listed but never opened in the rollout. It may already be auto-loaded into context by the harness, which the transcript does not show. I did not add a \"read CLAUDE.md\" rule, because the evidence cannot show that it was missed.\n- A reusable tracked-changes engine script was considered and not added. The runs' own engine worked, and a script would be untested speculation from a single run.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.3320555,
+          "cached": false,
+          "notes": "Only one rollout exists (base1), so no edit rests on a divergence. Each change rests on a single-run moment, and the notes say so.\n\n**CHANGED**\n\n1. **New skill `skills/interim-order-redline/SKILL.md`, with trigger line in `systemprompt.md`** (the trigger is under \"Doing the work\", naming `interim-order-redline` verbatim). The skill covers the controlling sources, the measure-by-measure test, finding-to-order consistency, concessions in replacement wording, forum limits, cross-instrument references, privilege placement, pre-finish checks, and the final-message order. Workspace facts are labelled \"In this workspace\". Moments behind it:\n   - **Finding-order contradiction.** Deliverable text, lines 67\u201371: \u00b64.3 says the Tribunal \"is not satisfied\" there is a real dissipation risk, \u00b64.4 says element (c) fails for the asset order, and \u00b65 still orders a USD 47.5m freeze (\"Accordingly, the Tribunal hereby orders\u2026\"). Nothing in the run checked that each operative paragraph still rests on a standing finding. This is \u00a73.\n   - **Unflagged concession.** Deliverable \u00b64.1 (line 63) has the Tribunal provisionally satisfied that the Claimant established a prima facie case that NIS \"failed to deliver\". PO1 \u00b63 records NIS denying breach and saying shortfalls \"to the extent they occurred\" were excused. The final message does not flag this. This is \u00a74.\n   - **Forum and \u00a714.4 analysis.** Base1 caught that the Bogot\u00e1 body is described as a \"Tribunal de Arbitraje\" and that \u00a714.4 may not reach it. The skill encodes that check and adds the Application \u00b674 pleading that the filing breaches \u00a714.2. Base1 already covered the core point, so this section is partly a restatement and could be cut.\n   - **Source conflicts.** PO1 \u00b63 cites \"Section 9\" of the SOA for force majeure; SOA \u00a78 is force majeure, and the Application cites \u00a78. Base1 did not list this in its source-conflicts section. Counsel address conflicts (PO1 \u00b610, draft recital 2 and \u00b618, Application counsel block, memo signature) were partly handled by base1, and the skill records them as workspace facts.\n\n2. **`guardrails.md` (was empty): one line on rule text.** Base1's final message says \"The cross-undertaking should rest on PO1 \u00b615, not ICC Art. 28(1) as the memo says\" (rollout ~line 1954). That is a negative claim about a rule whose text is not in the file, which the library guardrail also forbids. The line is universal to this practice area, so it is always-on.\n\n3. **Internal notes kept out of the file (skill \u00a78 and \u00a79).** Rollout ~lines 1912\u20131915 and 1965: the file contains 16 comments tagged \"INTERNAL \u2013 delete before filing\", and the final message asks the lawyer to strip them before filing. This is a judgment call that I made, not a failure the run showed. The rule is that internal analysis goes in the final message, so the file needs no repair.\n\n4. **Per-change grounds in the final message (skill \u00a79, item f).** The assessed text (deliverable txt, same reader as the grader) shows accepted text only. Comment text is absent (grep finds none of the comment strings) and deleted text is absent. Base1's final message gives decisions but not a per-change ground. Because comments are invisible to this reader, item (f) is the only readable place for the grounds. The library EXPERIENCE for a different task records the same comment-visibility risk. I did not copy that task's skill, because its trigger (procedural order) does not match an interim order.\n\n**KEEP_BASE (unchanged)**\n- `LongTermMEMORY.md`: left empty on purpose. No matter facts were stored as durable memory.\n- `scripts/`, `plugin/`, `tool_descriptions/`, `skills/README.md`: no trajectory evidence for a change. Base1 built its tracked-change engine by hand and it produced a correct reject-all match, so I did not add a script.\n- Traceability bullet in `systemprompt.md`: base1 bracketed the disputed dates and the Respondent address, and it did not assert unsupported facts, so no edit.\n- Verification bullet: base1 read the accepted text back in full (rollout ~l.1637\u20131815), which is what the bullet asks for.\n\n**NOT VERIFIED / OPEN**\n- Base1's final-message claims that Application \u00b697(b) gives a 48-hour force majeure notice period and that \u00b659 covers interest, costs and expenses. I did not find support for either in the Application text I could read, so neither is in the harness.\n- The workspace `CLAUDE.md` (1,378 bytes, at the workspace root) was never opened by base1. Its contents are not in my context, so I cannot say whether it contains binding instructions. Someone should check it.\n- The skill's \u00a79 \"in this run\" date fact (system date 19 October 2026 against a 13 May 2025 deadline) is a per-run observation and should not carry over to other matters.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.21376336,
+          "cached": false,
+          "notes": "revised -> systemprompt.md \"Reading documents\": replaced inv1's check-then-cite rule with a chunked-read rule (files over about 150 lines are read with offset/limit or sed until the last line; no citing unread paragraphs) -> base1's Read of the Application stopped at line 289 (\u00b691) of 439 with no marker (rollout ~l.1153\u20131154); the next message says \"Read everything needed\" (~l.1444), yet the final message and deliverable cite \u00b697(b), \u00b6101 and \u00b6\u00b6105\u2013110, which no read observation in base1 contains. inv1 hit the same cut at line 289 (~l.1355) even with the check-form rule in its prompt; it ran wc -l (439) and still did not read on. dom1 read the Application by offset/limit (~l.1224\u20131225) and did not hit the cut. 2 of 2 whole-file readers were cut; the chunked form is the one that worked (1/1, dom1). The record cannot show whether the run saw the paragraphs it cited; the citations match the source.\n\ndropped -> inv1 systemprompt workspace fact (Application = 439 lines; line 289 = \u00b691; \u00b6105 at line 329) -> matter-specific always-on text that costs budget on every run and has no use for other matters; the same moment is covered by the general chunked-read rule.\n\ndropped -> inv1 read-back wording (\"a word count, byte copy or grep count is not a read-back\") -> base1 checked the output by grep count (~l.1919) and inv1 by grep count on readback.txt (~l.1592), but both had already read the accepted text in full (base1 ~l.1637; inv1 ~l.1472). No defect traced to the count check. The library entry for the same wording records no observed effect. Base wording kept.\n\nkept -> systemprompt.md \"Doing the work\" grounding bullet and read-back line (base wording) -> all three rollouts delivered output/marked-up-interim-order.docx and reject-all matched the source in each (base1 ~l.1624; inv1 readback; dom1 \"reject-all paragraphs 107, mismatches 0\"). No nothing-produced case, and no evidence for a change.\n\nadded -> systemprompt.md trigger line naming the `interim-order-redline` skill (dom1) -> dom1 invoked the skill as its work moved through the findings and concessions, and it is the only run that avoided the \u00b64.1 concession (see the next line). Evidence is 1 rollout; the trigger is needed for the skill to load at all, and the name appears verbatim in the always-on text.\n\nkept (skill \u00a74, revised form) -> skills/interim-order-redline/SKILL.md \u00a74: the file carries the least concessive wording that still does what the instruction asks, and the instruction's own wording and the concession it makes go in the final message -> the strategy memo \u00a73.1 instructs the replacement \"the Tribunal is provisionally satisfied that the Claimant has established a prima facie case on the merits\" (a concession on breach). base1 filed it in \u00b64.1 (\"provisionally satisfied \u2026 failed to deliver\") and its final message does not name the concession; inv1 filed a sharper version (\"did not deliver 31,200 MT\", \u00b64.1) and does not name it; dom1 recorded the allegation and the denial, and flagged the memo wording as decision 2. 2 of 3 rollouts filed the concession. Choice of default: a filed concession is hard to withdraw, so the file holds the least concessive text and the lawyer chooses the memo wording.\n\nkept -> skill \u00a73 findings-to-orders consistency -> base1 accepted text has \u00b64.3 \"not satisfied \u2026 real risk \u2026 dissipate\", \u00b64.4 element (c) not satisfied for the asset order, then \u00b65 freezing USD 47.5m and \"Accordingly, the Tribunal hereby orders\" (deliverable txt ~l.61\u201375). The contradiction is unflagged in base1's final message (it only says \"leading with 'no asset measure' is your call\"). inv1 has \u00b64.3 \"no finding on dissipation\" with \u00b64.4 \"satisfied \u2026 measures are warranted\" over the same freeze. dom1 deleted the \u00b64.3 finding, made the freeze depend on \u00b64.4 placeholders, and flagged it as the main decision. Two of three rollouts show the defect.\n\nkept -> skill \u00a78 no internal notes in the Tribunal-facing file -> base1 left 16 comments tagged \"INTERNAL \u2013 delete before filing\" in the file and asks the lawyer to strip them (final message; build script INT tag). inv1 and dom1 kept internal analysis out of the file.\n\nrevised -> skill \u00a77 rule discipline: filed text carries at most a short bracket; reasons and the unverified rule list go in the final message -> dom1's wording put \"[rule text to be verified]\" into comments, which conflicts with the area's library guardrail (procedural-order entry: \"say so in your final message, not in the filed document\"). No run in this set filed an unsupported rule claim: base1's and inv1's Article 28(1) statements rest on the Application \u00b642 quotation, and the SIAA s.12(1) and Cap. 143A recital is in Application \u00b644. The change is for consistency with the area, not a demonstrated fix.\n\ndropped -> dom1 guardrails.md line (\"Do not state what a rule \u2026 says \u2026 unless its text is in the file\") -> no run in this set made an unsupported rule claim that the line would have stopped. base1 (final: \"SIAA text and the Singapore \u00a712(6) reference \u2026 not in the file\") and inv1 (final: \"could not check the Singapore IAA citations\") already flagged unverified rule points. The line duplicates the skill \u00a77 discipline and its filed-document placement conflicts with the library. KEEP_BASE for guardrails.md (empty).\n\nrevised -> skill \u00a79 final-message order: each item kept short -> dom1's final message stops mid-item (b) in the record (\"decides w\"), so items (c)\u2013(f) are absent from the trajectory. The cause is not visible. base1 and inv1 finished their final messages. The shorter form reduces the risk, but the cause is unconfirmed.\n\nrevised -> skill \u00a79 deadline check: per-run date fact removed, kept as the general rule \"compare the system date with the response deadline; if passed, say so\" -> dom1's \"13 May 2025 vs 19 October 2026\" is a per-run observation. base1 and inv1 also flagged the lapsed deadline in their finals, so the rule is supported across runs.\n\nkept (as a labelled section) -> skill \u00a710 matter notes (PO1 \u00b615 elements and cross-undertaking; SOA \u00a714.4 text and forum gap; PO1 \u00b63 \"Section 9\" vs Section 8; counsel-address conflicts; quantum 54,000 \u00d7 879.63 = 47,500,020) -> each fact checked against the source (PO1 \u00b63, SOA 14.4, Application \u00b674, Application \u00b644, memo signature). Labelled \"verify before reuse\" because it is loaded only on trigger and applies to this matter only.\n\ndropped -> dom1 skill \u00a71\u2013\u00a76 \"In this workspace\" labels, moved to \u00a710 -> generic rules kept in \u00a71\u2013\u00a79; matter facts isolated so later matters do not inherit them.\n\nKEEP_BASE -> scripts/ (none added) -> base1 hand-built the tracked-changes engine and verified reject-all identity; inv1 and dom1 did the same. No repeated mechanical failure, so no script.\n\nKEEP_BASE -> plugin/ and hooks.json (none added) -> all three rollouts delivered; no in-loop enforcement need shown.\n\nKEEP_BASE -> sub_agents/ (none) -> the input is not large relative to the answer; the work is one document and one judgment.\n\nKEEP_BASE -> LongTermMEMORY.md (empty) and tool_descriptions/tool_guidance.md (unchanged) -> no durable matter fact or tool-use failure recurs across runs.\n\nUnresolved (not acted on) -> workspace CLAUDE.md (1,378 bytes in base1; 2,198 bytes in inv1's listing) -> not opened by any run; its contents are unknown, so no rule was added.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "arbitration-international-dispute-resolution/draft-markup-of-proposed-interim-order",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 3,
+        "expected_P": 3,
+        "usd": 0.59239,
+        "rollout_usd": 0.0,
+        "session_usd": 0.59239,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "arbitration-international-dispute-resolution/draft-markup-of-proposed-interim-order",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "",
+      "chosen_label": "",
+      "chosen_run_id": "",
+      "chosen_is_base": false,
+      "why": "",
+      "id_map": {},
+      "dropped": [
+        "agg1"
+      ],
+      "n_candidates": 0,
+      "ok": false,
+      "fallback": false,
+      "error": "no candidate produced an artifact (finals-only pool has no base fallback)",
+      "usd": 0.0,
+      "experience": {},
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "",
+      "chosen_tree_is_base": true
+    }
+  },
+  "errors": [
+    "agg: selection failed: no candidate produced an artifact (finals-only pool has no base fallback)"
+  ]
+}

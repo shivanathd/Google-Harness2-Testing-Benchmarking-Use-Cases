@@ -1,0 +1,289 @@
+{
+ "schema_version": 1,
+ "diagram_type": "architecture",
+ "meta": {
+  "title": "HPB Test Rig",
+  "output": ".archify/architecture-hpb-rig-20261019-012925/hpb-rig.html",
+  "quality_profile": "showcase"
+ },
+ "components": [
+  {
+   "id": "bench",
+   "type": "database",
+   "label": "HPB benchmark",
+   "sublabel": "3 domains \u00d7 3 tiers",
+   "tag": "+6 fresh-seed variants",
+   "pos": [
+    40,
+    280
+   ],
+   "size": [
+    160,
+    64
+   ]
+  },
+  {
+   "id": "h2core",
+   "type": "backend",
+   "label": "Harness\u00b2 core",
+   "sublabel": "run_domain \u2192 run_task",
+   "tag": "unmodified",
+   "pos": [
+    300,
+    280
+   ],
+   "size": [
+    160,
+    64
+   ]
+  },
+  {
+   "id": "adapter",
+   "type": "backend",
+   "label": "HPBAdapter",
+   "sublabel": "BenchmarkAdapter seam",
+   "pos": [
+    560,
+    280
+   ],
+   "size": [
+    160,
+    64
+   ]
+  },
+  {
+   "id": "cc",
+   "type": "backend",
+   "label": "Claude Code CLI",
+   "sublabel": "Haiku 5.5 \u00b7 claude -p",
+   "pos": [
+    820,
+    280
+   ],
+   "size": [
+    160,
+    64
+   ]
+  },
+  {
+   "id": "adk",
+   "type": "backend",
+   "label": "Google ADK agent",
+   "sublabel": "LiteLLM \u00b7 4 tools",
+   "pos": [
+    820,
+    480
+   ],
+   "size": [
+    160,
+    64
+   ]
+  },
+  {
+   "id": "ollama",
+   "type": "cloud",
+   "label": "Ollama (local)",
+   "sublabel": "qwen3:8b \u00b7 127.0.0.1",
+   "pos": [
+    1080,
+    480
+   ],
+   "size": [
+    160,
+    64
+   ]
+  },
+  {
+   "id": "improver",
+   "type": "backend",
+   "label": "Improver",
+   "sublabel": "Sonnet 5.5 \u00b7 claude_cli",
+   "tag": "sandboxed",
+   "pos": [
+    300,
+    80
+   ],
+   "size": [
+    160,
+    64
+   ]
+  },
+  {
+   "id": "ar",
+   "type": "backend",
+   "label": "Autoresearch loop",
+   "sublabel": "keep edit if score rises",
+   "pos": [
+    560,
+    80
+   ],
+   "size": [
+    160,
+    64
+   ]
+  },
+  {
+   "id": "grader",
+   "type": "security",
+   "label": "Hidden graders",
+   "sublabel": "checks \u00b7 hidden tests",
+   "pos": [
+    820,
+    80
+   ],
+   "size": [
+    160,
+    64
+   ]
+  },
+  {
+   "id": "report",
+   "type": "frontend",
+   "label": "Evaluation report",
+   "sublabel": "re-rolls \u00b7 CI \u00b7 leak audit",
+   "pos": [
+    1080,
+    80
+   ],
+   "size": [
+    160,
+    64
+   ]
+  }
+ ],
+ "boundaries": [
+  {
+   "kind": "security-group",
+   "label": "sandbox-exec \u00b7 env allowlist",
+   "wraps": [
+    "cc",
+    "adk"
+   ]
+  },
+  {
+   "kind": "region",
+   "label": "Operator side (agents cannot read)",
+   "wraps": [
+    "grader",
+    "report"
+   ]
+  }
+ ],
+ "connections": [
+  {
+   "id": "bench-h2",
+   "from": "bench",
+   "to": "h2core",
+   "label": "task stream",
+   "variant": "emphasis"
+  },
+  {
+   "id": "h2-adapter",
+   "from": "h2core",
+   "to": "adapter",
+   "label": "execute",
+   "variant": "emphasis"
+  },
+  {
+   "id": "adapter-cc",
+   "from": "adapter",
+   "to": "cc",
+   "label": "CLAUDE.md",
+   "variant": "emphasis"
+  },
+  {
+   "id": "adapter-adk",
+   "from": "adapter",
+   "to": "adk",
+   "label": "instruction",
+   "fromSide": "bottom",
+   "toSide": "left"
+  },
+  {
+   "id": "adk-ollama",
+   "from": "adk",
+   "to": "ollama",
+   "label": "think=False"
+  },
+  {
+   "id": "h2-improver",
+   "from": "h2core",
+   "to": "improver",
+   "label": "evidence",
+   "fromSide": "top",
+   "toSide": "bottom"
+  },
+  {
+   "id": "ar-improver",
+   "from": "ar",
+   "to": "improver",
+   "label": "program.md",
+   "variant": "dashed"
+  },
+  {
+   "id": "ar-adapter",
+   "from": "ar",
+   "to": "adapter",
+   "label": "rollouts",
+   "variant": "dashed",
+   "fromSide": "bottom",
+   "toSide": "top"
+  },
+  {
+   "id": "grader-ar",
+   "from": "grader",
+   "to": "ar",
+   "label": "score",
+   "variant": "security"
+  },
+  {
+   "id": "cc-grader",
+   "from": "cc",
+   "to": "grader",
+   "label": "outputs",
+   "variant": "security",
+   "fromSide": "top",
+   "toSide": "bottom"
+  },
+  {
+   "id": "grader-report",
+   "from": "grader",
+   "to": "report",
+   "label": "results"
+  }
+ ],
+ "cards": [
+  {
+   "dot": "cyan",
+   "title": "Benchmark",
+   "items": [
+    "data \u00b7 ops \u00b7 swe, easy \u2192 medium \u2192 hard",
+    "Programmatic graders; SWE tiers use hidden tests incl. regressions"
+   ]
+  },
+  {
+   "dot": "emerald",
+   "title": "Conditions",
+   "items": [
+    "base \u00b7 Harness\u00b2 parallel k=1 \u00b7 sequential k=2 (data)",
+    "Autoresearch: grader in the loop, tuned on easy, frozen"
+   ]
+  },
+  {
+   "dot": "rose",
+   "title": "Isolation",
+   "items": [
+    "No tokens or keys in agent env; no web tools",
+    "Reads of graders, other runs and credential dirs denied"
+   ]
+  },
+  {
+   "dot": "violet",
+   "title": "Evaluation",
+   "items": [
+    "Fresh re-rolls, transfer to medium/hard, fresh-seed variants",
+    "Hierarchical bootstrap CI + sign-flip test; pre-registered"
+   ]
+  }
+ ]
+}

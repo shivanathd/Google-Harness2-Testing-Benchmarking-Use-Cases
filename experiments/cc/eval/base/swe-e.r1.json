@@ -1,0 +1,28 @@
+{
+ "cond": "base",
+ "task": "swe-e",
+ "rep": 1,
+ "partial": 1.0,
+ "all_pass": true,
+ "checks": {
+  "seconds": true,
+  "all_units_spaced": true,
+  "uppercase": true,
+  "zero": true,
+  "outer_space": true,
+  "empty_raises": true,
+  "unknown_unit_raises": true,
+  "garbage_raises": true,
+  "repeat_unit_raises": true,
+  "order_raises": true
+ },
+ "harness": "base",
+ "cost_usd": 0.00556512,
+ "tokens_in": 145905,
+ "tokens_out": 3452,
+ "wall_s": 78.5,
+ "error": "",
+ "infra_error": false,
+ "turns": 7,
+ "tool_calls": null
+}

@@ -1,0 +1,46 @@
+{
+ "h2-parallel-k1/intask": {
+  "n_tasks": 9,
+  "mean_delta": 0.4226190476190476,
+  "ci95": [
+   0.17261904761904762,
+   0.6944444444444444
+  ],
+  "signflip_p": 0.0078125,
+  "improved": 8,
+  "regressed": 0
+ },
+ "h2-parallel-k1/transfer": {
+  "n_tasks": 6,
+  "mean_delta": 0.125,
+  "ci95": [
+   -0.08333333333333333,
+   0.375
+  ],
+  "signflip_p": 0.5,
+  "improved": 2,
+  "regressed": 0
+ },
+ "h2-parallel-k1/variant": {
+  "n_tasks": 6,
+  "mean_delta": 0.3333333333333333,
+  "ci95": [
+   -0.25,
+   0.8333333333333334
+  ],
+  "signflip_p": 0.4375,
+  "improved": 4,
+  "regressed": 1
+ }
+}
+flips h2-parallel-k1/intask data-h: fail->pass ['chargebacks 0.50->1.00', 'net_usd 0.50->1.00', 'transactions 0.50->1.00'] pass->fail []
+flips h2-parallel-k1/intask ops-m: fail->pass ['failed 0.00->1.00', 'top_code 0.00->1.00', 'users 0.00->1.00'] pass->fail []
+flips h2-parallel-k1/intask ops-h: fail->pass ['billing.error_rate 0.00->1.00', 'billing.p95_ms 0.00->1.00', 'billing.requests 0.00->1.00', 'gateway.error_rate 0.00->1.00', 'gateway.p95_ms 0.00->1.00', 'gateway.requests 0.00->1.00', 'search.error_rate 0.00->1.00', 'search.p95_ms 0.00->1.00', 'search.requests 0.00->1.00'] pass->fail []
+flips h2-parallel-k1/intask swe-m: fail->pass ['basic_us 0.50->1.00', 'empty 0.50->1.00', 'eu_discount 0.50->1.00', 'float_cents 0.50->1.00', 'half_up_line 0.50->1.00', 'lowercase_region 0.50->1.00', 'multi_line_in 0.50->1.00', 'strings 0.50->1.00', 'tax_after_discount 0.50->1.00', 'unknown_region 0.50->1.00'] pass->fail []
+flips h2-parallel-k1/transfer data-h: fail->pass ['chargebacks 0.50->1.00', 'net_usd 0.50->1.00', 'transactions 0.50->1.00'] pass->fail []
+flips h2-parallel-k1/variant data-e-v: fail->pass [] pass->fail ['net_usd 1.00->0.00', 'transactions 1.00->0.00']
+flips h2-parallel-k1/variant data-m-v: fail->pass ['net_usd 0.00->1.00', 'refunds 0.00->1.00', 'transactions 0.00->1.00'] pass->fail []
+flips h2-parallel-k1/variant ops-e-v: fail->pass ['errors 0.50->1.00', 'top_code 0.50->1.00', 'users 0.50->1.00'] pass->fail []
+flips h2-parallel-k1/variant ops-m-v: fail->pass ['failed 0.50->1.00', 'top_code 0.50->1.00', 'users 0.50->1.00'] pass->fail []
+flips h2-parallel-k1/variant ops-h-v: fail->pass ['billing.error_rate 0.00->1.00', 'billing.p95_ms 0.00->1.00', 'billing.requests 0.00->1.00', 'gateway.error_rate 0.00->1.00', 'gateway.p95_ms 0.00->1.00', 'gateway.requests 0.00->1.00', 'search.error_rate 0.00->1.00', 'search.p95_ms 0.00->1.00', 'search.requests 0.00->1.00'] pass->fail []
+leak: {'harness_literal_hits': 0, 'blocked_escape_attempts': 3, 'grader_path_mentions': 0, 'improver_sessions_audited': 43, 'harnesses_audited': 9}

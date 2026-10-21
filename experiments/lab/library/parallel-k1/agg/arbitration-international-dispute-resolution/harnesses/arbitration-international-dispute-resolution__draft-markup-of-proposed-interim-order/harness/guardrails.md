@@ -1,0 +1,1 @@
+- A file that will be filed with, or sent to, a tribunal or counterparty carries no internal, privileged or strategy-memo content and no comment that must be deleted before it goes out. Put such points in the final message.

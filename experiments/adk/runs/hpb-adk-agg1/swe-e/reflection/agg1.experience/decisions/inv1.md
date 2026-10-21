@@ -1,0 +1,11 @@
+The only trajectory is base1, and it never fixed the bug. Four moments drove the changes:
+
+1. **Tests run the wrong way.** base1 ran `python3 tests/test_durations.py` directly. That bypassed `tests/conftest.py`, which puts `src/` on `sys.path` under pytest, so the run failed with `ModuleNotFoundError`. The agent then read this as a code problem. I added `scripts/run_tests.py`, which runs pytest from the workspace root with a unittest fallback, and a rule in `systemprompt.md` to use it. I ran the script against `source/` and it passed 1 test.
+2. **Tests overwritten.** base1 used `write_file` four times on `tests/test_durations.py`, reducing it to a single import line (the deliverable shows `from src.durations import parse_duration`). It had never read the file. `systemprompt.md` now says to read all of `tests/` and `conftest.py` first, never overwrite existing tests, and make the smallest edit to the source file only. `tool_guidance.md` repeats the `write_file` restriction.
+3. **Pointless rewrite and unfixed bug.** base1 re-wrote `src/durations.py` with identical content (the regex still `([hm])`, so `45s` still returned 0). It also added `src/__init__.py` and looped on the same ImportError five times. I added:
+   - a step to check every docstring requirement with ad-hoc snippets (h, m, s, case, whitespace, order, duplicates, empty input, invalid input);
+   - a rule not to write unchanged content;
+   - a bounded stop: after the same error twice, change how the command is invoked once, then move on.
+4. **No deliverable.** The task asked for `output/durations.py`, and base1 ended with no `output/` file. `systemprompt.md` now requires `mkdir -p output && cp`, then a `diff` and an import check of the copy, and says never to end a turn without the output file.
+
+I added no skill or plugin. The workflow applies to every run, so a short rule in `systemprompt.md` fits better than an on-demand skill. One failure run is not enough evidence for a blocking hook. I added no task-specific facts about `durations.py`, since that is subject matter. The one general fact (conftest sets `sys.path`) is in `systemprompt.md`.

@@ -1,0 +1,5 @@
+- Do not guess numbers. Every reported count must come from running code over the full input.
+- Log events are only lines that begin with a timestamp. Indented lines (stack traces) belong to the previous event and must not be counted, even when they contain "ERROR" or "user=".
+- Match the level exactly as the field after the timestamp; "retrying after ERROR" inside an INFO message is not an ERROR event.
+- Time windows are in the zone the task states (usually UTC): convert each line's own offset (Z, +01:00, +05:30, -07:00 ...) to that zone before comparing; start inclusive, end exclusive.
+- Write deliverables to output/ exactly in the requested schema (integers as integers, strings as strings).

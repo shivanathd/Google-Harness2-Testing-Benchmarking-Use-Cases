@@ -1,0 +1,126 @@
+{
+  "task_id": "arbitration-international-dispute-resolution/identify-arbitration-agreement-issues",
+  "domain": "arbitration-international-dispute-resolution",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "lab-cc-agg1/arbitration-international-dispute-resolution/identify-arbitration-agreement-issues/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/lab/exec/lab-cc-agg1/arbitration-international-dispute-resolution/identify-arbitration-agreement-issues/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "arbitration-international-dispute-resolution/identify-arbitration-agreement-issues",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.03484219,
+          "cached": false,
+          "notes": "Evidence: one rollout (base1), no candidates to compare. I read the task, the base harness, all 5 source files as the run extracted them, the full trajectory, and the produced memo text.\n\nWhat the run did well (left alone): it read all five sources in full, built the memo outside `output/` and wrote the exact filename, read the file back, and flagged its own loose statements before finishing. It also said what it did not check (layout, legal authorities).\n\nCHANGE 1, always-on `systemprompt.md`: the \"verify each produced file ... re-opens cleanly\" sentence is replaced by a trigger line that loads the new `deliverable-check` skill before finishing. The \"Python or pandoc\" wording matches what the run actually did.\n- Moment: the final message says the memo \"rates 22 issues ... 4 Critical, 5 High, 7 Medium, and 3 Low\". Those breakdown figures add to 19, and the memo's issue table has 19 rows (C-1 to C-4, H-1 to H-5, M-1 to M-7, L-1 to L-3). The count was written from memory, not taken from the saved file.\n- Moment: the run's readback was `head -60` and `tail -8` plus a word count, so the middle of the memo, including the issue table, was never reopened in full before the summary was written.\n\nCHANGE 2, new `skills/deliverable-check/SKILL.md`: a short on-demand checklist. It covers exact filenames, a full readback, reconciling stated totals against the counts in the file (with a grep that I tested on the produced memo; it returns 4/5/7/3 = 19), spot-checking cited section numbers against the source, and sourcing the final message's numbers from the saved file. The skill directory name matches its trigger line verbatim. It has no helper scripts and no braces. Nothing in it blocks a valid finish.\n\nConsidered and not changed:\n- Stop hook (`hooks.json`) to block finishing without the memo: the run did produce the deliverable, so there is no repeated early-exit evidence.\n- Reading the `.eml` raw in quoted-printable form: the run read it correctly and the names and dates came through, so no evidence of harm.\n- A pandoc or `which pandoc` workspace fact: it cost one discovery call, which is not a failure, and I did not add always-on text for it.\n- A build script or a source-hierarchy skill: one run, with the source conflicts already recorded in the memo's \"Points where I departed from the emails\" and Section 4. The evidence does not show a repeated failure there.\n- Legal substance (for example, whether the Singapore appeal point or the UCC \u00a72-725 analysis is right) is out of scope for this dimension and was not assessed.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.25201197000000003,
+          "cached": false,
+          "notes": "KEEP_BASE for everything except the two changes below. Basis: one rollout (base1). It has no divergence to compare against, so both changes rest on omissions visible in that single run and are not confirmed across runs.\n\n**Change 1: `systemprompt.md`, new trigger line in \"Doing the work\"**\nAdds one line naming the new skill `arbitration-clause-issues-review`, so the skill exists and loads only for arbitration-clause review tasks. Trajectory moment: the deliverable's bottom line (`output__arbitration-issues-memo.docx.txt`, l.13) says \"three governing laws,\" yet the run wrote the memo without a per-instrument breakdown. The body analyses only New York law (SA \u00a714.4/\u00a715.11, M-1). The IPLA's English law (\u00a79.2) and the QA Letter's Singapore law (\u00a77.3) are never discussed, and the memo has no check that the summary's counts are backed by the body.\n\n**Change 2: new `skills/arbitration-clause-issues-review/SKILL.md`**\nPractitioner-only content, with no matter facts. Sections:\n- \u00a71: the layers to keep separate (arbitration agreement, merits law, law of the arbitration agreement, seat's curial law, rules, tribunal authority, timetable, enforcement).\n- \u00a72: per-instrument anatomy, including exhibits, schedules and annexes as part of the instrument.\n- \u00a73: cross-instrument reconciliation, and a source-claim accuracy check.\n- \u00a74: enforcement posture, including the FAA Chapter 2 route, marked \"confirm against statute text.\"\n- \u00a75: quote-before-change rule and severity definitions.\n- \u00a76: coverage, questions, full-text claim, count, and [Verify] checks.\n\nTrajectory moments behind each section:\n- **Governing law and seat coverage (\u00a71, \u00a76 Coverage):** see Change 1. The skill requires every instrument's seat and governing law to be named in the body with its section.\n- **Client questions unanswered (\u00a74, \u00a76 Questions):** the emails (rollout ~l.45\u2013411, Priorities 1 and 4, and David Heller's request on \"U.S. enforcement wrinkles\" of a Singapore seat) asked for U.S. enforcement analysis and a seat view. The memo has no FAA/New York Convention route, no U.S. enforcement-court analysis, and no answer on the Singapore seat as such. A grep of the deliverable finds none of these.\n- **Counts in the final message (\u00a76 Counts):** the final message (rollout l.1755) says \"22 issues \u2026 4 Critical, 5 High, 7 Medium, and 3 Low.\" The memo table has 19 rows (C-1\u20134, H-1\u20135, M-1\u20137, L-1\u20133). The summary does not match the artifact.\n- **Overclaimed coverage (\u00a72 exhibits, \u00a76 Full-text claim):** the run states \"I have the full text of all five documents\" (rollout l.1649). The SA observation ends at the Exhibit A table header (rollout ~l.499\u2013503), so Exhibits B\u2013D and Schedule 1 never appear in the trajectory. The memo's C-3 quote of SA Exhibit B (\"to be attached as a separate annex\") is accurate, since I found it at line 537 of the source docx. The defect is the claimed coverage, not the content.\n- **Unverifiable clause edit (\u00a75 quote-before-change):** L-2 recommends \"remove \u00a715.9's exception for them,\" but SA \u00a715.9 (rollout ~l.849\u2013850) contains no exception.\n\n**Considered and not changed**\n- Reading-procedure fix for the clipped SA observation (offset/limit or re-reads). That is procedure, owned by the parallel candidate, so I left it alone.\n- No further always-on prose. Guardrails and LongTermMEMORY stay empty, because the single run shows no universal rule beyond the trigger.\n- No matter facts stored in the harness.\n- The memo's other citations spot-checked as accurate and needing no change: QA \u00a7\u00a71.2, 1.5, 2.1, 2.3, 4.4, 5.1, 5.4, 5.5, 6.1, 6.5, 6.6, 7.1, 7.2, 8.1; IPLA \u00a7\u00a72.2(b), 5.4, 6.4, 8.2(c), 8.3, 9.1, 9.3, 9.4, 10.3; SA \u00a7\u00a74.2, 5.2, 7.3, 9.3(c), 11.2, 14.6, 14.11, 15.8, 15.11; HG Memo \u00a7\u00a7II.C, III.A, III.B, III.D, IV.\n- The FAA Chapter 2 citation (9 U.S.C. \u00a7\u00a7 201\u2013208) is from general knowledge, not from the matter record. The skill marks it \"confirm against statute text.\"\n- The library's `procedural-order-redline` skill was used only as a form reference; nothing was copied.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.17009262,
+          "cached": false,
+          "notes": "kept|revised|dropped -> systemprompt.md: replaced the \"verify each file re-opens\" sentence with a trigger line for `deliverable-check` (inv1 wording, \"Python or pandoc\") -> inv1 rollout l.1675-1676 loaded the skill before finishing, and its count and cross-check steps ran (l.1679, l.1863). Base1 final message says \"22 issues ... 4 Critical, 5 High, 7 Medium, and 3 Low\" (l.1755), but the memo has 19 rows (C-1..4, H-1..5, M-1..7, L-1..3). That is 1/1 in base, so weak alone. Both candidates' memos reconcile (inv1 20 = 3+6+7+4; dom1 20 = 3+6+5+6). Kept because the trigger is the only way the skill loads.\n\nkept -> skills/deliverable-check/SKILL.md (inv1, five steps: names, full readback, counts, cross-references, final-message sourcing) -> inv1 l.1863-1864: the cross-reference step found three real errors in its own draft (a wrong section label, a misquoted Heller line, an unsourced distance figure) and corrected them before finishing. Its readback at l.1679 is a full-text check, not head/tail.\n\nrevised -> deliverable-check step 3 (added: a summary row grouping a range such as \"M-1 to M-7\" counts each ID in it) -> inv1 produced.md l.64 uses \"M-1 to M-7\" and \"L-1 to L-4\" rows, which a plain ID grep would undercount.\n\nrevised -> deliverable-check step 4 (added: check the memo's own pointers, \"see Section N, row X\", and re-check quotations of people against the text they quote) -> dom1 l.1759-1760: two Section 8 cross-references pointed at the wrong rows in Section 9; dom1 l.1716: a paraphrase of Park's email was presented as a quotation, and a pronoun-less honorific was used. 1/1 for each.\n\nkept -> systemprompt.md trigger line for `arbitration-clause-issues-review` -> dom1 loaded the skill at its first action (l.1). Its memo has a Questions table answering the client's priorities (dom1 produced.md l.303-311, including Priority 1 U.S. enforcement and Priority 4 seat acceptability from the emails, Matsuda ~l.290-357). Base has no answer to either question, and inv1 has no NY Convention or FAA route (grep of produced.md). Base and inv1 each show this 1/1.\n\nkept -> skills/arbitration-clause-issues-review/SKILL.md \u00a71-\u00a74 (layers kept separate; per-instrument anatomy including exhibits; cross-instrument reconciliation table; enforcement posture with FAA Ch. 2 marked \"confirm against statute text\") -> dom1 produced.md \u00a73 anatomy table covers the three governing laws (SA NY, QA Singapore, IPLA England) with sections. Base's body analyses only New York law (M-1), while its bottom line says \"three governing laws.\" Base C-4/H-4 mention the NY Convention only partially; dom1 gives the route. 1/1 each.\n\nkept -> skill \u00a75 quote-before-change rule -> base L-2 recommends \"remove \u00a715.9's exception\" but SA \u00a715.9 (source sa text, l.449-451) has no exception. 1/1 in base. Neither candidate repeats the error.\n\nrevised -> skill \u00a76 Counts bullet replaced with a pointer to the deliverable-check counts step -> both skills load in the same run, so the duplicated check was removed to avoid two sources for one rule.\n\nrevised -> skill \u00a76 Full-text bullet: added that a read which stops before the document ends does not count as full coverage, so re-read by offset or from the saved output first -> base l.1649 \"I have the full text of all five documents\" after the SA read stopped at the Exhibit A table header (l.503 of the observation, no end marker), with Exhibits B-D and Schedule 1 never shown. inv1 stopped at the same point (2/3 rollouts) and wrote \"extracted text is complete\" (inv1 l.1667). dom1 claims to have read the exhibits, but its trajectory also does not show Exhibits B-D. I could not tell whether the renderer clipped these reads. The rule is therefore stated as a coverage-claim rule for the memo, not as a finding that the solver was at fault.\n\nkept with caveat -> skill \u00a73 (show agreement or departure from the client's ranking) and \u00a76 Questions table -> dom1 produced.md \u00a71-\u00a73. These add memo content the assignment does not name (\"severity-rated issues memo with recommendations\"). I judged them substance drawn from the client's own correspondence, not a change to named fields, sections or order. A reviewer should confirm this reading.\n\ndropped -> plugin/hook to block finishing without the memo -> none of the three rollouts failed to deliver; all produced output/arbitration-issues-memo.docx.\n\ndropped -> always-on prose for the matter (guardrails.md, LongTermMEMORY.md stay empty) -> no universal rule or matter fact recurs across the rollouts; both candidates' decisions and the evidence show that all content needed is on-demand.\n\ndropped -> scripts/ helper for the count grep -> the grep is a one-line example inside the skill; no rollout failed for lack of a helper, so no script ships.\n\ndropped -> sub-agent for source cross-checking -> the input is not large relative to the answer, and the cross-check moments above were done inline.\n\nDelivery status: all three rollouts (base1, inv1, dom1) delivered the named file, so no edit is flagged unsafe on the emptiness criterion. Legal substance (Singapore appeal law, CISG, UCC \u00a72-725, FAA route) was not assessed; the skills mark these for confirmation.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "arbitration-international-dispute-resolution/identify-arbitration-agreement-issues",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 3,
+        "expected_P": 3,
+        "usd": 0.456947,
+        "rollout_usd": 0.0,
+        "session_usd": 0.456947,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "arbitration-international-dispute-resolution/identify-arbitration-agreement-issues",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "lab-cc-agg1/arbitration-international-dispute-resolution/identify-arbitration-agreement-issues/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.39709849999999997,
+      "experience": {
+        "cue": "A review deliverable whose final message restates totals (issues by severity, instruments, placeholders) that the deliverable's own summary table also tallies, with the verification step expected to check those totals before finishing.",
+        "lesson": "In the verification component (deliverable-check step 3, and the systemprompt line that sends the agent to it), require each total in the final message to be recomputed by a command over the saved file, counting only the summary-table rows (a range row such as \"M-1 to M-7\" counts each ID it covers), and to be quoted from that output rather than from working memory.",
+        "evidence": "Edit rows \"systemprompt.md, deliverable bullet\" and \"skills/deliverable-check/SKILL.md\" (both confounded). Contrast: base1 stated \"22 issues\" (l.1755) against a 19-row table, reading back with head/tail only. Inv1, agg1 and dom1 each recounted from the saved file, and their final totals match their tables (20, 16, 20). Inv1's first unrestricted grep over-counted (8 M / 5 L), so the restriction to table rows is part of the operation.",
+        "confidence": "low. Every row here rests on one rollout per candidate, and base1's miss could be a one-off. Dom1 reconciled without deliverable-check, so the count contrast is not isolated to one edit. The lesson is narrowed to totals only; the record does not show the readback or source-check steps helping the counts, and the source-check contrast is weaker than it looks because agg1's quotations were accurate without it.",
+        "edits": "component: systemprompt.md, \"Doing the work\" deliverable bullet (base: \"verify each produced file is non-empty and re-opens cleanly\"; candidates: trigger for deliverable-check)\ncandidates: agg1, inv1\nchange: Replaced the base sentence that asks the agent to verify each binary deliverable is non-empty and re-opens cleanly with: build with Python or pandoc, then load `deliverable-check` and run it on each produced file before finishing. The two candidates carry identical wording.\nobserved: inv1 built the memo (l.1668), loaded deliverable-check (l.1676), and ran a full readback with an ID tally from the saved file (l.1679). Its source cross-check (l.1863) corrected three defects in its own draft: a renewal sentence cited to H&G \u00a7II.A (it sits under \u00a7I, which I confirmed), a Heller quotation missing \"initial\" (the email reads \"well north of the initial $178M\"), and an unsourced distance figure. Its final count, 3 Critical / 6 High / 7 Medium / 4 Low = 20, matches its table. A naive grep over all ID occurrences had given 8 M / 5 L, so the count has to be taken from table rows. agg1 loaded the skill after its build (l.1674\u21921681). Its readback found the memo body had no title (l.1691), and it fixed that plus two pointers (l.2087\u20132096). Final 2/8/4/2 = 16 matches its headings. Base1 had no trigger and read back with head/tail only (l.1667, l.1735). It stated \"22 issues \u2026 4 Critical, 5 High, 7 Medium, and 3 Low\" (l.1755) against a 19-row table. Dom1 reconciled its count (20) without this trigger, by recounting the saved file with python-docx (l.1723).\nverdict: confounded\n\ncomponent: systemprompt.md, arbitration trigger bullet (new line: when the assignment is to review arbitration or dispute-resolution provisions across instruments, load `arbitration-clause-issues-review`)\ncandidates: agg1, dom1\nchange: Added one bullet that loads the arbitration skill for this task type. Base and inv1 have no such line.\nobserved: Both runs loaded the skill at their first action (dom1 l.1; agg1 l.1). Both memos contain what base1 and inv1 lack. They give an FAA Chapter 2 / New York Convention route (dom1 deliverable l.287; agg1 l.290). They answer the client's seat and U.S.-enforcement questions explicitly (dom1 l.295; agg1 l.297). They use [Verify] tags 24 and 28 times, against 6 in base1 and 0 in inv1. Base1 does not give the FAA route, and inv1 gives only a conditional seat recommendation (l.246). The trigger's only mechanical effect is loading the skill, so its output effect cannot be separated from the skill's content.\nverdict: confounded\n\ncomponent: skills/deliverable-check/SKILL.md\ncandidates: agg1 (five steps, plus a sentence that a range row such as \"M-1 to M-7\" counts each ID, and a sentence to re-check the memo's own pointers and quotations), inv1 (five steps without those two sentences)\nchange: New on-demand checklist: exact filenames; full readback; totals counted from the readback; cross-references checked against the source; final-message figures taken from the saved file.\nobserved: Same skill, different execution. inv1 ran the step-4 source check and found and fixed the three defects listed under the trigger row (l.1863\u20131864). agg1 ran the pointer part (two fixes, l.2087\u20132096). Its final message says it did not re-check clause numbers against the source (l.2148). Step 4 with its source check is present in both forms, so the gap is not explained by the two sentences that differ. Neither run shows the count step failing once it was run.\nverdict: confounded\n\ncomponent: skills/arbitration-clause-issues-review/SKILL.md (\u00a71 layers, \u00a72 per-instrument anatomy incl. exhibits, \u00a73 cross-instrument table and accuracy check, \u00a74 enforcement posture, \u00a75 quote-before-change, \u00a76 before-finishing checks)\ncandidates: dom1 (\u00a76 counts: \"re-count from the file\"; full-text: exhibits must have been read before claiming coverage), agg1 (\u00a76 counts points to the deliverable-check counts step; full-text adds: a read that stops before the document ends is not coverage, so re-read by offset first)\nchange: New six-section skill for arbitration-clause review. Keeps layers separate, requires each instrument's exhibits to be recorded, asks for a cross-instrument comparison and an accuracy check of third-party statements, requires the FAA route to be marked for statute confirmation, requires quoting before any change, and lists before-finishing checks.\nobserved: Consistent contrast with base1 and inv1, which lack the skill. Both skill runs produce the FAA route, explicit answers to client questions, a cross-instrument comparison, an accuracy table, and [Verify] tags. Neither base1 nor inv1 has a comparison table in the \u00a73 form; I found none by row label. Coverage: both skill memos state that the SA exhibits were read (dom1 deliverable l.23, \"Read in full: \u2026 Exhibits A to D, Schedule 1\"; agg1 l.19\u201321). The logged SA observation ends at source line 503 (the Exhibit A table header) in base1, inv1 and agg1, and base1 and agg1 are both exactly 50,021 bytes, which points to an output cap. No run logs a re-read. But agg1 quotes SA Exhibit B word for word, and base1, inv1 and agg1 all call Exhibit B \"to be attached\", none of which appears in any logged observation. So the logs probably understate what the model saw, and the record cannot show whether the agg1 stop-before-end rule changed anything. The \u00a75 quote-before-change rule: base1's L-2 (\"remove \u00a715.9's exception\"; the SA \u00a715.9 has no exception) does not recur. Neither candidate proposes changing \u00a715.9, so the record does not show the rule producing that.\nverdict: confounded\n\ncomponent: plugin/README.md, scripts/README.md, skills/README.md\ncandidates: agg1, dom1, inv1 (identical in all three; absent from base_harness)\nchange: Added rig documentation. The plugin README says Stop hooks in hooks.json enforce in-loop behaviour. The scripts README describes helpers under scripts/. The skills README describes on-demand loading.\nobserved: No candidate ships a hooks.json, no run fires a Stop hook, and no run reads any of the three READMEs (zero mentions in all four rollouts). dom1 wrote scripts/build_memo.py as an ad hoc build script (l.1713). That was a run-time choice, not an effect of the README.\nverdict: no observed effect"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/lab/exec/lab-cc-agg1/arbitration-international-dispute-resolution/identify-arbitration-agreement-issues/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "90f361ba2651dd1b"
+    }
+  },
+  "errors": []
+}

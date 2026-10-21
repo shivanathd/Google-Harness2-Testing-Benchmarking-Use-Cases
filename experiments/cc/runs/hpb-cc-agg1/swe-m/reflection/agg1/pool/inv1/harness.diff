@@ -1,0 +1,79 @@
+--- current/scripts/run_tests.py
++++ inv1/scripts/run_tests.py
+@@ -0,0 +1,70 @@
++#!/usr/bin/env python3
++"""Run a project's tests: pytest first, plain-Python fallback if pytest cannot collect.
++
++Usage: python3 scripts/run_tests.py [tests_dir=tests]
++Run from the workspace root. Exit 0 = all passed, 1 = a test failed, 2 = nothing could run.
++
++Why: in sandboxed workspaces pytest can die at collection with PermissionError while
++statting a parent directory (not a test failure). The fallback imports each test_*.py and
++calls its test_* functions / Test* class methods directly. Tests that need fixtures
++(function parameters) are reported as SKIP, never as PASS. Do not use `python -I`: it
++hides the user site-packages where pytest lives, so `import pytest` in tests breaks.
++"""
++import importlib.util
++import inspect
++import os
++import subprocess
++import sys
++import traceback
++
++tests_dir = sys.argv[1] if len(sys.argv) > 1 else "tests"
++root = os.getcwd()
++
++try:
++    p = subprocess.run([sys.executable, "-m", "pytest", tests_dir, "-q", "-p", "no:cacheprovider"],
++                       capture_output=True, text=True, timeout=300)
++    out = p.stdout + p.stderr
++    if p.returncode in (0, 1) and "PermissionError" not in out and "Interrupted" not in out:
++        print(out)
++        sys.exit(p.returncode)
++    print("pytest unusable (exit %d); falling back to direct execution. Last lines:" % p.returncode)
++    print("\n".join(out.splitlines()[-5:]))
++except (subprocess.TimeoutExpired, OSError) as e:
++    print("pytest not runnable (%s); falling back to direct execution" % e)
++
++sys.path[:0] = [root, os.path.abspath(tests_dir)]
++passed = failed = skipped = 0
++files = sorted(f for f in os.listdir(tests_dir) if f.startswith("test_") and f.endswith(".py"))
++if not files:
++    print("no test files found in", tests_dir)
++    sys.exit(2)
++for fname in files:
++    try:
++        spec = importlib.util.spec_from_file_location(fname[:-3], os.path.join(tests_dir, fname))
++        mod = importlib.util.module_from_spec(spec)
++        spec.loader.exec_module(mod)
++    except Exception:
++        failed += 1
++        print("FAIL (import)", fname)
++        traceback.print_exc()
++        continue
++    cases = [(n, f) for n, f in vars(mod).items() if n.startswith("test_") and inspect.isfunction(f)]
++    for cn, cls in vars(mod).items():
++        if cn.startswith("Test") and inspect.isclass(cls):
++            inst = cls()
++            cases += [(cn + "." + n, getattr(inst, n)) for n in dir(inst) if n.startswith("test_")]
++    for name, fn in cases:
++        if inspect.signature(fn).parameters:
++            skipped += 1
++            print("SKIP (needs fixtures)", fname, name)
++            continue
++        try:
++            fn()
++            passed += 1
++            print("PASS", fname, name)
++        except Exception:
++            failed += 1
++            print("FAIL", fname, name)
++            traceback.print_exc()
++print("%d passed, %d failed, %d skipped (direct execution)" % (passed, failed, skipped))
++sys.exit(1 if failed else (2 if passed == 0 else 0))
+--- current/tool_descriptions/tool_guidance.md
++++ inv1/tool_descriptions/tool_guidance.md
+@@ -0,0 +1,3 @@
++- Run the project's tests with `python3 scripts/run_tests.py` from the workspace root. It tries pytest, and if pytest dies at collection with a PermissionError (a sandbox restriction on parent directories, not a test failure) it runs the test functions directly. Run it once before editing code for a baseline, and again after the final edit. Report in CHANGES.md which runner actually ran and any SKIPs.
++- Do not use `python -I` for anything that imports pytest or project code: it hides user site-packages. If a command fails with PermissionError or ModuleNotFoundError, change the invocation once; if it still fails, use the fallback and state that plainly rather than retrying variants.
++- Before finishing, reread `output/CHANGES.md` and confirm it matches the final code (names, behaviours, test results).

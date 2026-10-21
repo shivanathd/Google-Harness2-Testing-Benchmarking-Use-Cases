@@ -1,0 +1,1 @@
+Finance needs the September 2026 net revenue figure. Follow POLICY.md in the workspace exactly. Write output/answer.json as {"net_usd": <number, 2 decimals>, "transactions": <charges recognised as September revenue, counted even if later charged back>, "chargebacks": <chargebacks booked in September>}.

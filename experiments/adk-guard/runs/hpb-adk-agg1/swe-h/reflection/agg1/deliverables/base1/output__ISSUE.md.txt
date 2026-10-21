@@ -1,0 +1,13 @@
+# Inventory CLI: three fixes for the next release
+
+1. `stock report` crashes when the stock file does not exist yet or is empty. Treat both
+   as an empty inventory (`store.load` returns `{}`).
+2. `remove` lets quantities go below zero and silently creates unknown SKUs. `ops.remove`
+   must raise ValueError instead and leave the data unchanged. `ops.add` must likewise
+   raise ValueError for a quantity that is not positive. In the CLI, any such error prints
+   `error: <message>` to stderr, returns exit status 1 and leaves the file unchanged.
+3. Feature: `stock report --low N` lists only SKUs with quantity < N, sorted by quantity
+   ascending, then by SKU. The plain `stock report` output (`SKU<TAB>QTY` lines sorted by
+   SKU) must not change -- other tools parse it.
+
+`stock.cli.main(argv)` returns the exit status.

@@ -1,0 +1,9 @@
+- **Change:** I rewrote only the "In this workspace (verified)" paragraph of `systemprompt.md`. The previous attempt was rejected because it recorded this instance's data: the row and unique-id counts, the duplicated transaction ids, the computed result and its counts, the specific month, and an example amount.
+- **What replaced it:** workspace facts stated structurally, with no values.
+  - Duplicate txn_ids appear as identical rows and should be counted once.
+  - Amounts can carry thousands commas.
+  - Currencies are USD, EUR and INR, with usd_per_unit rates that are multiplied.
+  - A zero fx rate on a date outside the requested month does not matter unless a settlement or refund falls on that date.
+- **New instruction:** I added a line telling the agent to sanity-check the helper's counts against a quick independent filter of the raw files before finishing. I wrote this from the existing procedure; I did not re-trace a trajectory moment for it.
+- **Unchanged:** the procedure paragraph, `scripts/net_revenue.py`, `scripts/check_output.py` and `hooks.json`. I grepped the harness for the flagged values and the only match left is the `--month 2026-09` usage example in the `scripts/net_revenue.py` docstring.
+- **Checks:** I found no template braces in the `.md` files. There are no skills, so no trigger line is needed. I did not re-read `context/rollouts/` or `context/deliverables/` in this pass. The edit is limited to removing the flagged data.

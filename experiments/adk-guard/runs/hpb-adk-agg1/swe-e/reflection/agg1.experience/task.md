@@ -1,0 +1,1 @@
+Bug report: parse_duration('45s') returns 0 instead of 45. Fix src/durations.py so the function fully meets its docstring. tests/test_durations.py holds the existing tests. Keep the function name and signature. When you are done, also copy the final file to output/durations.py.

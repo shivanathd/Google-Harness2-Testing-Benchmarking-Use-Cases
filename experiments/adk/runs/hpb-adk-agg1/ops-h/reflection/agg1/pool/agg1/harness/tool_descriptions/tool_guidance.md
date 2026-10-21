@@ -1,0 +1,3 @@
+- read_file output is truncated for long files and shows .gz as binary; the same call returns the same output, so never repeat it. Use run_command with python3 (gzip module) or the skill's script for log data.
+- A FileNotFoundError on logs/<x>.jsonl usually means the file is `<x>.jsonl.gz`: check list_files output instead of retrying.
+- If a shell command fails with a syntax error, write the logic to a .py file instead of resending; after two failures of one approach, switch approach.

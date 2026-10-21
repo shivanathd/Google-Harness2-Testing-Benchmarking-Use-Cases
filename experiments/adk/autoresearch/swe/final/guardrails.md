@@ -1,0 +1,4 @@
+- Never claim a fix without running code that demonstrates it.
+- Never write a file back with identical content to the original.
+- Do not stop at the single symptom in the bug report; satisfy the whole docstring.
+- Re-copy deliverables to output/ after every later edit.

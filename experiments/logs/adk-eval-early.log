@@ -1,0 +1,22 @@
+adk h2-parallel-k1/intask  ops-e    r2 partial=1.00 err=
+adk h2-parallel-k1/variant ops-e-v  r1 partial=1.00 err=
+adk h2-parallel-k1/intask  ops-e    r3 partial=1.00 err=
+adk h2-parallel-k1/intask  ops-e    r1 partial=1.00 err=
+adk h2-parallel-k1/variant ops-e-v  r2 partial=1.00 err=
+adk h2-parallel-k1/intask  data-e   r1 partial=1.00 err=
+adk h2-parallel-k1/intask  data-e   r2 partial=1.00 err=
+adk h2-parallel-k1/variant data-e-v r1 partial=0.00 err=
+adk h2-parallel-k1/intask  data-e   r3 partial=1.00 err=
+adk h2-parallel-k1/variant data-e-v r2 partial=0.00 err=
+adk h2-parallel-k1/transfer data-m   r1 partial=0.00 err=
+adk h2-parallel-k1/transfer data-m   r2 partial=0.00 err=
+adk h2-parallel-k1/transfer data-m   r3 partial=0.00 err=
+adk h2-parallel-k1/transfer ops-m    r1 partial=0.33 err=
+adk h2-parallel-k1/transfer ops-m    r2 partial=0.00 err=
+adk h2-parallel-k1/transfer ops-m    r3 partial=0.00 err=
+adk h2-parallel-k1/transfer data-h   r1 partial=0.00 err=LlmCallsLimitExceededError: Max number of llm call
+adk h2-parallel-k1/transfer data-h   r2 partial=0.00 err=LlmCallsLimitExceededError: Max number of llm call
+adk h2-parallel-k1/transfer ops-h    r1 partial=0.00 err=
+adk h2-parallel-k1/transfer ops-h    r3 partial=0.00 err=
+adk h2-parallel-k1/transfer data-h   r3 partial=0.00 err=
+adk h2-parallel-k1/transfer ops-h    r2 partial=0.00 err=LlmCallsLimitExceededError: Max number of llm call

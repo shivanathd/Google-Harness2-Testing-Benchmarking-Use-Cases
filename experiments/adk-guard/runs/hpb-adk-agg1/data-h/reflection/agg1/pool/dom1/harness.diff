@@ -1,0 +1,260 @@
+--- current/hooks.json
++++ dom1/hooks.json
+@@ -1 +0,0 @@
+-{"hooks": {"Stop": [{"hooks": [{"type": "command", "command": "python3 scripts/check_output.py"}]}]}}
+--- current/scripts/check_output.py
++++ dom1/scripts/check_output.py
+@@ -1,16 +0,0 @@
+-#!/usr/bin/env python3
+-"""Stop-hook check: exit 2 (stderr to agent) if output/answer.json is missing or malformed."""
+-import json, sys
+-try:
+-    d = json.load(open("output/answer.json"))
+-    assert isinstance(d, dict), "top level must be an object"
+-    assert isinstance(d["net_usd"], (int, float)) and not isinstance(d["net_usd"], bool)
+-    assert round(d["net_usd"], 2) == d["net_usd"], "net_usd must have at most 2 decimals"
+-    for k in ("transactions", "chargebacks"):
+-        assert isinstance(d[k], int) and not isinstance(d[k], bool), k + " must be an integer"
+-except Exception as e:
+-    print("output/answer.json is missing or invalid (%s: %s). It must be plain JSON with no backslash-escaped "
+-          'quotes: {"net_usd": <2dp number>, "transactions": <int>, "chargebacks": <int>}. Compute the values '
+-          "from the source files (`python3 scripts/net_revenue.py --month YYYY-MM` writes it), "
+-          "never a placeholder." % (type(e).__name__, e), file=sys.stderr)
+-    sys.exit(2)
+--- current/scripts/net_revenue.py
++++ dom1/scripts/net_revenue.py
+@@ -1,123 +0,0 @@
+-#!/usr/bin/env python3
+-"""Net revenue in USD for one UTC month: captured charges minus chargebacks and fees.
+-
+-Usage: python3 scripts/net_revenue.py --month YYYY-MM [--charges charges.csv]
+-           [--chargebacks chargebacks.csv] [--customers customers.csv] [--fx fx.csv]
+-           [--fee 15.00] [--out output/answer.json] [--dry]
+-
+-Standard library only. Rules (POLICY.md of this task family -- re-read the policy and
+-change flags if it differs): status 'captured' only; month decided on the timestamp
+-converted to UTC; amount_minor / 10**exponent (JPY 0, others 2); fx = usd_per_unit
+-multiply; customers with is_test true are dropped from charges AND chargebacks; a
+-chargeback reverses the full original charge plus a flat fee, both booked in the UTC
+-month of chargeback_at; "transactions" counts captured charges of the month even if
+-charged back later. Rounds once at the end. Writes {"net_usd","transactions","chargebacks"}.
+-Exits 1 on an unparseable value, unknown currency/charge id; diagnostics go to stderr.
+-"""
+-import argparse, csv, json, os, sys
+-from datetime import datetime, timezone
+-from decimal import Decimal, ROUND_HALF_UP
+-
+-EXP = {"JPY": 0, "KRW": 0, "VND": 0, "BHD": 3, "KWD": 3}  # default exponent is 2
+-
+-
+-def rows(path):
+-    with open(path, newline="", encoding="utf-8-sig") as f:
+-        return [{k.strip(): (v or "").strip() for k, v in r.items()} for r in csv.DictReader(f)]
+-
+-
+-def utc(s):
+-    t = s.strip().replace("Z", "+00:00")
+-    try:
+-        d = datetime.fromisoformat(t)
+-    except ValueError:
+-        sys.exit("unparseable timestamp %r" % s)
+-    if d.tzinfo is None:
+-        sys.exit("timestamp without offset %r (decide deliberately, then edit)" % s)
+-    return d.astimezone(timezone.utc)
+-
+-
+-def main():
+-    a = argparse.ArgumentParser()
+-    a.add_argument("--month", required=True)
+-    a.add_argument("--charges", default="charges.csv")
+-    a.add_argument("--chargebacks", default="chargebacks.csv")
+-    a.add_argument("--customers", default="customers.csv")
+-    a.add_argument("--fx", default="fx.csv")
+-    a.add_argument("--fee", default="15.00")
+-    a.add_argument("--status", default="captured")
+-    a.add_argument("--out", default="output/answer.json")
+-    a.add_argument("--dry", action="store_true")
+-    o = a.parse_args()
+-    y, m = map(int, o.month.split("-"))
+-    inm = lambda d: (d.year, d.month) == (y, m)
+-    fee = Decimal(o.fee)
+-
+-    fx = {r["currency"].upper(): Decimal(r["usd_per_unit"]) for r in rows(o.fx)}
+-    test = {r["customer_id"] for r in rows(o.customers) if r["is_test"].lower() == "true"}
+-
+-    def usd(c, minor):
+-        if c.upper() not in fx:
+-            sys.exit("currency %r not in fx table" % c)
+-        return Decimal(minor) / (Decimal(10) ** EXP.get(c.upper(), 2)) * fx[c.upper()]
+-
+-    ch, dupc = {}, 0
+-    for r in rows(o.charges):
+-        if r["charge_id"] in ch:
+-            dupc += 1
+-            continue
+-        ch[r["charge_id"]] = r
+-    rev, n, bycur, skipped_test, edge = Decimal(0), 0, {}, [], []
+-    for cid, r in ch.items():
+-        d = utc(r["captured_at"])
+-        if r["status"].lower() != o.status.lower():
+-            continue
+-        if r["customer_id"] in test:
+-            if inm(d):
+-                skipped_test.append(cid)
+-            continue
+-        if r["captured_at"][:7] != d.strftime("%Y-%m") and (inm(d) or r["captured_at"][:7] == o.month):
+-            edge.append("%s %s->UTC %s" % (cid, r["captured_at"], d.strftime("%Y-%m-%d %H:%M")))
+-        if not inm(d):
+-            continue
+-        v = usd(r["currency"], r["amount_minor"])
+-        rev += v
+-        n += 1
+-        bycur[r["currency"]] = bycur.get(r["currency"], Decimal(0)) + v
+-
+-    cbs, nc, cb_usd, cb_test, cb_bad, seen = Decimal(0), 0, Decimal(0), [], [], set()
+-    for r in rows(o.chargebacks):
+-        if r["chargeback_id"] in seen:
+-            continue
+-        seen.add(r["chargeback_id"])
+-        d = utc(r["chargeback_at"])
+-        if not inm(d):
+-            continue
+-        c = ch.get(r["charge_id"])
+-        if c is None:
+-            sys.exit("chargeback %s refers to unknown charge %s" % (r["chargeback_id"], r["charge_id"]))
+-        if c["customer_id"] in test:
+-            cb_test.append(r["chargeback_id"])
+-            continue
+-        if c["status"].lower() != o.status.lower():
+-            cb_bad.append(r["chargeback_id"])
+-        cb_usd += usd(c["currency"], c["amount_minor"]) + fee
+-        nc += 1
+-
+-    net = (rev - cb_usd).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+-    q = lambda v: v.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+-    print("charges=%d dup_rows=%d | revenue_txns=%d revenue_usd=%s by_cur=%s | test_charges_dropped=%s | "
+-          "utc_month_shifted=%s | chargebacks_applied=%d reversal_plus_fees_usd=%s test_chargebacks_dropped=%s "
+-          "chargebacks_on_non_%s_charge=%s | net_usd=%s"
+-          % (len(ch), dupc, n, q(rev), {k: str(q(v)) for k, v in bycur.items()}, skipped_test or "none",
+-             edge or "none", nc, q(cb_usd), cb_test or "none", o.status, cb_bad or "none", net), file=sys.stderr)
+-    ans = {"net_usd": float(net), "transactions": n, "chargebacks": nc}
+-    if not o.dry:
+-        os.makedirs(os.path.dirname(o.out) or ".", exist_ok=True)
+-        with open(o.out, "w") as f:
+-            json.dump(ans, f)
+-    print(json.dumps(ans))
+-
+-
+-if __name__ == "__main__":
+-    main()
+--- current/skills/revenue-reconcile/SKILL.md
++++ dom1/skills/revenue-reconcile/SKILL.md
+@@ -0,0 +1,25 @@
++---
++name: revenue-reconcile
++description: Monthly net revenue from payment-processor charges, chargebacks/refunds, fx rates and a customer test-flag file, following a written recognition policy. Use for any "net revenue for month X" reconciliation.
++---
++# Net revenue reconciliation (practitioner checklist)
++
++Analytic move: RECONCILE charges.csv against chargebacks.csv, customers.csv and fx.csv under POLICY.md, then CALCULATE one month's net USD. POLICY.md in the workspace is the controlling source; if it differs from this list, POLICY.md wins.
++
++## Run it
++`python3 skills/revenue-reconcile/scripts/recognise.py --month YYYY-MM [--fee AMOUNT from POLICY.md]` (files read from the workspace root, writes output/answer.json with keys net_usd, transactions, chargebacks; use `--cb-key refunds` etc. if the task names the count differently). Read the stderr row-by-row classification and check it against the rules below. If you cannot run code, apply the rules by hand row by row and do the arithmetic carefully.
++
++## Rules to hold (and check each row against)
++1. Month is decided on the UTC instant: convert every timestamp with its offset (e.g. +05:30, -05:00) to UTC BEFORE taking the month. Rows near a month edge flip month (a +05:30 local time on the 1st before 05:30 is the previous UTC month; a -05:00 evening on the last day is the next UTC month). List every boundary row and classify it deliberately.
++2. Only status `captured` is revenue; `authorized` and `voided` never are, whatever their date.
++3. Minor units: divide by 100 for USD/EUR/INR; JPY (zero-decimal) is whole units, no division. Then multiply by usd_per_unit (USD per 1 unit of currency). Sanity-check magnitudes of the largest converted amounts against the others.
++4. Test customers (is_test true) are excluded everywhere: charges AND chargebacks (a chargeback on a test customer's charge is not counted and its fee is not charged). Look up the customer of the ORIGINAL charge. Suspiciously large round-number charges are usually test-account traps: confirm the customer flag.
++5. A chargeback reverses the full original charge amount (converted at the same fx rate) plus the flat USD fee stated in POLICY.md, both booked in the month of chargeback_at (UTC), regardless of when the charge was captured. So a chargeback in month M can reverse a charge recognised in an earlier month, and a charge recognised in M whose chargeback falls in a later month is NOT reversed in M (it still counts in "transactions").
++6. Counts: "transactions" = captured, non-test charges whose UTC captured month is M (not reduced by chargebacks). "chargebacks" = non-test chargebacks whose UTC chargeback_at month is M (each costs the fee).
++7. Round only the final net figure (2 decimals); keep full precision through the sum. Output keys exactly as the task names; net_usd is a plain JSON number, valid JSON (no backslash-escaped quotes).
++8. Never write placeholder/guess numbers; the figure must come from the computation.
++
++## Before finishing, confirm
++- Each of the three counts/figures reconciles to the row list (recognised charges, test exclusions, chargebacks booked, other-month chargebacks listed and excluded).
++- Chargeback rows pointing at missing charge_ids, non-captured charges, or duplicate ids are surfaced, not silently dropped.
++- answer.json parses as JSON and has exactly the requested keys.
+--- current/skills/revenue-reconcile/scripts/recognise.py
++++ dom1/skills/revenue-reconcile/scripts/recognise.py
+@@ -0,0 +1,70 @@
++#!/usr/bin/env python3
++"""Recognised revenue for one month from charges + chargebacks + fx + customers (stdlib only).
++Usage: python3 recognise.py --month 2026-09 [--dir .] [--out output/answer.json]
++Prints diagnostics (every row's classification) to stderr, writes the JSON answer."""
++import argparse, csv, json, os, sys
++from datetime import datetime, timezone
++from decimal import Decimal, ROUND_HALF_UP
++
++ZERO_DEC = {"JPY", "KRW", "VND", "CLP", "ISK", "UGX", "XOF", "XAF"}
++THREE_DEC = {"BHD", "KWD", "OMR", "JOD", "TND"}
++
++def utc(s):
++    s = s.strip().replace("Z", "+00:00")
++    d = datetime.fromisoformat(s)
++    if d.tzinfo is None:
++        sys.exit("naive timestamp, no offset: " + s)
++    return d.astimezone(timezone.utc)
++
++def main():
++    ap = argparse.ArgumentParser()
++    ap.add_argument("--month", required=True)
++    ap.add_argument("--dir", default=".")
++    ap.add_argument("--out", default="output/answer.json")
++    ap.add_argument("--fee", default="15.00")
++    ap.add_argument("--cb-key", default="chargebacks")
++    a = ap.parse_args()
++    rd = lambda f: list(csv.DictReader(open(os.path.join(a.dir, f), newline="")))
++    fx = {r["currency"].strip(): Decimal(r["usd_per_unit"]) for r in rd("fx.csv")}
++    test = {r["customer_id"].strip() for r in rd("customers.csv") if r["is_test"].strip().lower() == "true"}
++    seen, charges = set(), {}
++    for r in rd("charges.csv"):
++        if r["charge_id"] in seen:
++            print("DUPLICATE charge_id", r["charge_id"], file=sys.stderr)
++        seen.add(r["charge_id"]); charges[r["charge_id"]] = r
++
++    def usd(r):
++        c = r["currency"].strip()
++        dec = 0 if c in ZERO_DEC else 3 if c in THREE_DEC else 2
++        return Decimal(r["amount_minor"]) / (Decimal(10) ** dec) * fx[c]
++
++    net, n, k = Decimal(0), 0, 0
++    for cid, r in charges.items():
++        st = r["status"].strip()
++        if st not in ("captured", "authorized", "voided"):
++            print("UNKNOWN STATUS", cid, st, file=sys.stderr)
++        if st != "captured":
++            continue
++        t = utc(r["captured_at"]); m = t.strftime("%Y-%m")
++        tag = "TEST-EXCLUDED" if r["customer_id"] in test else ("RECOGNISED" if m == a.month else "other month")
++        print("%-5s %s %s -> %s UTC  %-13s usd=%s" % (cid, r["currency"], r["captured_at"], t.strftime("%Y-%m-%d %H:%M"), tag, usd(r)), file=sys.stderr)
++        if tag == "RECOGNISED":
++            n += 1; net += usd(r)
++    for cb in rd("chargebacks.csv"):
++        r = charges.get(cb["charge_id"])
++        if r is None:
++            print("ORPHAN chargeback", cb["chargeback_id"], file=sys.stderr); continue
++        t = utc(cb["chargeback_at"]); m = t.strftime("%Y-%m")
++        tag = "TEST-EXCLUDED" if r["customer_id"] in test else ("BOOKED" if m == a.month else "other month")
++        print("%-5s %s chargeback_at=%s %-13s charge=%s status=%s usd=%s" % (cb["chargeback_id"], cb["charge_id"], t.strftime("%Y-%m-%d %H:%M"), tag, r["captured_at"], r["status"], usd(r)), file=sys.stderr)
++        if r["status"].strip() != "captured":
++            print("  WARNING: chargeback on non-captured charge", file=sys.stderr)
++        if tag == "BOOKED":
++            k += 1; net -= usd(r) + Decimal(a.fee)
++    net = net.quantize(Decimal("0.01"), ROUND_HALF_UP)
++    print("net=%s transactions=%d %s=%d" % (net, n, a.cb_key, k), file=sys.stderr)
++    os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
++    with open(a.out, "w") as f:
++        f.write('{"net_usd": %s, "transactions": %d, "%s": %d}\n' % (net, n, a.cb_key, k))
++
++main()
+--- current/systemprompt.md
++++ dom1/systemprompt.md
+@@ -1,5 +1,3 @@
+-You are an assistant that completes tasks inside a workspace directory. Read the task, do the work, and write the requested deliverables under output/. A task is not done until the real file exists: never write a placeholder or example value, and do not end a turn with only a plan -- compute from the source files and write. Start with list_files "." (paths are relative to the workspace root; do not probe "/" or guess directory names), then read the policy and every input file in full. If a command fails, read the error and change something before rerunning.
++You are an assistant that completes tasks inside a workspace directory. Read the task, do the work, and write the requested deliverables under output/.
+ 
+-Revenue reconciliation (charges + chargebacks + customers + fx, rules in POLICY.md): if you can run commands, run `python3 scripts/net_revenue.py --month YYYY-MM` (stdlib only; month from the task; optional --fee, default 15.00). It writes output/answer.json as net_usd, transactions, chargebacks and prints diagnostics on stderr. Check the stderr against the raw files and POLICY.md; if the policy differs from the helper's rules (listed in its docstring), adjust flags or compute by hand.
+-If you cannot run commands, compute by hand, row by row, and write down each included row and its USD value before summing. Apply the policy exactly: convert every timestamp with its offset to UTC before taking the month, drop is_test customers from charges and chargebacks, treat zero-decimal currencies (JPY) as whole units, and let a chargeback reverse a charge made in any month. Count "transactions" before removing charged-back ones. Round once at the end.
+-Write the JSON with plain quotes (no backslash escapes) -- a hand-written `{\"net_usd\"...}` is invalid JSON -- and keep exactly the keys the task names. After writing, reopen output/answer.json and confirm it parses and the values are the computed ones.
++When the task asks for a monthly revenue/net figure from charge, chargeback or refund, fx and customer exports under a POLICY.md, load the `revenue-reconcile` skill. Never write a placeholder number to answer.json: the figure must come from the computation.

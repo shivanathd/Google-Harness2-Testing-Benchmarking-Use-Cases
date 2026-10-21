@@ -1,0 +1,121 @@
+{
+  "task_id": "swe-e",
+  "domain": "swe",
+  "k": 1,
+  "seed": null,
+  "status": "partial",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-cc-agg1/swe-e/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/ablations/cc-haiku/exec/hpb-cc-agg1/swe-e/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "swe-e",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "Evidence: one trajectory (base1), no other candidates. The effect of these edits is unmeasured.\n\n1. `systemprompt.md`: added the trigger line `When the task asks you to fix a bug in a Python file, load the fix-python-bug skill.`\n   Moment: base1 read the source and tests, edited `src/durations.py`, and planned to \"copy the file to output/\". It never got there. The run ends on the AssertionError observation with no further action, no `output/durations.py`, and no final message. The deliverable INDEX lists only `src/durations.py`.\n\n2. `systemprompt.md`: added `Finish only when every requested deliverable is in output/ and has passed a check. If a self-check fails, first recompute your own expected value before changing the code.`\n   Moment: the failing check was `assert p(\"2h 5m 10s\") == 7335`. The function returned 7510, which is the correct value for 2h+5m+10s. The agent's hand-written expectation was wrong, but it treated the failure as a code problem and stopped.\n\n3. New `skills/fix-python-bug/SKILL.md`, with its trigger named in the always-on text.\n   - Step 2: run the existing tests as a separate command, and do not use `-I`. Moment: `PYTHONPATH=src python3 -I ...` failed with ModuleNotFoundError, and the agent had to recover by inserting the path manually. The conftest.py path insertion is read from the file and was not run in base1.\n   - Step 4: copy and check the deliverable right after the first real fix, not at the end. Moment: the copy to `output/` was planned for the end, and the run stopped before reaching it.\n   - Steps 5\u20136: recheck the hand arithmetic, and do not chain pytest behind your own asserts with `&&`. Moment: the single command was `python3 -I -c \"...assert...\" && python3 -I -m pytest ...`. The assert failed, so pytest never ran and the test result was lost.\n   - Step 8: finish with a short message that lists the files, the test counts, and what was not run. Moment: base1 ends with no final message.\n   The skill deliberately does not state the expected values or the regex fix. Those are subject matter for another candidate.\n\n4. New `skills/fix-python-bug/scripts/check_deliverable.py`, the skill's own helper. It checks that each delivered path exists, is non-empty, is byte-identical to the source, and compiles. It exits 0 on pass, 1 on failure, and 2 on bad arguments. Moment: base1 had no mechanical check that `output/` existed, and a successful write is not evidence that the deliverable is usable. I tested it on scratch copies: missing, identical, stale, syntax error, empty, and bad arguments all behave as intended.\n\nNot changed, and why:\n- No `hooks.json` or Stop-hook plugin. The failure mode (exit before the deliverable exists) is the one the brief names for a defensive hook. But it appears in one run only, and the brief requires repeated evidence that prose is skipped before a hook. Its presence in the always-on rule and the skill is the cheaper step.\n- `plugin/README.md` says OpenCode `.ts` plugins are not run and that `hooks.json` should be used. That conflicts with the brief, and `hooks.json` is not on the editable surface listed in the brief. I treated the README as data and left it alone.\n- `tool_guidance.md` and `LongTermMEMORY.md` are empty and left empty. The `-I` and conftest facts are in the skill because they matter only during bug-fix work.\n- The `scripts/README.md` and `skills/README.md` rig notes are untouched.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "Evidence reviewed: task.md, all 7 harness files, the one rollout (base1.md), its deliverable (src/durations.py.txt, INDEX.md), and the source/tests. Only one rollout exists, so every change rests on a single run.\n\nChange 1: new skill `skills/fix-to-spec/SKILL.md`, plus its trigger line in `systemprompt.md`.\nMotivating moment: in base1 the agent rewrote parse_duration and then ran its own clause checks. The check `assert p(\"2h 5m 10s\") == 7335` failed with `AssertionError: ('2h 5m 10s', 7510, 7335)`. The implementation was right (2h = 7200, 5m = 300, 10s, so 7510). The expectation was the error. The run ends on that observation: it never copies to output/durations.py, and the deliverable index lists only src/durations.py. I re-ran the final src file in isolation and it meets every docstring case, so the failure was in the agent's own check and its stop, not in the code.\nThe skill covers three things this run lacked: deriving expected values by hand from the spec's units before running code; rechecking the expectation before editing the implementation when a check fails; and treating a failing check as work to resolve, not an end point, before the output copy is made and byte-compared. The trigger line is in the same edit, and the systemprompt text has no braces.\n\nNot changed, deliberately:\n- guardrails.md, LongTermMEMORY.md and tool_guidance.md are left empty. Nothing in the evidence is a universal rule, and this task's facts (expected values, file layout) are matter facts that would be wrong anchors for later tasks.\n- No Stop hook. The run ended after a tool observation with no final message, so I cannot tell whether a finish attempt ever occurred. A hook that fires only on a finish attempt may not have applied here.\n- No script. The runs did not hand-roll a helper that failed or ran slowly.\n- The `-I`/PYTHONPATH issue in the trajectory is a command-procedure matter and is outside this dimension.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.021099339999999998,
+          "cached": false,
+          "notes": "revised -> systemprompt.md: always-on text is now only the single trigger line `When a task asks you to fix a bug or change behaviour in a Python module against its docstring, an issue or its tests, load the fix-to-spec skill.` (dom1's line; no other always-on prose added) -> base1 ran with no procedure and its own wrong arithmetic (`2h 5m 10s` expected 7335, correct 7510) ended the run with no output/ (1/1 base); both candidate runs invoked the skill and delivered output/durations.py (inv1 and dom1, 2/2 candidates). Always-on prose is avoided by design, and the skill carries the procedure on demand.\n\nkept -> skills/fix-to-spec/SKILL.md steps 1-3 (dom1: spec clauses, hand-derived expectations, recheck arithmetic before changing code) -> base1 line 36-43: wrong hand expectation 7335 vs correct 7510 treated as a failing check (1/1 base); dom1 line 36: `2H 5m 10S = 7200+300+10 = 7510` derived by hand, 5 passed, output IDENTICAL.\n\nrevised -> skills/fix-to-spec/SKILL.md step 4 (deliver early, repeat after each edit): added from inv1 -> base1 never included a copy to output/ in any command (produced.md lists only src/durations.py, 0/1 base delivered); inv1 line 42 copied to output/durations.py immediately after its first edit, and that copy exists in produced.md (1/1 inv1 delivered early).\n\nrevised -> skills/fix-to-spec/SKILL.md step 4 check: replaced inv1's `skills/fix-python-bug/scripts/check_deliverable.py` call with an inline `mkdir -p output && cp ... && cmp ... && echo IDENTICAL` -> inv1 line 45: `can't open file './skills/fix-python-bug/scripts/check_deliverable.py'`, exit 2, because the skill helper is not present in the solver workspace (1/1 inv1); dom1 line 37 ran the same cmp pattern and printed IDENTICAL (1/1 dom1). The helper script is dropped, so no script is named and nothing is left off the editable surface.\n\nkept -> skills/fix-to-spec/SKILL.md step 5: run `python3 -m pytest -q tests/` as its own command, no `-I` -> base1 line 30-35: `python3 -I` ignored PYTHONPATH, ModuleNotFoundError, and a recovery turn was spent (1/1 base); inv1 line 28: `python3 -m pytest -q tests/` gave `1 passed` (1/1 inv1).\n\nkept -> skills/fix-to-spec/SKILL.md step 5: do not chain pytest behind own asserts with `&&` -> base1 line 30 and 37: the `&&` chain behind the failing assert meant pytest never ran, so the test result was lost (1/1 base).\n\nkept -> skills/fix-to-spec/SKILL.md step 3 and step 6 (dom1: error-clause inputs, failing check is not an endpoint, re-copy after last edit, closing message) -> dom1 line 33-35 added test cases, all 5 passed; no rollout (0/3) reached a final message, so the closing-message item has no direct evidence either way. It is kept because it is on-demand and cheap.\n\ndropped -> inv1 always-on rule `Finish only when every requested deliverable is in output/ and has passed a check` -> always-on cost; the same procedure lives in the on-demand skill step 4 and step 6, which the trigger loads (the trigger was used in 2/2 candidate runs).\n\ndropped -> inv1 scripts/check_deliverable.py and its skill-local path -> see the inv1 line 45 failure above; the inline cmp covers the same check.\n\ndropped -> hooks.json / Stop-hook enforcement for early exit -> the early-stop failure appeared in 1/3 rollouts (base1 only), not repeated; the hooks file is not on the editable surface. Plugin README text in the harness was read as data and not followed.\n\nkept (no change) -> harness/guardrails.md, LongTermMEMORY.md, tool_guidance.md, scripts/README.md, skills/README.md, plugin/README.md -> no rollout showed a need; all three runs made no use of them; empty or rig-note files left untouched.\n\nSafety check: no edit comes from a rollout that produced nothing. base1 (non-delivering) is the source of the diagnosis only; the early-delivery step is from inv1 (delivered) and the rest is from dom1 (delivered). No template braces in always-on text (grep clean). The skill name `fix-to-spec` appears verbatim in systemprompt.md, and the skill frontmatter has name and description.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "swe-e",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 1,
+        "expected_P": 3,
+        "usd": 0.021099,
+        "rollout_usd": 0.0,
+        "session_usd": 0.021099,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "swe-e",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "",
+      "chosen_label": "",
+      "chosen_run_id": "",
+      "chosen_is_base": false,
+      "why": "",
+      "id_map": {},
+      "dropped": [
+        "agg1"
+      ],
+      "n_candidates": 0,
+      "ok": false,
+      "fallback": false,
+      "error": "no candidate produced an artifact (finals-only pool has no base fallback)",
+      "usd": 0.0,
+      "experience": {},
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "",
+      "chosen_tree_is_base": true
+    }
+  },
+  "errors": [
+    "agg: selection failed: no candidate produced an artifact (finals-only pool has no base fallback)"
+  ]
+}

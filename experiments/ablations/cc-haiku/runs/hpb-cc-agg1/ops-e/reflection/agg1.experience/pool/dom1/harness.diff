@@ -1,0 +1,156 @@
+--- current/skills/log-window-stats/SKILL.md
++++ dom1/skills/log-window-stats/SKILL.md
+@@ -1,35 +1,35 @@
+ ---
+ name: log-window-stats
+-description: Count events at one log level, distinct users and the most frequent code inside a UTC time window of a service log whose timestamps carry mixed UTC offsets, and deliver the figures as the JSON file the task names. Use for incident or traffic statistics over a log window.
++description: Count ERROR-level events, distinct users and the most frequent error code from a timestamped service log over a UTC time window, and deliver the result as a JSON file. Use for any log-window counting or top-value task.
+ ---
+ 
+ # Log window statistics
+ 
+-## The deliverable
+-- The file the task names under output/ is the deliverable. Figures printed to the console or left in the transcript do not count. The task is not finished until the file exists and parses.
+-- Write exactly the keys the task names, with the JSON types it names (numbers as numbers, strings as strings). Add no extra keys; whatever reads the file keys on exact names.
+-- End with a one-line final message that names the file, its values, and any tie or empty-window case below.
++## What the deliverable is
++- The named file under output/ is the deliverable. Figures printed to the console or computed by a helper are not. The task is incomplete until the file exists, parses as JSON, and holds exactly the keys the task names, with the JSON types the task names (numbers as numbers, strings as strings).
++- Add no extra keys. Whatever reads this file keys on the exact names.
+ 
+-## What is an event
+-- An event is a header line: an ISO-8601 timestamp, then the level token, then the [component]. Match the level exactly as the task states it.
+-- Indented lines (stack traces and continuation text) belong to the header above them and are not events. Any "LEVEL user= code=" text inside them is not the event's user or code; take those from the header.
+-- A level word inside msg= text is not a level field.
++## What counts as an event
++- An event is a header line: an ISO-8601 timestamp, then the level, then the [component]. Match the level token exactly (ERROR) unless the task says otherwise.
++- Indented lines (stack traces, continuation text) belong to the header above them. They are not events, and any "LEVEL user= code=" text inside them does not supply the event's user or code. Take attributes from the header.
+ 
+ ## Time
+-- Every timestamp carries its own UTC offset. Convert each one to UTC before comparing it with the window. Comparing raw strings, or assuming one zone, gives wrong counts.
+-- Apply the bounds as the task states them (for example start inclusive, end exclusive). Re-check the events nearest each bound after conversion.
++- Every timestamp carries its own UTC offset. Convert each one to UTC before comparing it with the window. Comparing raw timestamp strings, or assuming one zone, gives a different count.
++- Apply the window bounds as the task states them (start inclusive, end exclusive, if so stated). Check events sitting exactly on a bound.
+ 
+ ## Statistics
+-- errors: in-window events at the requested level.
+-- users: distinct user values among those same events.
+-- top_code: most frequent code among those same events. If codes tie and the task gives no tie rule, write the alphabetically first tied code and name every tied code in the final message.
+-- No events: errors 0, users 0, top_code an empty string, and the final message says so.
++- errors: number of in-window events at the requested level.
++- users: distinct user values among those same events, each user counted once.
++- top_code: most frequent code among those same events. If two codes tie, the task does not say which to report. Name the tie in the final message rather than picking silently.
+ 
+-## Helper and checks
+-- Helper: `scripts/window_stats.py` in this skill's own directory (the folder holding this SKILL.md; the runtime may place it under `.claude/skills/`). Run it as `python3 -I <skill-dir>/scripts/window_stats.py <log> --start <ISO> --end <ISO> --level <LEVEL>`, with bounds that carry explicit offsets. It prints JSON with count, users, top_code (None on a tie), top_codes, codes, matches, headers, continuation_lines, levels and unparsed. Map each figure to the task's key names yourself.
+-- Before using the figures: `unparsed` is empty; `headers` plus `continuation_lines` equals the non-blank line count `grep -c . <log>`; `levels` contains the task's level.
+-- Consistency: users is at most errors; the per-code counts sum to errors; top_code's count is the maximum among codes of in-window events.
+-- Without the helper, do the same parse in one pass over every line of the file and check the same counts. A hand-read sample is not enough.
++## Consistency checks before finishing
++- users is at most errors. If errors is 0, users is 0 and top_code has no defined value; say so.
++- The per-code counts sum to errors.
++- top_code's count is the maximum, and the code occurs among the in-window events, not just somewhere in the file.
++- Re-check the two events nearest each window bound against the UTC conversion.
+ 
+-## Verify the file
+-- Parse it and confirm the key set and types, for example `python3 -I -c "import json,sys; d=json.load(open(sys.argv[1])); print(d, {k: type(v).__name__ for k, v in d.items()})" output/<file>.json`.
++## Facts observed in this workspace (app.log of this task; re-verify on any new log)
++- 163 lines: 130 header events and 33 indented traceback lines in 11 blocks.
++- Four offset forms appear: Z, +01:00, +05:30, -07:00.
++- In all 11 traceback blocks, the "upstream ERROR user= code=" text names a user and code that differ from the header the block belongs to. Counting users or codes from that text gives the wrong set.
++- A raw-string comparison against the UTC window undercounts ERROR events compared with a UTC-converted comparison.
+--- current/skills/log-window-stats/scripts/window_stats.py
++++ dom1/skills/log-window-stats/scripts/window_stats.py
+@@ -1,86 +0,0 @@
+-"""Count events of one level inside a UTC window of a mixed-offset log.
+-
+-Usage: python3 -I skills/log-window-stats/scripts/window_stats.py <log> --start <ISO> --end <ISO> [--level ERROR]
+---start is inclusive and --end is exclusive. Both need a UTC offset (Z or +hh:mm).
+-Only timestamped header lines are events; indented continuation lines (tracebacks) are not.
+-Prints one JSON object: count, users, top_code (None when tied), top_codes, codes, matches,
+-events_without_user, events_without_code, headers, continuation_lines, levels, unparsed.
+-"""
+-import argparse
+-import json
+-import re
+-from collections import Counter
+-from datetime import datetime, timezone
+-
+-HEADER = re.compile(
+-    r'^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2}))\s+(\w+)\s+\[([^\]]+)\]\s+(.*)$'
+-)
+-
+-
+-def parse_ts(text):
+-    ts = datetime.fromisoformat(text.replace('Z', '+00:00'))
+-    if ts.tzinfo is None:
+-        raise SystemExit(f'timestamp needs a UTC offset: {text}')
+-    return ts.astimezone(timezone.utc)
+-
+-
+-def main():
+-    ap = argparse.ArgumentParser()
+-    ap.add_argument('log')
+-    ap.add_argument('--start', required=True)
+-    ap.add_argument('--end', required=True)
+-    ap.add_argument('--level', default='ERROR')
+-    args = ap.parse_args()
+-    start, end = parse_ts(args.start), parse_ts(args.end)
+-
+-    levels = Counter()
+-    matches = []
+-    headers = continuation = 0
+-    unparsed = []
+-    with open(args.log, encoding='utf-8') as fh:
+-        for n, raw in enumerate(fh, 1):
+-            line = raw.rstrip('\n')
+-            if not line.strip():
+-                continue
+-            if line[0] in ' \t':
+-                continuation += 1
+-                continue
+-            m = HEADER.match(line)
+-            if not m:
+-                unparsed.append({'line': n, 'text': line})
+-                continue
+-            headers += 1
+-            level = m.group(2)
+-            levels[level] += 1
+-            ts = parse_ts(m.group(1))
+-            if level != args.level or not (start <= ts < end):
+-                continue
+-            user = re.search(r'\buser=(\S+)', m.group(4))
+-            code = re.search(r'\bcode=(\S+)', m.group(4))
+-            matches.append([n, ts.isoformat(), user and user.group(1), code and code.group(1)])
+-
+-    codes = Counter(e[3] for e in matches if e[3])
+-    most = codes.most_common()
+-    top_count = most[0][1] if most else 0
+-    top_codes = sorted(code for code, k in codes.items() if k == top_count)
+-    result = {
+-        'window_utc': [start.isoformat(), end.isoformat()],
+-        'level': args.level,
+-        'count': len(matches),
+-        'users': len({e[2] for e in matches if e[2]}),
+-        'top_code': top_codes[0] if len(top_codes) == 1 else None,
+-        'top_codes': top_codes,
+-        'codes': dict(most),
+-        'matches': matches,
+-        'events_without_user': sum(1 for e in matches if not e[2]),
+-        'events_without_code': sum(1 for e in matches if not e[3]),
+-        'headers': headers,
+-        'continuation_lines': continuation,
+-        'levels': dict(levels),
+-        'unparsed': unparsed,
+-    }
+-    print(json.dumps(result, indent=2))
+-
+-
+-if __name__ == '__main__':
+-    main()
+--- current/systemprompt.md
++++ dom1/systemprompt.md
+@@ -1,3 +1,3 @@
+ You are an assistant that completes tasks inside a workspace directory. Read the task, do the work, and write the requested deliverables under output/.
+ 
+-When a task asks for incident or traffic statistics from service logs over a time window (event counts, distinct users, or the most frequent code), load the `log-window-stats` skill.
++When a task asks for counts, distinct users or a most-frequent code from a timestamped service log over a time window, load the `log-window-stats` skill.

@@ -1,0 +1,126 @@
+{
+  "task_id": "swe-e",
+  "domain": "swe",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-adk-agg1/swe-e/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/adk/exec/hpb-adk-agg1/swe-e/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "swe-e",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "The only trajectory is base1, and it never fixed the bug. Four moments drove the changes:\n\n1. **Tests run the wrong way.** base1 ran `python3 tests/test_durations.py` directly. That bypassed `tests/conftest.py`, which puts `src/` on `sys.path` under pytest, so the run failed with `ModuleNotFoundError`. The agent then read this as a code problem. I added `scripts/run_tests.py`, which runs pytest from the workspace root with a unittest fallback, and a rule in `systemprompt.md` to use it. I ran the script against `source/` and it passed 1 test.\n2. **Tests overwritten.** base1 used `write_file` four times on `tests/test_durations.py`, reducing it to a single import line (the deliverable shows `from src.durations import parse_duration`). It had never read the file. `systemprompt.md` now says to read all of `tests/` and `conftest.py` first, never overwrite existing tests, and make the smallest edit to the source file only. `tool_guidance.md` repeats the `write_file` restriction.\n3. **Pointless rewrite and unfixed bug.** base1 re-wrote `src/durations.py` with identical content (the regex still `([hm])`, so `45s` still returned 0). It also added `src/__init__.py` and looped on the same ImportError five times. I added:\n   - a step to check every docstring requirement with ad-hoc snippets (h, m, s, case, whitespace, order, duplicates, empty input, invalid input);\n   - a rule not to write unchanged content;\n   - a bounded stop: after the same error twice, change how the command is invoked once, then move on.\n4. **No deliverable.** The task asked for `output/durations.py`, and base1 ended with no `output/` file. `systemprompt.md` now requires `mkdir -p output && cp`, then a `diff` and an import check of the copy, and says never to end a turn without the output file.\n\nI added no skill or plugin. The workflow applies to every run, so a short rule in `systemprompt.md` fits better than an on-demand skill. One failure run is not enough evidence for a blocking hook. I added no task-specific facts about `durations.py`, since that is subject matter. The one general fact (conftest sets `sys.path`) is in `systemprompt.md`.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "Evidence: one rollout (base1). It failed in these ways:\n- It never fixed `parse_duration`. Its first `write_file` rewrote `src/durations.py` unchanged, with the `[hm]` regex still missing `s`.\n- It ran `python3 tests/test_durations.py` directly. That failed with `ModuleNotFoundError` because `tests/conftest.py` only puts `src/` on `sys.path` under pytest.\n- It treated that error as a bug. It overwrote `tests/test_durations.py` with a one-line import, three times, which destroyed the existing test. It also added `src/__init__.py`.\n- It never wrote `output/durations.py`, which the task requires.\n\nChanges:\n1. New skill `skills/fix-python-bug/SKILL.md`.\n   - It treats the docstring as the controlling spec (\"fully meets its docstring\") and the existing tests as a floor.\n   - It says to run tests with pytest from the workspace root, and explains the direct-run `ModuleNotFoundError` as a harness mistake. This targets the direct-run failure above.\n   - It forbids overwriting or truncating tests and adding `src/__init__.py`. This targets the destroyed test file.\n   - It gives an edge-case matrix for parser functions and recommends `re.fullmatch`. This targets the unfixed bug: the original regex is unanchored and `findall` silently skips garbage.\n   - It records the verified facts for this workspace. The original regex omits `s`, and the docstring clauses are listed. The existing test only covers \"1h30m\". Whether whitespace is allowed between a number and its own unit is not stated, so the skill tells the agent to pick the stricter reading and say so.\n   - It requires copying the final file to the task-named output path and diffing the copy. This targets the missing `output/durations.py`.\n2. `systemprompt.md` gets a trigger line that names the skill, plus a short rule never to overwrite tests and to run `python3 -m pytest tests -q`. The `README` placeholders, `guardrails.md`, `LongTermMEMORY.md` and `tool_guidance.md` are unchanged.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.1262317,
+          "cached": false,
+          "notes": "- kept -> inv1 `systemprompt.md` workflow (read tests and conftest, run tests via script, smallest source-only edit, `cp` plus `diff` to the output path, stop looping on a repeated error) -> base1 had no `output/durations.py`. It overwrote `tests/test_durations.py` four times and wrote an unchanged `src/durations.py`. It looped on ModuleNotFoundError five times and produced nothing usable. inv1 delivered `output/durations.py` with the `s` unit fixed and the tests intact.\n- kept -> inv1 `scripts/run_tests.py` and the `tool_guidance.md` write_file/run_command rules -> base1 ran `python3 tests/test_durations.py` directly, bypassing conftest. It then edited tests and added `src/__init__.py` to \"fix\" the import. In inv1 the script ran the suite cleanly on the first try (1 passed) and no test was touched. The script exists in the harness, so the reference to it is valid.\n- kept -> dom1 skill `fix-python-bug`, with a trigger line added to `systemprompt.md` -> it carries the edge-case matrix (empty, no-unit, garbage, repeated unit, out-of-order, case, whitespace) and the advice to use `re.fullmatch` instead of `findall`. Both rollouts left the `findall` approach in place. That version still accepts \"1h1h\" and \"30m1h\", ignores garbage, and returns 0 for empty input instead of raising ValueError, so neither fully meets the docstring. The skill loads only on demand, so it costs nothing until used.\n- revised -> dom1 skill: replaced the task-specific \"Workspace fact\" line with a general check that the pattern covers every unit or token the docstring names, plus choosing the stricter reading when the spec is ambiguous. The deleted line described this one file. A library entry should not carry facts about a single file.\n- revised -> `systemprompt.md` step 4: it now says \"fully meets its docstring\" means every clause, and that an edge case may be claimed verified only if it was actually run. In the dom1 rollout the final message said invalid inputs \"raise ValueError\" and edge cases were verified. The only commands run were `pytest` and a single `45s` check, and the code cannot raise ValueError. inv1 also stopped at the symptom fix and never ran its stated docstring check.\n- dropped -> dom1 and inv1 as wholesale adoptions: each rollout delivered the output file but fixed only the `s` regex. Both missed the remaining docstring requirements, so the merge adds the verification demand and the skill pointer. Only one rollout exists per candidate. No rollout under a candidate produced nothing. The only non-delivering one was base1, and the edits address its failures.\n- caveat -> merged harness untested: the combined prompt is longer than either candidate, and whether it actually gets the agent to implement the full docstring is unconfirmed.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "swe-e",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 1,
+        "expected_P": 3,
+        "usd": 0.126232,
+        "rollout_usd": 0.0,
+        "session_usd": 0.126232,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "swe-e",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-adk-agg1/swe-e/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.15957,
+      "experience": {
+        "cue": "A harness is edited because the agent stopped at the reported symptom, or fixed only one clause of a multi-clause spec. The edit adds prose demands such as \"enumerate every requirement and verify each\", or an on-demand skill that carries an edge-case checklist.",
+        "lesson": "Do not count on prose in systemprompt.md or in a skill to produce full-spec coverage. Keep the procedural guardrails (run the tests the right way, never overwrite tests, copy to the output path), which are what visibly changed behavior. Put the completeness check somewhere the agent cannot skip it. One option is a scripts/ checker that runs accept and reject probes derived from the docstring and prints failures. Another is a step that requires writing the reject cases into a new test file and showing them failing before the source edit. Also drop wording like \"only claim verified if you ran it\", which was ignored in the record.",
+        "evidence": "Four edit rows: the systemprompt.md workflow, the skill, step 4 and its verified-claim sentence, and the dom1 prompt. Base1 destroyed the tests and delivered nothing. All three candidate rollouts delivered with tests intact. All three also made only the `[hm]` to `[hms]` change, kept the unanchored `findall`, and ran no docstring-clause snippet. The one run that loaded the checklist (dom1) behaved the same as the two that did not. Every one of the three claimed full compliance or verification it had not run.",
+        "confidence": "low. There is one rollout per candidate, and procedural and completeness edits shipped together, so the record cannot separate which edit prevented the base failure. The completeness half is a consistent null across three runs. The remedy of an executable check has not been tried here, so it is a proposal and not a result.",
+        "edits": "component: systemprompt.md (five-step workflow: read tests and conftest, run tests via the script, smallest source-only edit, check every docstring clause, deliver with cp and diff)\ncandidates: agg1 (adopted), inv1 (same workflow, but step 4 is shorter and has no \"only claim verified if you ran it\" sentence and no skill pointer)\nchange: Replaced the one-line base prompt with an ordered bug-fix workflow. It forbids editing tests, says to stop looping on a repeated error, and requires a copy to the task-named output path.\nobserved: Base base1 ran `python3 tests/test_durations.py` directly and hit ModuleNotFoundError. It then overwrote `tests/test_durations.py` four times, added `src/__init__.py`, never fixed the regex, and wrote no `output/durations.py`. agg1 and inv1 ran `python3 scripts/run_tests.py` first (1 passed), touched no tests, fixed `[hm]` to `[hms]`, and delivered `output/durations.py`. The step-4 demand to check every docstring clause changed nothing. agg1 ran no edge-case snippet, left the `findall` code in place, and ended with \"handles all specified cases\". inv1 said it would verify and then never ran a check. Both deliverables still return 0 for empty input and accept \"1h1h\" and garbage. The delivery fix rests on one failing base run and one passing run per candidate, so sampling variance is possible.\nverdict: confounded"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/adk/exec/hpb-adk-agg1/swe-e/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "d48afbe18477b7e5"
+    }
+  },
+  "errors": []
+}

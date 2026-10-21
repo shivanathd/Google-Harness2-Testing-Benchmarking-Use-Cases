@@ -1,0 +1,614 @@
+{
+  "executor": "adk",
+  "task_hash": "8aec868f593e",
+  "n_rows": 105,
+  "infra_voided": 0,
+  "comparisons": {
+    "h2-parallel-k1/intask": {
+      "n_tasks": 9,
+      "mean_delta": 0.647089947089947,
+      "ci95": [
+        0.3907407407407407,
+        0.8776455026455027
+      ],
+      "signflip_p": 0.0078125,
+      "improved": 8,
+      "regressed": 0,
+      "per_task": [
+        {
+          "task": "data-e",
+          "tier": "easy",
+          "treat": 1.0,
+          "base": 0.0,
+          "delta": 1.0,
+          "treat_allpass": "3/3",
+          "base_allpass": "0/4",
+          "treat_sd": 0.0,
+          "base_sd": 0.0,
+          "flips": {
+            "up": [
+              "net_usd 0.00->1.00",
+              "transactions 0.00->1.00"
+            ],
+            "down": []
+          }
+        },
+        {
+          "task": "data-m",
+          "tier": "medium",
+          "treat": 1.0,
+          "base": 0.0,
+          "delta": 1.0,
+          "treat_allpass": "3/3",
+          "base_allpass": "0/4",
+          "treat_sd": 0.0,
+          "base_sd": 0.0,
+          "flips": {
+            "up": [
+              "net_usd 0.00->1.00",
+              "refunds 0.00->1.00",
+              "transactions 0.00->1.00"
+            ],
+            "down": []
+          }
+        },
+        {
+          "task": "data-h",
+          "tier": "hard",
+          "treat": 1.0,
+          "base": 0.08333333333333333,
+          "delta": 0.9166666666666666,
+          "treat_allpass": "3/3",
+          "base_allpass": "0/4",
+          "treat_sd": 0.0,
+          "base_sd": 0.14433756729740643,
+          "flips": {
+            "up": [
+              "chargebacks 0.25->1.00",
+              "net_usd 0.00->1.00",
+              "transactions 0.00->1.00"
+            ],
+            "down": []
+          }
+        },
+        {
+          "task": "ops-e",
+          "tier": "easy",
+          "treat": 1.0,
+          "base": 0.5,
+          "delta": 0.5,
+          "treat_allpass": "3/3",
+          "base_allpass": "0/4",
+          "treat_sd": 0.0,
+          "base_sd": 0.16666666666666666,
+          "flips": {
+            "up": [
+              "errors 0.00->1.00",
+              "users 0.50->1.00"
+            ],
+            "down": []
+          }
+        },
+        {
+          "task": "ops-m",
+          "tier": "medium",
+          "treat": 1.0,
+          "base": 0.16666666666666666,
+          "delta": 0.8333333333333334,
+          "treat_allpass": "3/3",
+          "base_allpass": "0/4",
+          "treat_sd": 0.0,
+          "base_sd": 0.16666666666666666,
+          "flips": {
+            "up": [
+              "failed 0.00->1.00",
+              "top_code 0.50->1.00",
+              "users 0.00->1.00"
+            ],
+            "down": []
+          }
+        },
+        {
+          "task": "ops-h",
+          "tier": "hard",
+          "treat": 1.0,
+          "base": 0.0,
+          "delta": 1.0,
+          "treat_allpass": "3/3",
+          "base_allpass": "0/4",
+          "treat_sd": 0.0,
+          "base_sd": 0.0,
+          "flips": {
+            "up": [
+              "billing.error_rate 0.00->1.00",
+              "billing.p95_ms 0.00->1.00",
+              "billing.requests 0.00->1.00",
+              "gateway.error_rate 0.00->1.00",
+              "gateway.p95_ms 0.00->1.00",
+              "gateway.requests 0.00->1.00",
+              "search.error_rate 0.00->1.00",
+              "search.p95_ms 0.00->1.00",
+              "search.requests 0.00->1.00"
+            ],
+            "down": []
+          }
+        },
+        {
+          "task": "swe-e",
+          "tier": "easy",
+          "treat": 0.2,
+          "base": 0.2,
+          "delta": 0.0,
+          "treat_allpass": "0/3",
+          "base_allpass": "0/4",
+          "treat_sd": 0.0,
+          "base_sd": 0.0,
+          "flips": {
+            "up": [],
+            "down": []
+          }
+        },
+        {
+          "task": "swe-m",
+          "tier": "medium",
+          "treat": 0.13333333333333333,
+          "base": 0.0,
+          "delta": 0.13333333333333333,
+          "treat_allpass": "0/3",
+          "base_allpass": "0/4",
+          "treat_sd": 0.18856180831641267,
+          "base_sd": 0.0,
+          "flips": {
+            "up": [],
+            "down": []
+          }
+        },
+        {
+          "task": "swe-h",
+          "tier": "hard",
+          "treat": 0.6190476190476191,
+          "base": 0.17857142857142855,
+          "delta": 0.4404761904761905,
+          "treat_allpass": "0/3",
+          "base_allpass": "0/4",
+          "treat_sd": 0.12140522651411392,
+          "base_sd": 0.10714285714285714,
+          "flips": {
+            "up": [
+              "add_accumulates 0.50->1.00",
+              "add_nonpositive 0.00->1.00",
+              "add_then_report 0.00->1.00",
+              "load_empty 0.00->1.00",
+              "load_missing 0.00->1.00",
+              "report_format 0.50->1.00",
+              "report_missing_file 0.00->1.00"
+            ],
+            "down": []
+          }
+        }
+      ]
+    },
+    "h2-parallel-k1/transfer": {
+      "n_tasks": 6,
+      "mean_delta": -0.02777777777777778,
+      "ci95": [
+        -0.1111111111111111,
+        0.038690476190476185
+      ],
+      "signflip_p": 0.75,
+      "improved": 1,
+      "regressed": 2,
+      "per_task": [
+        {
+          "task": "data-m",
+          "tier": "medium",
+          "treat": 0.0,
+          "base": 0.0,
+          "delta": 0.0,
+          "treat_allpass": "0/3",
+          "base_allpass": "0/4",
+          "treat_sd": 0.0,
+          "base_sd": 0.0,
+          "flips": {
+            "up": [],
+            "down": []
+          }
+        },
+        {
+          "task": "data-h",
+          "tier": "hard",
+          "treat": 0.0,
+          "base": 0.08333333333333333,
+          "delta": -0.08333333333333333,
+          "treat_allpass": "0/3",
+          "base_allpass": "0/4",
+          "treat_sd": 0.0,
+          "base_sd": 0.14433756729740643,
+          "flips": {
+            "up": [],
+            "down": []
+          }
+        },
+        {
+          "task": "ops-m",
+          "tier": "medium",
+          "treat": 0.0,
+          "base": 0.16666666666666666,
+          "delta": -0.16666666666666666,
+          "treat_allpass": "0/3",
+          "base_allpass": "0/4",
+          "treat_sd": 0.0,
+          "base_sd": 0.16666666666666666,
+          "flips": {
+            "up": [],
+            "down": [
+              "top_code 0.50->0.00"
+            ]
+          }
+        },
+        {
+          "task": "ops-h",
+          "tier": "hard",
+          "treat": 0.0,
+          "base": 0.0,
+          "delta": 0.0,
+          "treat_allpass": "0/3",
+          "base_allpass": "0/4",
+          "treat_sd": 0.0,
+          "base_sd": 0.0,
+          "flips": {
+            "up": [],
+            "down": []
+          }
+        },
+        {
+          "task": "swe-m",
+          "tier": "medium",
+          "treat": 0.0,
+          "base": 0.0,
+          "delta": 0.0,
+          "treat_allpass": "0/3",
+          "base_allpass": "0/4",
+          "treat_sd": 0.0,
+          "base_sd": 0.0,
+          "flips": {
+            "up": [],
+            "down": []
+          }
+        },
+        {
+          "task": "swe-h",
+          "tier": "hard",
+          "treat": 0.26190476190476186,
+          "base": 0.17857142857142855,
+          "delta": 0.08333333333333331,
+          "treat_allpass": "0/3",
+          "base_allpass": "0/4",
+          "treat_sd": 0.03367175148507369,
+          "base_sd": 0.10714285714285714,
+          "flips": {
+            "up": [
+              "add_accumulates 0.50->1.00",
+              "add_nonpositive 0.00->0.67",
+              "report_format 0.50->1.00"
+            ],
+            "down": []
+          }
+        }
+      ]
+    },
+    "h2-parallel-k1/variant": {
+      "n_tasks": 6,
+      "mean_delta": 0.9722222222222222,
+      "ci95": [
+        0.888888888888889,
+        1.0
+      ],
+      "signflip_p": 0.03125,
+      "improved": 6,
+      "regressed": 0,
+      "per_task": [
+        {
+          "task": "data-e-v",
+          "tier": "easy",
+          "treat": 1.0,
+          "base": 0.0,
+          "delta": 1.0,
+          "treat_allpass": "2/2",
+          "base_allpass": "0/2",
+          "treat_sd": 0.0,
+          "base_sd": 0.0,
+          "flips": {
+            "up": [
+              "net_usd 0.00->1.00",
+              "transactions 0.00->1.00"
+            ],
+            "down": []
+          }
+        },
+        {
+          "task": "data-m-v",
+          "tier": "medium",
+          "treat": 1.0,
+          "base": 0.0,
+          "delta": 1.0,
+          "treat_allpass": "2/2",
+          "base_allpass": "0/2",
+          "treat_sd": 0.0,
+          "base_sd": 0.0,
+          "flips": {
+            "up": [
+              "net_usd 0.00->1.00",
+              "refunds 0.00->1.00",
+              "transactions 0.00->1.00"
+            ],
+            "down": []
+          }
+        },
+        {
+          "task": "data-h-v",
+          "tier": "hard",
+          "treat": 1.0,
+          "base": 0.0,
+          "delta": 1.0,
+          "treat_allpass": "2/2",
+          "base_allpass": "0/2",
+          "treat_sd": 0.0,
+          "base_sd": 0.0,
+          "flips": {
+            "up": [
+              "chargebacks 0.00->1.00",
+              "net_usd 0.00->1.00",
+              "transactions 0.00->1.00"
+            ],
+            "down": []
+          }
+        },
+        {
+          "task": "ops-e-v",
+          "tier": "easy",
+          "treat": 1.0,
+          "base": 0.16666666666666666,
+          "delta": 0.8333333333333334,
+          "treat_allpass": "2/2",
+          "base_allpass": "0/2",
+          "treat_sd": 0.0,
+          "base_sd": 0.16666666666666666,
+          "flips": {
+            "up": [
+              "errors 0.00->1.00",
+              "top_code 0.50->1.00",
+              "users 0.00->1.00"
+            ],
+            "down": []
+          }
+        },
+        {
+          "task": "ops-m-v",
+          "tier": "medium",
+          "treat": 1.0,
+          "base": 0.0,
+          "delta": 1.0,
+          "treat_allpass": "2/2",
+          "base_allpass": "0/2",
+          "treat_sd": 0.0,
+          "base_sd": 0.0,
+          "flips": {
+            "up": [
+              "failed 0.00->1.00",
+              "top_code 0.00->1.00",
+              "users 0.00->1.00"
+            ],
+            "down": []
+          }
+        },
+        {
+          "task": "ops-h-v",
+          "tier": "hard",
+          "treat": 1.0,
+          "base": 0.0,
+          "delta": 1.0,
+          "treat_allpass": "2/2",
+          "base_allpass": "0/2",
+          "treat_sd": 0.0,
+          "base_sd": 0.0,
+          "flips": {
+            "up": [
+              "billing.error_rate 0.00->1.00",
+              "billing.p95_ms 0.00->1.00",
+              "billing.requests 0.00->1.00",
+              "gateway.error_rate 0.00->1.00",
+              "gateway.p95_ms 0.00->1.00",
+              "gateway.requests 0.00->1.00",
+              "search.error_rate 0.00->1.00",
+              "search.p95_ms 0.00->1.00",
+              "search.requests 0.00->1.00"
+            ],
+            "down": []
+          }
+        }
+      ]
+    },
+    "h2-parallel-k1/variant (strict)": {
+      "n_tasks": 5,
+      "mean_delta": 0.9666666666666667,
+      "ci95": [
+        0.8666666666666668,
+        1.0
+      ],
+      "signflip_p": 0.0625,
+      "improved": 5,
+      "regressed": 0,
+      "per_task": [
+        {
+          "task": "data-e-v",
+          "tier": "easy",
+          "treat": 1.0,
+          "base": 0.0,
+          "delta": 1.0,
+          "treat_allpass": "2/2",
+          "base_allpass": "0/2",
+          "treat_sd": 0.0,
+          "base_sd": 0.0,
+          "flips": {
+            "up": [
+              "net_usd 0.00->1.00",
+              "transactions 0.00->1.00"
+            ],
+            "down": []
+          }
+        },
+        {
+          "task": "data-m-v",
+          "tier": "medium",
+          "treat": 1.0,
+          "base": 0.0,
+          "delta": 1.0,
+          "treat_allpass": "2/2",
+          "base_allpass": "0/2",
+          "treat_sd": 0.0,
+          "base_sd": 0.0,
+          "flips": {
+            "up": [
+              "net_usd 0.00->1.00",
+              "refunds 0.00->1.00",
+              "transactions 0.00->1.00"
+            ],
+            "down": []
+          }
+        },
+        {
+          "task": "ops-e-v",
+          "tier": "easy",
+          "treat": 1.0,
+          "base": 0.16666666666666666,
+          "delta": 0.8333333333333334,
+          "treat_allpass": "2/2",
+          "base_allpass": "0/2",
+          "treat_sd": 0.0,
+          "base_sd": 0.16666666666666666,
+          "flips": {
+            "up": [
+              "errors 0.00->1.00",
+              "top_code 0.50->1.00",
+              "users 0.00->1.00"
+            ],
+            "down": []
+          }
+        },
+        {
+          "task": "ops-m-v",
+          "tier": "medium",
+          "treat": 1.0,
+          "base": 0.0,
+          "delta": 1.0,
+          "treat_allpass": "2/2",
+          "base_allpass": "0/2",
+          "treat_sd": 0.0,
+          "base_sd": 0.0,
+          "flips": {
+            "up": [
+              "failed 0.00->1.00",
+              "top_code 0.00->1.00",
+              "users 0.00->1.00"
+            ],
+            "down": []
+          }
+        },
+        {
+          "task": "ops-h-v",
+          "tier": "hard",
+          "treat": 1.0,
+          "base": 0.0,
+          "delta": 1.0,
+          "treat_allpass": "2/2",
+          "base_allpass": "0/2",
+          "treat_sd": 0.0,
+          "base_sd": 0.0,
+          "flips": {
+            "up": [
+              "billing.error_rate 0.00->1.00",
+              "billing.p95_ms 0.00->1.00",
+              "billing.requests 0.00->1.00",
+              "gateway.error_rate 0.00->1.00",
+              "gateway.p95_ms 0.00->1.00",
+              "gateway.requests 0.00->1.00",
+              "search.error_rate 0.00->1.00",
+              "search.p95_ms 0.00->1.00",
+              "search.requests 0.00->1.00"
+            ],
+            "down": []
+          }
+        }
+      ]
+    }
+  },
+  "voided_cells": {
+    "h2-parallel-k1/variant|data-h-v": [
+      "15"
+    ]
+  },
+  "base_mean": 0.1253968253968254,
+  "pass_k": {
+    "base": {
+      "1": 0.0,
+      "2": 0.0,
+      "3": 0.0
+    },
+    "h2-parallel-k1/intask": {
+      "1": 0.6666666666666666,
+      "2": 0.6666666666666666,
+      "3": 0.6666666666666666
+    },
+    "h2-parallel-k1/transfer": {
+      "1": 0.0,
+      "2": 0.0,
+      "3": 0.0
+    }
+  },
+  "cost": {
+    "base": {
+      "exec_usd": 0,
+      "tokens_in": 2291362,
+      "tokens_out": 18497,
+      "rollouts": 48,
+      "mean_wall_s": 626.5
+    },
+    "h2-parallel-k1/intask": {
+      "exec_usd": 0,
+      "tokens_in": 799455,
+      "tokens_out": 18375,
+      "rollouts": 27,
+      "mean_wall_s": 176.6
+    },
+    "h2-parallel-k1/transfer": {
+      "exec_usd": 0,
+      "tokens_in": 1672510,
+      "tokens_out": 33764,
+      "rollouts": 18,
+      "mean_wall_s": 527.2
+    },
+    "h2-parallel-k1/variant": {
+      "exec_usd": 0,
+      "tokens_in": 74264,
+      "tokens_out": 2773,
+      "rollouts": 12,
+      "mean_wall_s": 77.6
+    }
+  },
+  "improver": {
+    "sweep-parallel-k1": {
+      "usd": 5.7426,
+      "calls": 50
+    }
+  },
+  "leak_audit": {
+    "harness_literal_hits": [
+      "/Users/me/GoogleHarness2/experiments/adk-guard/runs/hpb-adk-agg1/data-e/harnesses/agg1/scripts/net_revenue.py: literal 234"
+    ],
+    "blocked_escape_attempts": [],
+    "grader_path_mentions": [],
+    "improver_sessions_audited": 80,
+    "harnesses_audited": 9
+  }
+}

@@ -1,0 +1,34 @@
+# Process transactions for September 2026
+import pandas as pd
+
+# Load transactions and fx data
+transactions = pd.read_csv('transactions.csv')
+fx = pd.read_csv('fx.csv')
+
+# Filter transactions for September 2026 with status SETTLED
+transactions_sept = transactions[
+    (transactions['date'].str.contains(r'\bSep\b', case=False)) &
+    (transactions['status'] == 'SETTLED')
+]
+
+# Convert date format for consistency
+transactions_sept['date'] = pd.to_datetime(transactions_sept['date']).dt.strftime('%Y-%m-%d')
+
+# Convert amounts to USD using fx rates
+transactions_sept['amount_usd'] = transactions_sept.apply(
+    lambda row: float(row['amount'].replace(',', '')) * fx.loc[fx['currency'] == row['currency'], 'usd_per_unit'].values[0],
+    axis=1
+)
+
+# Calculate net USD revenue
+net_usd = transactions_sept['amount_usd'].sum()
+transactions_count = len(transactions_sept)
+
+# Output result
+output = {
+    'net_usd': round(net_usd, 2),
+    'transactions': transactions_count
+}
+
+# Write output to answer.json
+pd.DataFrame([output]).to_json('output/answer.json', orient='records')

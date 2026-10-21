@@ -1,0 +1,126 @@
+{
+  "task_id": "data-e",
+  "domain": "data",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "hpb-adk-agg1/data-e/base1",
+      "run_dir": "/Users/me/GoogleHarness2/experiments/adk-guard/exec/hpb-adk-agg1/data-e/base1"
+    }
+  ],
+  "modes": {
+    "agg": {
+      "mode": "agg",
+      "task_id": "data-e",
+      "k": 1,
+      "finals": [
+        "agg1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "I fixed the rejection by removing everything instance-specific from `systemprompt.md`. The edit has not been tested on a full rollout. The only check I ran was that `scripts/net_revenue.py` now errors when `--month` is missing.\n\n- **`systemprompt.md`:**\n  - I deleted the \"Workspace facts\" block, which held the expected result (21 transactions, 18691.64), the duplicate-id count, the sample amounts and the currency list.\n  - In its place is a short method paragraph. It points to `scripts/net_revenue.py --month YYYY-MM`, and says the script handles the messy formats and counts each txn_id once. It tells the agent to check the stderr diagnostics (duplicate and conflict counts, fx direction, output keys) against the raw files, and to fix the parsing rather than rerun an unchanged failing command.\n  - The pandas/`(954.34)` remark is evidence of the failure mode from the one rollout (`base1.md`). The agent's pandas script hit `ModuleNotFoundError`, the pip install timed out, and it then crashed on `float('(954.34)')`. That run ended at the 40-call limit with no `output/answer.json`.\n  - The pandas/`(954.34)` remark names a file value as an example of that failure. If the filter treats that as task data, it can be reduced to \"accounting negatives\".\n- **`scripts/net_revenue.py`:** I removed the hard-coded default month (2026-09) and made `--month` required. The month now comes from the task each time, so the script holds no time window. The script's usage text now reads `YYYY-MM`.\n- **Unchanged:** `scripts/check_output.py`, `hooks.json`, and the other working rules. The Stop hook is a valid completion guard against the missing-deliverable outcome seen in `base1.md`.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 0,
+          "usd": 0.0,
+          "cached": true,
+          "notes": "- **Evidence:** the only rollout, base1, never wrote `output/answer.json`. It filtered September with `str.contains('Sep')`, which misses the ISO-dated rows. It then called `float()` on `(954.34)` and hit the same ValueError about 35 times. It reran the unchanged script until the 40-LLM-call limit. Its only deliverable is a script that, as written, would also write answer.json in a records-list shape.\n- **New skill `skills/payment-revenue-reconcile/SKILL.md`:** it records the quirks I checked in `source/transactions.csv`:\n  - Six txn_ids are repeated: T11007, T11010, T11012, T11014, T11019, T11022.\n  - Dates come in two formats.\n  - Amounts include thousands separators and `(x)` accounting negatives.\n  - Statuses are SETTLED, PENDING and VOID.\n  - The files have CRLF line endings.\n  - FX is multiplied as `usd_per_unit`, with USD, EUR and INR all mapped.\n  \n  It also gives the domain rules and a finish checklist:\n  - Dedupe by txn_id.\n  - Filter by parsed date, not a text match.\n  - Keep SETTLED refunds as negatives.\n  - Round once at the end.\n  - Write answer.json as a plain object, not the pandas records orient base1 used.\n- **New script `skills/payment-revenue-reconcile/scripts/settled_revenue.py`:** stdlib only, because pandas was missing in the run and a pip install timed out. It parses the dates and amounts, dedupes by txn_id, flags conflicting duplicates, converts to USD, prints a per-currency reconciliation and writes the JSON. I ran it on this workspace's source files and it ran cleanly, with no conflicting duplicates and nothing unparseable. I did not copy its numeric result into the harness.\n- **`systemprompt.md`:** added the required trigger line for the skill, plus one short line saying not to rerun an unchanged failing command. The second line is a procedure nudge. I added it because of the repeated-failure loop, and a parallel procedure candidate may supersede it.",
+          "error": ""
+        },
+        {
+          "label": "agg1",
+          "dim": "AGG",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.13447720000000002,
+          "cached": false,
+          "notes": "kept -> INV candidate (`scripts/net_revenue.py` with a required `--month`, the Stop hook `hooks.json` plus `scripts/check_output.py`, and the working-rules paragraph in `systemprompt.md`), adopted wholesale -> base1 never wrote `output/answer.json` (1/1 base rollouts produced nothing). It filtered on `str.contains('Sep')`, then hit `ValueError` on `float('(954.34)')` and reran the unchanged script until the 40-call limit. inv1 delivered `{\"net_usd\": 18691.64, \"transactions\": 21}` in 2 commands. Its script output showed 6 duplicate rows dropped and no conflicting duplicates. I judged the Stop hook worth keeping because the costliest outcome is a missing file. It is a validity check on answer.json, so it doesn't change the deliverable's shape.\nrevised -> `systemprompt.md` wording -> I replaced the literal `\"(954.34)\"` with \"accounting negatives\" so no file value is baked into always-on text. The `(954.34)` crash itself is in base1.\ndropped -> DOM candidate's skill `payment-revenue-reconcile` with its own `settled_revenue.py` -> dom1 also delivered the same 18691.64 / 21 in 2 calls, so it is equal, not better. A second, near-identical parser would duplicate the one I kept and add a skill and trigger line for no measured gain. Its quirk list also names this workspace's specifics (six duplicate rows, USD/EUR/INR). Its useful content is already covered by the script's handling and by the \"inspect distinct formats\" and \"check the fx direction\" rules in `systemprompt.md`.\nkept -> required `--month` in `net_revenue.py` -> the month comes from the task each run and nothing instance-specific is hard-coded.\nnote -> neither candidate rollout failed to deliver, so the non-delivery caveat doesn't apply to either. The only non-delivering rollout is base1, which is the baseline. Each candidate has a single rollout, and both agree on the answer. That agreement is support, not independent proof.",
+          "error": ""
+        }
+      ],
+      "similarity": {
+        "n": 1,
+        "n_distinct": 1,
+        "mean_line_jaccard": 1.0
+      },
+      "ledger": {
+        "mode": "agg",
+        "task_id": "data-e",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 1,
+        "expected_P": 3,
+        "usd": 0.134477,
+        "rollout_usd": 0.0,
+        "session_usd": 0.134477,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "agg1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "agg1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "agg": {
+      "task_id": "data-e",
+      "mode": "agg",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "agg1",
+      "chosen_run_id": "hpb-adk-agg1/data-e/agg1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "agg1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.12685849999999999,
+      "experience": {
+        "cue": "A recurring data-reconciliation task over messy exports (mixed date or number formats, duplicate keys, optional libraries). An unaided agent hand-writes a parser, crashes on an unhandled value format, and burns its whole call budget rerunning the failure without ever writing the required file.",
+        "lesson": "In the harness's `scripts/` directory, ship a tested, standard-library-only helper that handles the known format mess. It should take the task-varying parameters (month, status, file paths) as required arguments, so nothing instance-specific is hard-coded. It should write the deliverable in the exact requested shape and print diagnostics (rows read, duplicates dropped, conflicts, items included). Add a pointer to it in `systemprompt.md` (\"use this instead of hand-rolling a parser\"). Put a \"never rerun an unchanged failing command\" rule next to the pointer as a fallback.",
+        "evidence": "Rests on the helper-script rows (`scripts/net_revenue.py` and the systemprompt pointer; `skills/payment-revenue-reconcile`). The contrast is base1, which hand-wrote pandas, hit `ValueError` on `float('(954.34)')`, hit the 40-call limit and wrote nothing. Against that, inv1, agg1 and dom1 (two separately written helpers) each delivered the same correct 18691.64 / 21 in about 2 commands, and my independent recomputation agrees. The script and the pointer always shipped together, and each arm is a single rollout.",
+        "confidence": "medium. The contrast is stark and holds across two independent helper implementations, but all arms are single rollouts. The prompt pointer was never isolated from the script. The recovery rules and the hook were never exercised.",
+        "edits": "component: scripts/net_revenue.py (new; stdlib-only helper with a required `--month`)\ncandidates: inv1, agg1 (same file in both; dom1 did not carry it)\nchange: Added a script that parses ISO and \"Mon DD, YYYY\" dates, thousands separators and \"(x)\" accounting negatives. It dedupes by txn_id, filters status and month by parsed date, multiplies by the fx rate, and rounds once. It writes `{\"net_usd\",\"transactions\"}` and prints a diagnostic line (duplicates, conflicts, included count) to stderr.\nobserved: base1 hand-wrote a pandas script. It filtered months with `str.contains('Sep')`, then crashed on `float('(954.34)')` and reran the failing script until the 40-call limit, so it never wrote answer.json. inv1 and agg1 ran the script once after `list_files` and got 18691.64 / 21 in about 2 commands. dom1 reached the same answer with its own equivalent script, so the helper-script idea is supported by two independent implementations. The comparison is one rollout per arm, and the file was never tested without the systemprompt pointer.\nverdict: confounded (the script and the systemprompt pointer to it always shipped together, so neither effect is isolated; the base1 vs helper-script contrast is clear but rests on one rollout per arm)\n\ncomponent: systemprompt.md \"Working rules\" block plus the settled-revenue pointer paragraph\ncandidates: inv1, agg1 (inv1 wording: \"first attempts with pandas failed\u2026 '(954.34)' crashed\"; agg1/current wording: \"hand-written pandas attempts failed\u2026 accounting negatives crashed float()\"); dom1 added only a short trigger line plus \"don't rerun an unchanged failing command\"\nchange: Added call-budget rules: write the deliverable early, never rerun an unchanged failing command, fall back to stdlib if pandas is missing, start with list_files, inspect distinct formats, and recheck the output shape. It also tells the agent to use the helper script and check its stderr diagnostics. The wording was generalised from the literal \"(954.34)\" to \"accounting negatives\" in agg1.\nobserved: In inv1 and agg1 the agent ran `list_files`, then went straight to the script. The working rules had no visible effect because the script succeeded on the first run, so the failure-recovery rules never fired. The only visible effect of the pointer is that the agent used the script. The agg1 vs inv1 wording difference changed nothing observable.\nverdict: confounded (the pointer is inseparable from the script, and the working rules were never exercised)\n\ncomponent: hooks.json + scripts/check_output.py (Stop hook validating output/answer.json)\ncandidates: inv1, agg1\nchange: A Stop hook that exits 2 if answer.json is missing or its keys or types are wrong.\nobserved: It never fired. Every run wrote a valid file on the first command. The record shows nothing for or against it.\nverdict: no observed effect\n\ncomponent: skills/payment-revenue-reconcile/ (SKILL.md plus settled_revenue.py) and its trigger line in systemprompt.md\ncandidates: dom1\nchange: Added a skill with a stdlib reconcile script and a quirk and checklist document. The quirks were this workspace's specifics: six duplicate rows, mixed dates, CRLF line endings, and USD/EUR/INR. The prompt got a trigger line to load the skill.\nobserved: The agent called `load_skill`, then ran the script once and got 18691.64 / 21. The per-currency reconciliation printed in its output was a useful cross-check. Its result was the same as the other two helper-script candidates, and it took about as many steps.\nverdict: no observed effect (equal to the plain script; it added a skill-loading step and workspace-specific text for no measured gain)"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "/Users/me/GoogleHarness2/experiments/adk-guard/exec/hpb-adk-agg1/data-e/agg1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "ac3acfa4fcb0017e"
+    }
+  },
+  "errors": []
+}

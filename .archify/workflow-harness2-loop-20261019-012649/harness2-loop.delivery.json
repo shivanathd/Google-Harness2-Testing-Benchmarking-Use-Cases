@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "4844bba2-b27c-4823-ba7c-8619854fb783",
+  "status": "current",
+  "command": "deliver",
+  "type": "workflow",
+  "input": "/Users/me/GoogleHarness2/.archify/workflow-harness2-loop-20261019-012649/candidate.json",
+  "output": "/Users/me/GoogleHarness2/.archify/workflow-harness2-loop-20261019-012649/harness2-loop.html",
+  "specification": {
+    "sha256": "edc8059170ecd93857ccced82239178a2608ba801114e465ff1c23f271895d5e",
+    "bytes": 6414
+  },
+  "artifact": {
+    "sha256": "d0df7db52cf2c0245f68092d5fd843bc643d6ccfc6c9f371abd403dba4ee2e38",
+    "bytes": 762408
+  }
+}

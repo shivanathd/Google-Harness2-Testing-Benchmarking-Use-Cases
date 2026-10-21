@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "bf30975d-ec5f-417b-8662-7fa4ae5f343f",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/me/GoogleHarness2/.archify/architecture-hpb-rig-20261019-012925/candidate.json",
+  "output": "/Users/me/GoogleHarness2/.archify/architecture-hpb-rig-20261019-012925/hpb-rig.html",
+  "specification": {
+    "sha256": "21dc7e029958a66da07ea4eaee7d2f05b464c50d2f708b68eb3a50d862188035",
+    "bytes": 4752
+  },
+  "artifact": {
+    "sha256": "1260ded0e93cd664c059a446ae0194f1309996a9b86c909cc982efcab9c3f294",
+    "bytes": 766702
+  }
+}
